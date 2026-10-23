@@ -1,0 +1,190 @@
+"use client";
+import { motion } from "motion/react";
+import { BadgeCheck, Bell, ChevronRight, CreditCard, FlaskConical, Info, LogOut, Mail, Users, Volume2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
+import { Badge, Button, Card, Field, PageTitle, Sheet, Toggle } from "@/components/ui";
+import { rise, stagger } from "@/components/visuals";
+import { OFFER, SUPPORT_EMAIL } from "@/lib/config";
+import { useApp, type Account } from "@/lib/store";
+import { lock } from "@/lib/vault";
+
+export default function Compte() {
+  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, assistantVoice: x.assistantVoice, set: x.set, reset: x.reset })));
+  const router = useRouter();
+  const [edit, setEdit] = useState(false);
+  const [mail, setMail] = useState<string | null>(null);
+  const a = s.account;
+  const extra = s.cards.filter((c) => c.extra && c.status !== "perdue").length;
+  const opened = s.outbox.find((m) => m.id === mail);
+
+  return (
+    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
+      <PageTitle eyebrow="Mon compte" title={`${a.firstName} ${a.lastName}`} lead={a.email} />
+
+      <motion.div variants={rise}>
+        <Card>
+          <div className="flex items-center justify-between">
+            <div className="font-semibold">Mes coordonnées</div>
+            <button onClick={() => setEdit(true)} className="text-[0.9rem] font-semibold text-gold-deep">
+              Modifier
+            </button>
+          </div>
+          <dl className="mt-3 grid gap-2 text-[0.95rem]">
+            {[
+              ["Téléphone", a.phone],
+              ["Naissance", `${new Date(a.birthDate).toLocaleDateString("fr-FR")} à ${a.birthCity} (${a.birthCountry})`],
+              ["Adresse", a.address.replace(/\n/g, ", ")],
+              ["Situation", a.situation],
+            ].map(([k, v]) => (
+              <div key={k} className="flex gap-3">
+                <dt className="w-28 shrink-0 text-mist">{k}</dt>
+                <dd className="flex-1">{v || "—"}</dd>
+              </div>
+            ))}
+          </dl>
+        </Card>
+      </motion.div>
+
+      <motion.div variants={rise}>
+        <Card>
+          <div className="flex items-center gap-3">
+            <BadgeCheck className={`h-7 w-7 ${a.kyc === "verifie" ? "text-sage" : "text-gold-deep"}`} />
+            <div className="flex-1">
+              <div className="font-semibold">Identité {a.kyc === "verifie" ? "vérifiée" : a.kyc === "en_cours" ? "en cours de vérification" : "à vérifier"}</div>
+              <div className="text-[0.88rem] text-mist">Pour que personne ne puisse se faire passer pour vous</div>
+            </div>
+          </div>
+          <div className="mt-4 rounded-2xl bg-ink/[0.04] p-4 text-[0.92rem] text-ink-soft">
+            <div className="mb-1 flex items-center gap-2 font-semibold text-ink">
+              <Info className="h-4 w-4" /> Qui peut lire quoi ?
+            </div>
+            Votre identité, vos coordonnées et les noms de vos proches sont dans l'Espace : nous pouvons les lire, pour vérifier votre identité, surveiller le registre des décès et vous accompagner. Le contenu de votre Coffre, lui, est chiffré sur votre téléphone : personne chez nous ne peut le lire.
+          </div>
+        </Card>
+      </motion.div>
+
+      <motion.div variants={rise}>
+        <Card>
+          <div className="flex items-center gap-3">
+            <Users className="h-7 w-7 text-gold-deep" />
+            <div className="flex-1">
+              <div className="font-semibold">Formule famille</div>
+              <div className="text-[0.88rem] text-mist">Pour le couple et les parents · {OFFER.includedCards} cartes incluses</div>
+            </div>
+            <Badge tone="sage">Active</Badge>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-center">
+            <div className="rounded-2xl bg-ink/[0.04] p-3">
+              <div className="font-display text-[1.6rem] font-semibold">{OFFER.familyPrice ? `${OFFER.familyPrice} €` : "—"}</div>
+              <div className="text-[0.8rem] text-mist">par an</div>
+            </div>
+            <div className="rounded-2xl bg-ink/[0.04] p-3">
+              <div className="font-display text-[1.6rem] font-semibold">{extra}</div>
+              <div className="text-[0.8rem] text-mist">carte{extra > 1 ? "s" : ""} supplémentaire{extra > 1 ? "s" : ""}</div>
+            </div>
+          </div>
+          {!OFFER.familyPrice && <p className="mt-3 text-[0.85rem] text-mist">Tarifs communiqués au lancement.</p>}
+        </Card>
+      </motion.div>
+
+      <motion.div variants={rise} className="space-y-2.5">
+        <Toggle checked={s.assistantVoice} onChange={(assistantVoice) => s.set({ assistantVoice })} label="L'assistante parle à voix haute" hint="Les réponses sont lues automatiquement" />
+        <Link href="/espace/cartes" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
+          <CreditCard className="h-6 w-6 text-gold-deep" />
+          <span className="flex-1 font-semibold">Mes cartes</span>
+          <ChevronRight className="h-5 w-5 text-mist" />
+        </Link>
+        <Link href="/espace/procedures" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
+          <Bell className="h-6 w-6 text-gold-deep" />
+          <span className="flex-1 font-semibold">Coup dur et décès : signalements</span>
+          <ChevronRight className="h-5 w-5 text-mist" />
+        </Link>
+        <Link href="/espace/demo" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
+          <FlaskConical className="h-6 w-6 text-gold-deep" />
+          <span className="flex-1">
+            <span className="block font-semibold">Mode démonstration</span>
+            <span className="text-[0.85rem] text-mist">Avancer le temps, simuler la veille des décès</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-mist" />
+        </Link>
+      </motion.div>
+
+      <motion.section variants={rise}>
+        <h2 className="mb-1 text-[1.3rem] font-semibold">E-mails envoyés</h2>
+        <p className="mb-3 text-[0.9rem] text-mist">
+          {s.reminders.length} rappel{s.reminders.length > 1 ? "s" : ""} d'échéance programmé{s.reminders.length > 1 ? "s" : ""}. Les e-mails ne contiennent jamais le contenu du Coffre.
+        </p>
+        <div className="space-y-2">
+          {s.outbox.slice(0, 12).map((m) => (
+            <button key={m.id} onClick={() => setMail(m.id)} className="flex w-full items-center gap-3 rounded-2xl bg-paper p-3.5 text-left ring-1 ring-line">
+              <Mail className="h-5 w-5 shrink-0 text-mist" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold">{m.subject}</span>
+                <span className="block truncate text-[0.82rem] text-mist">
+                  À {m.to} · {new Date(m.at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                </span>
+              </span>
+            </button>
+          ))}
+          {s.outbox.length === 0 && <p className="text-[0.9rem] text-mist">Aucun e-mail pour l'instant.</p>}
+        </div>
+      </motion.section>
+
+      <motion.div variants={rise} className="space-y-3 pt-2">
+        <Button
+          full
+          variant="outline"
+          icon={<LogOut className="h-5 w-5" />}
+          onClick={() => {
+            // shortcut: demo sign-out wipes local data; with Supabase this becomes auth.signOut().
+            lock();
+            s.reset();
+            router.replace("/");
+          }}
+        >
+          Se déconnecter
+        </Button>
+        <p className="text-center text-[0.85rem] text-mist">
+          Une question ? <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold text-ink underline">{SUPPORT_EMAIL}</a>
+        </p>
+      </motion.div>
+
+      <Sheet open={edit} onClose={() => setEdit(false)} title="Mes coordonnées">
+        <AccountForm value={a} onSave={(account) => { s.set({ account }); setEdit(false); }} />
+      </Sheet>
+
+      <Sheet open={!!opened} onClose={() => setMail(null)} title={opened?.subject}>
+        {opened && (
+          <div className="rounded-2xl bg-paper p-5 ring-1 ring-line">
+            <div className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-gold-deep">À {opened.to}</div>
+            <h3 className="mt-2 text-[1.4rem] font-semibold">{opened.title}</h3>
+            {opened.body.map((p) => (
+              <p key={p} className="mt-3 text-ink-soft">{p}</p>
+            ))}
+          </div>
+        )}
+      </Sheet>
+    </motion.div>
+  );
+}
+
+function AccountForm({ value, onSave }: { value: Account; onSave: (a: Account) => void }) {
+  const [a, setA] = useState(value);
+  const up = (k: keyof Account) => (v: string) => setA({ ...a, [k]: v });
+  return (
+    <div className="space-y-4">
+      <Field label="Téléphone" type="tel" inputMode="tel" value={a.phone} onChange={up("phone")} />
+      <Field label="E-mail" type="email" inputMode="email" value={a.email} onChange={up("email")} />
+      <Field label="Adresse" multiline value={a.address} onChange={up("address")} />
+      <Field label="Situation familiale" value={a.situation} onChange={up("situation")} />
+      <Toggle checked={a.isBusinessOwner} onChange={(isBusinessOwner) => setA({ ...a, isBusinessOwner })} label="Je dirige une entreprise" hint="Ajoute la rubrique « Entreprise » au Coffre" />
+      <p className="text-[0.85rem] text-mist">Nom, prénom et naissance sont vérifiés avec votre identité : pour les corriger, contactez-nous.</p>
+      <Button full variant="gold" onClick={() => onSave(a)}>
+        Enregistrer
+      </Button>
+    </div>
+  );
+}

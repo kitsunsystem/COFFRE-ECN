@@ -1,0 +1,26 @@
+# Supabase project config (local dev + deploy). Run `supabase link --project-ref <ref>` once the project exists.
+project_id = "sillage"
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["capacitor://localhost", "https://localhost"]
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+
+# Internal functions are protected by the service role key check in code, not by a user JWT.
+[functions.send-email]
+verify_jwt = false
+
+[functions.insee-watch]
+verify_jwt = false
+
+[functions.procedures-tick]
+verify_jwt = false
+
+[functions.relances]
+verify_jwt = false
+
+[functions.assistant]
+verify_jwt = true

@@ -1,0 +1,17 @@
+{
+  "appId": "app.sillage.famille",
+  "appName": "Sillage",
+  "webDir": "out",
+  "ios": {
+    "contentInset": "never"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#070d18",
+      "launchShowDuration": 600
+    }
+  }
+}

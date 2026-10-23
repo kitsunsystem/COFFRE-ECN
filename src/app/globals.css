@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0f1b2d;
+  --color-ink-soft: #2a3a52;
+  --color-night: #070d18;
+  --color-night-2: #0e1a2e;
+  --color-cream: #f7f2e9;
+  --color-sand: #ede3d1;
+  --color-paper: #fffdf9;
+  --color-gold: #c9a55c;
+  --color-gold-soft: #ead7a8;
+  --color-gold-deep: #9c7a34;
+  --color-sage: #4f8a62;
+  --color-sage-soft: #d9eadc;
+  --color-coral: #d0573d;
+  --color-coral-soft: #f7dcd3;
+  --color-mist: #6b778a;
+  --color-line: #e3d9c6;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+
+  --radius-xl2: 1.75rem;
+  --shadow-soft: 0 1px 2px rgb(15 27 45 / 0.04), 0 8px 24px -8px rgb(15 27 45 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(15 27 45 / 0.06), 0 24px 48px -16px rgb(15 27 45 / 0.22);
+  --shadow-glow: 0 0 0 1px rgb(201 165 92 / 0.25), 0 20px 60px -10px rgb(201 165 92 / 0.45);
+
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+  --animate-shine: shine 4.5s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes aurora {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(6%, -4%, 0) scale(1.08); }
+    100% { transform: translate3d(-5%, 5%, 0) scale(0.96); }
+  }
+  @keyframes shine {
+    0%, 60% { transform: translateX(-120%) skewX(-18deg); }
+    100% { transform: translateX(220%) skewX(-18deg); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+}
+
+/* Seniors first: large base size, generous line height, strong contrast. */
+html {
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+::selection {
+  background: var(--color-gold-soft);
+  color: var(--color-ink);
+}
+:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>");
+  mix-blend-mode: overlay;
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
