@@ -12,10 +12,13 @@ import { Tour } from "./tour";
 import { useHydrated, useNow } from "./providers";
 import { Aurora, Logo } from "./visuals";
 
-type NavItem = { href: string; label: string; icon: LucideIcon; center?: boolean };
+// trailingSlash is on (static hosting): compare paths without it.
+const usePath = () => usePathname().replace(/(.)\/$/, "$1");
+
+type NavItem ={ href: string; label: string; icon: LucideIcon; center?: boolean };
 
 function BottomNav({ items, dark }: { items: NavItem[]; dark?: boolean }) {
-  const path = usePathname();
+  const path = usePath();
   const active = (h: string) => (h === "/espace" || h === "/coffre/rubriques" ? path === h : path.startsWith(h));
   return (
     <nav className={`fixed inset-x-0 bottom-0 z-40 safe-bottom ${dark ? "bg-night/80" : "bg-cream/85"} backdrop-blur-xl`}>
@@ -46,7 +49,7 @@ function BottomNav({ items, dark }: { items: NavItem[]; dark?: boolean }) {
 
 // Enter-only: waiting for an exit animation made every tap feel slow.
 function Transition({ children }: { children: ReactNode }) {
-  const path = usePathname();
+  const path = usePath();
   return (
     <motion.div key={path} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}>
       {children}
@@ -70,7 +73,7 @@ export function EspaceShell({ children }: { children: ReactNode }) {
   const procedures = useApp((s) => s.procedures);
   const tourPending = useApp((s) => s.tourPending);
   const router = useRouter();
-  const path = usePathname();
+  const path = usePath();
   const t = useNow(5000);
   useEffect(() => {
     if (hydrated && !account) router.replace("/connexion");
