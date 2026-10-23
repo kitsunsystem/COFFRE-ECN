@@ -2,7 +2,7 @@
 
 Application conforme au *Brief développeurs — coffre familial* : un **Espace** (compte, famille, garants, cartes, aide, services, assistante) et un **Coffre** chiffré qui s'ouvre avec une **carte NFC + code**.
 
-**Démo en ligne : https://kitsunsystem.github.io/COFFRE-ECN-demo/** (dépôt public qui ne contient que la démo compilée ; ce dépôt-ci reste privé)
+**Démo en ligne : https://kitsunsystem.github.io/COFFRE-ECN/**
 
 ## Lancer
 
@@ -11,7 +11,7 @@ npm install
 npm run dev        # http://localhost:3000
 npm test           # 15 tests : règles d'ouverture, veille INSEE, chiffrement, e-mails
 npm run build      # export statique dans out/ (web + Capacitor)
-npm run deploy     # met à jour la démo en ligne (branche gh-pages de COFFRE-ECN-demo)
+npm run deploy     # met à jour la démo en ligne (branche gh-pages)
 ```
 
 **Démonstration sans aucune clé** : page *Connexion* → « Découvrir la démonstration ». Famille Durand préremplie, code de toutes les cartes : `123456`. Le *Mode démonstration* (Compte → Mode démonstration) avance le temps, simule la veille INSEE et ouvre l'administration (`/admin`).
