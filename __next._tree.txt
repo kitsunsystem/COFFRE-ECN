@@ -1,0 +1,5 @@
+:HL["/COFFRE-ECN/_next/static/chunks/32khl2nsu9f6f.css","style"]
+:HL["/COFFRE-ECN/_next/static/media/a343f882a40d2cc9-s.p.1sj6eobyi31rd.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/COFFRE-ECN/_next/static/media/b67966e0b83b2cd0-s.p.0fuf3937kiol3.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+1:[["children",{"s":"__PAGE__","h":160}]]
+0:{"b":"_08AMiCU-sK3qUtbsxwr-","t":{"t":{"s":"","h":80,"c":"$Q1"}}}
