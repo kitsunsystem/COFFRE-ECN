@@ -40,7 +40,8 @@ export default function Services() {
       <PageTitle eyebrow="Services" title="On s'occupe de tout" lead="Quand les démarches sont trop lourdes, une conciergerie les fait pour vous. Elle ne voit que les documents que vous lui confiez, avec votre mandat." />
 
       <motion.div variants={rise}>
-        <Card className="relative overflow-hidden bg-night !p-6 text-paper">
+        {/* !bg-night: Card's own bg-paper otherwise wins, leaving light text on a light card. */}
+        <Card className="relative overflow-hidden !bg-night !p-6 text-paper !ring-paper/10">
           <motion.div className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-gold/30 blur-3xl" animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 7, repeat: Infinity }} />
           <ConciergeBell className="relative h-9 w-9 text-gold-soft" />
           <h2 className="relative mt-3 text-[1.5rem] font-semibold">La conciergerie</h2>
