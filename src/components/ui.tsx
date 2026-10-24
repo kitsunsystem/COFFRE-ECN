@@ -1,7 +1,8 @@
 "use client";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
 import Link from "next/link";
-import { useEffect, useId, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 type Variant = "primary" | "gold" | "ghost" | "outline" | "danger" | "light";
@@ -139,13 +140,17 @@ export function Badge({ children, tone = "ink" }: { children: ReactNode; tone?: 
 }
 
 export function Sheet({ open, onClose, title, children, dark }: { open: boolean; onClose: () => void; title?: string; children: ReactNode; dark?: boolean }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   }, [open, onClose]);
-  return (
+  // Portal to <body>: inside a blurred or transformed parent (the top bar, page transitions) a fixed sheet is trapped there.
+  if (!mounted) return null;
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -175,7 +180,8 @@ export function Sheet({ open, onClose, title, children, dark }: { open: boolean;
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 
