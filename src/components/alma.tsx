@@ -95,18 +95,19 @@ export function Alma({ dark }: { dark?: boolean }) {
 
   return (
     <>
+      {/* Lives in the top bar: a floating button used to hide "Ajouter", "Jamais" and other controls. */}
       <motion.button
         onClick={() => setOpen(true)}
         aria-label={`Parler à ${ASSISTANT_NAME}`}
-        className={`fixed bottom-28 right-4 z-40 flex items-center gap-2 rounded-full p-1.5 pr-4 shadow-lift ring-1 ${dark ? "bg-night-2 text-paper ring-paper/15" : "bg-paper ring-line"}`}
+        className={`flex items-center gap-1.5 rounded-full p-1 ring-1 sm:pr-3 ${dark ? "bg-paper/10 text-paper ring-paper/15" : "bg-paper ring-line"}`}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.6, type: "spring", stiffness: 200, damping: 16 }}
+        transition={{ delay: 0.4, type: "spring", stiffness: 200, damping: 16 }}
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.95 }}
       >
-        <AlmaFace size={40} />
-        <span className="text-[0.9rem] font-semibold">{ASSISTANT_NAME}</span>
+        <AlmaFace size={34} />
+        <span className="hidden text-[0.85rem] font-semibold sm:inline">{ASSISTANT_NAME}</span>
       </motion.button>
 
       <Sheet open={open} onClose={() => { setOpen(false); speechSynthesis?.cancel(); }} title={`Bonjour, je suis ${ASSISTANT_NAME}`}>
@@ -124,7 +125,7 @@ export function Alma({ dark }: { dark?: boolean }) {
               <div key={v} className="relative overflow-hidden rounded-2xl bg-ink p-4 text-paper">
                 <Play className="mb-6 h-6 w-6 text-gold" />
                 <div className="text-[0.9rem] font-semibold">{v}</div>
-                <div className="text-[0.75rem] text-paper/60">Vidéo de 1 min · bientôt</div>
+                <div className="text-[0.75rem] text-paper/60">Vidéo explicative · bientôt</div>
               </div>
             ))}
           </div>

@@ -5,7 +5,8 @@ import { useRef, useState } from "react";
 import { subsection, type Field as FieldDef } from "@/lib/sections";
 import { useApp, type VaultItem } from "@/lib/store";
 import { decryptFile, deleteItem, encryptFile, saveItem, shareWithConcierge, type FileMeta, type ItemPayload } from "@/lib/vault";
-import { Button, Field, Notice, Toggle } from "./ui";
+import Link from "next/link";
+import { Button, Field, Notice } from "./ui";
 
 export type Entry = { item: VaultItem; payload: ItemPayload };
 
@@ -39,12 +40,10 @@ function SecretInput({ f, value, onChange }: { f: FieldDef; value: string; onCha
 export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: Entry; onDone: () => void }) {
   const sub = subsection(subId);
   const concierge = useApp((s) => s.concierge).filter((c) => c.status !== "demande" && c.status !== "termine");
-  const hasReminder = useApp((s) => s.reminders.some((r) => r.itemId === entry?.item.id));
   const [title, setTitle] = useState(entry?.payload.title ?? "");
   const [fields, setFields] = useState<Record<string, string>>(entry?.payload.fields ?? {});
   const [files, setFiles] = useState<FileMeta[]>(entry?.payload.files ?? []);
   const [pending, setPending] = useState<File[]>([]);
-  const [remind, setRemind] = useState(entry ? hasReminder : true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -58,7 +57,7 @@ export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: En
     try {
       // Files are encrypted on the phone before being stored; only ciphertext ever leaves it.
       const added = await Promise.all(pending.map((f) => encryptFile(subId, f)));
-      await saveItem(subId, { title: title.trim(), fields, files: [...files, ...added] }, entry?.item.id, remind);
+      await saveItem(subId, { title: title.trim(), fields, files: [...files, ...added] }, entry?.item.id);
       onDone();
     } catch (e) {
       setError((e as Error).message);
@@ -85,7 +84,15 @@ export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: En
           />
         ),
       )}
-      {dated && <Toggle checked={remind} onChange={setRemind} label="Me prévenir avant la date" hint="Un e-mail vous prévient, sans dire de quoi il s'agit" />}
+      {dated && (
+        <p className="text-[0.88rem] text-mist">
+          Pour être prévenu avant cette date, ajoutez-la dans{" "}
+          <Link href="/espace/echeances" className="font-semibold text-ink underline">
+            Mes échéances
+          </Link>{" "}
+          (dans l&apos;Espace, avec votre accord).
+        </p>
+      )}
 
       <div>
         <div className="mb-2 text-[0.92rem] font-semibold text-ink-soft">Documents</div>

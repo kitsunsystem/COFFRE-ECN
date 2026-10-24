@@ -4,6 +4,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { render, type TemplateId } from "../../supabase/functions/_shared/templates";
+import { LAUNCH } from "./config";
 import type { Sealed } from "./crypto";
 import type { Moment, Procedure } from "./rules";
 
@@ -66,9 +67,11 @@ export interface Envelope {
   sealed: string; // sub-section key sealed to the holder's card
 }
 
+// Typed by the user in the Espace, with their consent, so reminders work without ever touching the Coffre.
 export interface Reminder {
-  itemId: string;
-  date: string; // only the date leaves the Coffre, never what it is about
+  id: string;
+  label: string; // "Passeport", "Bail", "Contrat d'assurance"…
+  date: string;
 }
 
 export interface ConciergeCase {
@@ -104,10 +107,13 @@ interface State {
   people: Person[];
   cards: Card[];
   guarantors: Guarantor[];
-  rights: Record<string, Record<string, Moment>>; // cardId → subsectionId → moment (metadata, shown in the Espace)
+  rights: Record<string, Record<string, Moment>>; // personId → subsectionId → moment; applies to every card of the person's pack
   vault: Vault;
   procedures: Procedure[];
   reminders: Reminder[];
+  reminderConsent: boolean;
+  phase: "decouverte" | "lancement"; // discovery: no document can be stored in the Coffre yet
+  billing: { status: "a_jour" | "impaye" | "efface"; since?: number };
   checklist: Record<string, boolean>;
   concierge: ConciergeCase[];
   outbox: OutboxEmail[];
@@ -130,6 +136,9 @@ const initial: State = {
   vault: { ssk: {}, items: [], envelopes: [] },
   procedures: [],
   reminders: [],
+  reminderConsent: false,
+  phase: LAUNCH.phase,
+  billing: { status: "a_jour" },
   checklist: {},
   concierge: [],
   outbox: [],
@@ -150,7 +159,8 @@ export const useApp = create<State & Actions>()(
       },
       reset: () => set({ ...initial }),
     }),
-    { name: "sillage-demo", skipHydration: true },
+    // v2: rights per person (2-card packs) and reminders typed in the Espace; older demo data is simply ignored.
+    { name: "sillage-demo-2", skipHydration: true },
   ),
 );
 
@@ -159,6 +169,7 @@ export const uid = () => crypto.randomUUID();
 
 export const ownerCards = (s: { cards: Card[] }) => s.cards.filter((c) => c.holderId === "owner");
 export const holderCards = (s: { cards: Card[] }) => s.cards.filter((c) => c.holderId !== "owner");
+export const packOf = (s: { cards: Card[] }, personId: string) => s.cards.filter((c) => c.holderId === personId && c.status !== "perdue");
 export const personName = (people: Person[], id: string) => {
   if (id === "owner") return "Vous";
   const p = people.find((x) => x.id === id);

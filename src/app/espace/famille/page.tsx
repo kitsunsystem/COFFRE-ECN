@@ -1,16 +1,14 @@
 "use client";
 import { motion } from "motion/react";
-import { FileSignature, Pencil, Plus, ShieldCheck, Trash, UserPlus } from "lucide-react";
+import { Pencil, Plus, ShieldCheck, Trash, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
+import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
-import { RUBRICS, downloadLetter } from "@/lib/aide";
 import { uid, useApp, type Person } from "@/lib/store";
 
 const RELATIONS = ["Conjoint(e)", "Enfant", "Parent", "Frère ou sœur", "Ami(e)", "Autre"];
 const empty: Person = { id: "", firstName: "", lastName: "", relation: "Enfant", email: "", phone: "" };
-const procuration = RUBRICS.flatMap((r) => r.letters).find((l) => l.id === "procuration-coffre");
 
 export default function Famille() {
   const s = useApp(useShallow((x) => ({ people: x.people, guarantors: x.guarantors, cards: x.cards, account: x.account!, set: x.set, email: x.email })));
@@ -32,7 +30,7 @@ export default function Famille() {
       people: x.people.filter((p) => p.id !== id),
       guarantors: x.guarantors.filter((g) => g.personId !== id),
       cards: x.cards.map((c) => (cardIds.includes(c.id) ? { ...c, status: "perdue", boxPk: undefined } : c)),
-      rights: Object.fromEntries(Object.entries(x.rights).filter(([k]) => !cardIds.includes(k))),
+      rights: Object.fromEntries(Object.entries(x.rights).filter(([k]) => k !== id)),
       vault: { ...x.vault, envelopes: x.vault.envelopes.filter((e) => !cardIds.includes(e.cardId)) },
     }));
     setEdit(null);
@@ -83,8 +81,7 @@ export default function Famille() {
                 <span className="flex flex-wrap gap-1.5 pt-1">
                   <Badge>{p.relation}</Badge>
                   {s.guarantors.some((g) => g.personId === p.id) && <Badge tone="gold">Garant</Badge>}
-                  {card(p.id) && <Badge tone="sage">Carte</Badge>}
-                  {p.managesMe && <Badge tone="coral">Gère mon compte</Badge>}
+                  {card(p.id) && <Badge tone="sage">Bénéficiaire · 2 cartes</Badge>}
                 </span>
               </span>
               <Pencil className="h-4 w-4 shrink-0 text-mist" />
@@ -131,19 +128,6 @@ export default function Famille() {
         >
           Désigner un garant
         </Button>
-      </motion.section>
-
-      <motion.section variants={rise} className="mt-10">
-        <Card className="bg-gradient-to-br from-paper to-sand/60">
-          <FileSignature className="h-8 w-8 text-gold-deep" />
-          <h2 className="mt-3 text-[1.3rem] font-semibold">Un enfant peut gérer le compte d'un parent</h2>
-          <p className="mt-2 text-ink-soft">Si votre parent n'est pas à l'aise avec le téléphone, vous pouvez gérer son compte à sa place, avec une procuration signée. Le modèle est prêt : imprimez-le, faites-le signer, puis activez l'option sur la fiche du proche concerné.</p>
-          {procuration && (
-            <Button className="mt-4" variant="outline" onClick={() => downloadLetter(procuration)}>
-              Télécharger le modèle de procuration
-            </Button>
-          )}
-        </Card>
       </motion.section>
 
       <Sheet open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? "Modifier ce proche" : "Ajouter un proche"}>
@@ -201,7 +185,6 @@ function PersonForm({ value, onSave, onDelete }: { value: Person; onSave: (p: Pe
       </div>
       <Field label="E-mail" type="email" inputMode="email" value={p.email ?? ""} onChange={up("email")} hint="Pour le prévenir s'il reçoit une carte ou devient garant." />
       <Field label="Téléphone" type="tel" inputMode="tel" value={p.phone ?? ""} onChange={up("phone")} />
-      {p.relation === "Enfant" && <Toggle checked={!!p.managesMe} onChange={(managesMe) => setP({ ...p, managesMe })} label="Gère mon compte" hint="Avec une procuration signée" />}
       <Button full variant="gold" disabled={!p.firstName.trim() || !p.lastName.trim()} onClick={() => onSave({ ...p, firstName: p.firstName.trim(), lastName: p.lastName.trim() })}>
         Enregistrer
       </Button>

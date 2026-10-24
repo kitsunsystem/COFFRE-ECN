@@ -10,6 +10,7 @@ import { useApp, useSession } from "@/lib/store";
 
 export default function Essentiels() {
   const items = useApp((s) => s.vault.items);
+  const launched = useApp((s) => s.phase) === "lancement";
   const mode = useSession((s) => s.session.mode);
   const router = useRouter();
   const filled = (subId: string) => items.some((i) => i.subsectionId === subId);
@@ -69,6 +70,13 @@ export default function Essentiels() {
                   En ajouter un autre
                 </Button>
               </div>
+            ) : !launched ? (
+              <div className="mt-5 rounded-[1.75rem] bg-gold/15 p-5 ring-1 ring-gold/30">
+                <p className="text-paper/85">Phase découverte : vous pourrez remplir cette étape au lancement officiel. Rien n&apos;est stocké avant.</p>
+                <Button className="mt-4" full variant="light" onClick={next}>
+                  Étape suivante
+                </Button>
+              </div>
             ) : (
               <div className="mt-5 rounded-[1.75rem] bg-cream p-5 text-ink">
                 <ItemEditor key={step.subsectionId + adding} subId={step.subsectionId} onDone={next} />
@@ -84,7 +92,7 @@ export default function Essentiels() {
               <ShieldCheck className="h-12 w-12" />
             </motion.div>
             <h2 className="mt-6 text-[1.7rem] font-semibold">{done === ESSENTIALS.length ? "L'essentiel est en place" : "Bien avancé"}</h2>
-            <p className="mx-auto mt-2 max-w-xs text-paper/65">{done === ESSENTIALS.length ? "Choisissez maintenant qui pourra voir quoi, et à quel moment." : `${ESSENTIALS.length - done} étape${ESSENTIALS.length - done > 1 ? "s" : ""} restent : revenez quand vous voulez.`}</p>
+            <p className="mx-auto mt-2 max-w-xs text-paper/65">{done === ESSENTIALS.length ? "Choisissez maintenant qui pourra voir quoi, et à quel moment." : `${ESSENTIALS.length - done} étape${ESSENTIALS.length - done > 1 ? "s restent" : " reste"} : revenez quand vous voulez.`}</p>
             <Button className="mt-6" full variant="gold" href="/coffre/droits">
               Qui voit quoi
             </Button>

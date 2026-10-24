@@ -8,7 +8,7 @@ import { useNow } from "@/components/providers";
 import { Badge, Button, Card, Field, Notice, PageTitle, Segmented, Sheet } from "@/components/ui";
 import { Countdown, rise, stagger } from "@/components/visuals";
 import { DELAYS } from "@/lib/config";
-import { declare, procedureStatus, type Procedure, type ProcedureKind, type ProcedureStatus } from "@/lib/rules";
+import { accessEnd, declare, procedureStatus, type Procedure, type ProcedureKind, type ProcedureStatus } from "@/lib/rules";
 import { now, ownerCards, useApp } from "@/lib/store";
 import { closeCoupDur, lock, unlock } from "@/lib/vault";
 
@@ -65,7 +65,11 @@ export default function Procedures() {
                 {p.note && <p className="mt-3 rounded-2xl bg-ink/[0.04] p-3 text-[0.92rem] text-ink-soft">« {p.note} »</p>}
                 {p.match && <p className="mt-2 text-[0.85rem] text-mist">Correspondance registre : {Math.round(p.match.score * 100)} %{p.match.doubtful ? " (douteuse, vérifiée par une personne)" : ""}</p>}
 
-                {st === "verification" && <p className="mt-4 flex items-center gap-2 text-ink-soft"><Hourglass className="h-5 w-5 text-gold-deep" /> Notre équipe vérifie le décès auprès de l'état civil avant tout délai.</p>}
+                {st === "verification" && (
+                  <p className="mt-4 flex items-center gap-2 text-ink-soft">
+                    <Hourglass className="h-5 w-5 shrink-0 text-gold-deep" /> {p.acte ? "Notre équipe vérifie l'acte de décès, le registre INSEE et l'identité du bénéficiaire." : "En attente de l'acte de décès, fourni par un bénéficiaire, avant toute vérification."}
+                  </p>
+                )}
                 {st === "delai" && p.endsAt && (
                   <div className="mt-4 rounded-2xl bg-coral-soft p-4 text-center">
                     <div className="text-[0.85rem] font-semibold text-coral">Ouverture des accès dans</div>
@@ -76,7 +80,13 @@ export default function Procedures() {
                   </div>
                 )}
                 {st === "active" && <p className="mt-4 text-ink-soft">Les proches désignés pour un coup dur peuvent ouvrir ce que vous leur avez attribué. Quand vous allez mieux, reprenez la main : leurs clés sont changées.</p>}
-                {st === "terminee" && <p className="mt-4 text-ink-soft">Chaque proche a reçu uniquement ce qui lui était destiné. La rubrique « À effacer » a été détruite sans être lue.</p>}
+                {st === "terminee" && (
+                  <p className="mt-4 text-ink-soft">
+                    {p.erasedAt
+                      ? "La période d'accès est terminée : le Coffre a été effacé définitivement."
+                      : `Chaque bénéficiaire ouvre uniquement ce qui lui était destiné, avec sa carte, jusqu'au ${new Date(accessEnd(p)!).toLocaleDateString("fr-FR", { dateStyle: "long" })}. Ensuite, le Coffre est effacé définitivement. La rubrique « À effacer » a déjà été détruite sans être lue.`}
+                  </p>
+                )}
 
                 {(st === "verification" || st === "delai") && (
                   <Button className="mt-4" full variant="gold" icon={<HeartHandshake className="h-5 w-5" />} onClick={() => setProve({ p, action: "cancel" })}>
@@ -103,6 +113,9 @@ export default function Procedures() {
             Signaler comme garant
           </Button>
           {s.guarantors.length === 0 && <p className="mt-2 text-center text-[0.85rem] text-mist">Désignez d'abord un garant dans « Famille ».</p>}
+          <Button className="mt-3" full variant="ghost" href="/beneficiaire">
+            Espace bénéficiaire : déposer un acte de décès
+          </Button>
         </Card>
       </motion.section>
 
@@ -186,7 +199,7 @@ function Declare({ guarantors, onDeclare }: { guarantors: { id: string; name: st
       <Notice tone={kind === "coup_dur" ? "gold" : "coral"}>
         {kind === "coup_dur"
           ? `Le titulaire est prévenu partout et peut annuler pendant ${days(DELAYS.coupDur)}. Ensuite, seuls les éléments prévus pour un coup dur s'ouvrent.`
-          : `Un décès est toujours vérifié par une personne de notre équipe. Puis un délai de ${days(DELAYS.deces)} s'ouvre, avec des alertes, avant toute transmission.`}
+          : `Un décès est toujours vérifié par notre équipe : registre INSEE, acte de décès fourni par un bénéficiaire et son identité. Puis un délai de ${days(DELAYS.deces)} s'ouvre, avec des alertes, avant toute transmission.`}
       </Notice>
       <Button full variant="danger" disabled={!by} onClick={() => onDeclare(kind, guarantors.find((g) => g.id === by)!.name, note.trim())}>
         Envoyer le signalement

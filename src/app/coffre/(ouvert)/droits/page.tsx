@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NamedIcon } from "@/components/icons";
 import { Button, Segmented } from "@/components/ui";
-import { MOMENTS, type Moment } from "@/lib/rules";
+import { moment, MOMENTS, type Moment } from "@/lib/rules";
 import { SECTIONS } from "@/lib/sections";
-import { holderCards, personName, useApp, useSession } from "@/lib/store";
+import { packOf, useApp, useSession } from "@/lib/store";
 import { setRight, setSectionRight } from "@/lib/vault";
 
-const DOT: Record<Moment, string> = { now: "bg-sage", coup_dur: "bg-gold", deces: "bg-coral", jamais: "bg-paper/20" };
 const OPTIONS = MOMENTS.map((m) => ({ id: m.id, label: m.short }));
 
 export default function Droits() {
@@ -20,12 +19,14 @@ export default function Droits() {
   const account = useApp((s) => s.account);
   const mode = useSession((s) => s.session.mode);
   const router = useRouter();
-  const holders = holderCards({ cards }).filter((c) => c.status === "active");
-  const [cardId, setCardId] = useState<string | undefined>(holders[0]?.id);
+  // Every beneficiary has a 2-card pack; rights belong to the person and open with either card.
+  const beneficiaries = people.filter((p) => packOf({ cards }, p.id).length > 0);
+  const [personId, setPersonId] = useState<string | undefined>(beneficiaries[0]?.id);
   const [open, setOpen] = useState<string | null>("urgence");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const r = (cardId && rights[cardId]) || {};
+  const r = (personId && rights[personId]) || {};
+  const activeCards = personId ? packOf({ cards }, personId).filter((c) => c.status === "active").length : 0;
 
   useEffect(() => {
     if (mode === "holder") router.replace("/coffre/rubriques");
@@ -43,26 +44,25 @@ export default function Droits() {
   }
 
   const sections = SECTIONS.filter((s) => s.id !== "effacer" && (!s.optional || account?.isBusinessOwner));
-  const pending = holderCards({ cards }).filter((c) => c.status !== "active" && c.status !== "perdue");
 
   return (
     <div>
       <div className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-gold-soft">Qui voit quoi</div>
       <h1 className="mt-2 text-[2rem] font-semibold leading-tight">Pour chacun, au bon moment</h1>
-      <p className="mt-2 text-paper/65">Une carte par proche. Pour chaque rubrique, choisissez quand il pourra l'ouvrir. Par défaut : jamais.</p>
+      <p className="mt-2 text-paper/65">Pour chaque bénéficiaire et chaque rubrique, choisissez quand il pourra l&apos;ouvrir avec ses cartes. Par défaut : jamais.</p>
 
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-[0.8rem] text-paper/65">
+      <div className="mt-4 space-y-1.5 text-[0.82rem] text-paper/70">
         {MOMENTS.map((m) => (
-          <span key={m.id} className="flex items-center gap-1.5">
-            <span className={`h-2.5 w-2.5 rounded-full ${DOT[m.id]}`} /> {m.label}
-          </span>
+          <div key={m.id} className="flex items-center gap-2">
+            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${m.dot}`} /> {m.label}
+          </div>
         ))}
       </div>
 
-      {holders.length === 0 ? (
+      {beneficiaries.length === 0 ? (
         <div className="mt-8 rounded-[1.6rem] bg-paper/5 p-6 text-center ring-1 ring-paper/10">
           <CreditCard className="mx-auto h-8 w-8 text-gold-soft" />
-          <p className="mt-3 text-paper/75">{pending.length > 0 ? "Les cartes de vos proches doivent d'abord être activées par eux." : "Attribuez d'abord une carte à un proche."}</p>
+          <p className="mt-3 text-paper/75">Désignez d&apos;abord un bénéficiaire : il reçoit un pack de 2 cartes à son nom.</p>
           <Button className="mt-4" variant="light" href="/espace/cartes">
             Gérer les cartes
           </Button>
@@ -70,14 +70,14 @@ export default function Droits() {
       ) : (
         <>
           <div className="-mx-5 mt-6 flex gap-2 overflow-x-auto px-5 pb-1">
-            {holders.map((c) => (
-              <button key={c.id} onClick={() => setCardId(c.id)} className={`relative shrink-0 rounded-full px-4 py-2.5 text-[0.95rem] font-semibold ${cardId === c.id ? "text-ink" : "text-paper/75 ring-1 ring-paper/15"}`}>
-                {cardId === c.id && <motion.span layoutId="holder" className="absolute inset-0 rounded-full bg-gold-soft" transition={{ type: "spring", stiffness: 400, damping: 32 }} />}
-                <span className="relative">{personName(people, c.holderId)}</span>
+            {beneficiaries.map((p) => (
+              <button key={p.id} onClick={() => setPersonId(p.id)} className={`relative shrink-0 rounded-full px-4 py-2.5 text-[0.95rem] font-semibold ${personId === p.id ? "text-ink" : "text-paper/75 ring-1 ring-paper/15"}`}>
+                {personId === p.id && <motion.span layoutId="holder" className="absolute inset-0 rounded-full bg-gold-soft" transition={{ type: "spring", stiffness: 400, damping: 32 }} />}
+                <span className="relative">{p.firstName}</span>
               </button>
             ))}
           </div>
-
+          {activeCards === 0 && <p className="mt-3 text-[0.88rem] text-gold-soft">Ses cartes ne sont pas encore activées : vos choix s&apos;appliqueront dès leur activation.</p>}
           {error && <p className="mt-3 font-semibold text-coral-soft">{error}</p>}
 
           <div className="mt-5 space-y-3">
@@ -95,34 +95,36 @@ export default function Droits() {
                       <span className="block font-semibold">{s.title}</span>
                       <span className="mt-1 flex gap-1">
                         {values.map((v, i) => (
-                          <span key={i} className={`h-1.5 w-5 rounded-full ${DOT[v]}`} />
+                          <span key={i} className={`h-1.5 w-5 rounded-full ${moment(v).dot}`} />
                         ))}
                       </span>
                     </span>
-                    {busy?.startsWith(s.id) ? <Loader2 className="h-5 w-5 animate-spin text-gold-soft" /> : (
+                    {busy?.startsWith(s.id) ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-gold-soft" />
+                    ) : (
                       <motion.span animate={{ rotate: expanded ? 180 : 0 }}>
                         <ChevronDown className="h-5 w-5 text-paper/50" />
                       </motion.span>
                     )}
                   </button>
                   <AnimatePresence initial={false}>
-                    {expanded && cardId && (
+                    {expanded && personId && (
                       <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} transition={{ type: "spring", stiffness: 220, damping: 28 }}>
                         <div className="space-y-4 border-t border-paper/10 p-4">
                           <div className="rounded-2xl bg-paper/[0.06] p-3">
                             <div className="mb-2 text-[0.82rem] font-bold text-paper/70">Toute la rubrique</div>
                             <div className="rounded-full bg-paper">
-                              <Segmented layoutKey={`all-${s.id}`} options={OPTIONS} value={same ?? ("" as Moment)} onChange={(m) => change(s.id, () => setSectionRight(cardId, s.id, m))} />
+                              <Segmented layoutKey={`all-${s.id}`} options={OPTIONS} value={same ?? ("" as Moment)} onChange={(m) => change(s.id, () => setSectionRight(personId, s.id, m))} />
                             </div>
                           </div>
                           {s.subsections.map((x) => (
                             <div key={x.id}>
                               <div className="mb-1.5 flex items-center gap-2 text-[0.92rem] font-semibold">
-                                <span className={`h-2 w-2 rounded-full ${DOT[r[x.id] ?? "jamais"]}`} />
+                                <span className={`h-2 w-2 rounded-full ${moment(r[x.id] ?? "jamais").dot}`} />
                                 {x.title}
                               </div>
                               <div className="rounded-full bg-paper">
-                                <Segmented layoutKey={`${cardId}-${x.id}`} options={OPTIONS} value={r[x.id] ?? "jamais"} onChange={(m) => change(`${s.id}:${x.id}`, () => setRight(cardId, x.id, m))} />
+                                <Segmented layoutKey={`${personId}-${x.id}`} options={OPTIONS} value={r[x.id] ?? "jamais"} onChange={(m) => change(`${s.id}:${x.id}`, () => setRight(personId, x.id, m))} />
                               </div>
                             </div>
                           ))}
@@ -134,7 +136,7 @@ export default function Droits() {
               );
             })}
           </div>
-          <p className="mt-5 text-center text-[0.85rem] text-paper/50">« À effacer » n'est jamais attribué : cette rubrique est détruite au décès sans être lue.</p>
+          <p className="mt-5 text-center text-[0.85rem] text-paper/50">« À effacer » n&apos;est jamais attribué : cette rubrique est détruite au décès sans être lue.</p>
         </>
       )}
     </div>

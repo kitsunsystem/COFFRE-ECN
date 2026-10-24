@@ -5,7 +5,7 @@ import { cardAndCode, demoChip, holderKeys } from "./cards";
 import { na, newKey, newSalt, open, openFrom, openJson, seal, sealJson, sealTo, toB64, type Sealed } from "./crypto";
 import { isReleased, type Moment } from "./rules";
 import { ALL_SUBSECTIONS, SECTIONS } from "./sections";
-import { now, uid, useApp, useSession, type Envelope, type VaultItem } from "./store";
+import { now, packOf, uid, useApp, useSession, type Envelope, type VaultItem } from "./store";
 
 export interface FileMeta {
   id: string;
@@ -58,6 +58,8 @@ export async function activateHolderCard(cardId: string, pin: string) {
   const salt = await newSalt();
   const keys = await holderKeys(await demoChip(cardId), pin, salt);
   useApp.getState().set((s) => ({ cards: s.cards.map((c) => (c.id === cardId ? { ...c, status: "active", activatedAt: now(), boxPk: keys.publicKeyB64, salt } : c)) }));
+  // The new card inherits its person's rights now if the Coffre is open, otherwise the next time the owner opens it.
+  if (useSession.getState().session.mode === "owner") await syncEnvelopes();
 }
 
 export async function unlock(cardId: string, pin: string): Promise<"owner" | "holder"> {
@@ -71,6 +73,7 @@ export async function unlock(cardId: string, pin: string): Promise<"owner" | "ho
       const kek = await cardAndCode(chip, "unlock", pin, st.vault.salt!);
       const vmk = await open(kek, card.wrappedVmk!, vmkAad(cardId));
       useSession.getState().setSession({ mode: "owner", cardId, vmk });
+      await syncEnvelopes().catch(console.error); // never reported as a wrong code
     } else {
       const keys = await holderKeys(chip, pin, card.salt!);
       if (keys.publicKeyB64 !== card.boxPk) throw new Error("bad code");
@@ -116,17 +119,20 @@ export async function readItems(subId: string): Promise<{ item: VaultItem; paylo
   return Promise.all(items.map(async (item) => ({ item, payload: await openJson<ItemPayload>(key, item.data, itemAad(item.id)) })));
 }
 
-export async function saveItem(subId: string, payload: ItemPayload, id = uid(), remind = true) {
+// Discovery phase: no personal document may be stored before the official launch (HDS hosting, final encryption).
+function assertLaunched() {
+  if (useApp.getState().phase !== "lancement") throw new Error("L'ajout de documents ouvrira au lancement officiel.");
+}
+
+export async function saveItem(subId: string, payload: ItemPayload, id = uid()) {
   ownerVmk();
+  assertLaunched();
   const key = (await subsectionKey(subId))!;
   const data = await sealJson(key, payload, itemAad(id));
-  const expiry = Object.entries(payload.fields).find(([k, v]) => (k === "expiry" || k === "date") && v)?.[1];
   const removed = (useApp.getState().vault.items.find((i) => i.id === id)?.fileIds ?? []).filter((f) => !payload.files.some((x) => x.id === f));
   await Promise.all(removed.map((f) => del(`blob:${f}`)));
   useApp.getState().set((s) => ({
     vault: { ...s.vault, items: [...s.vault.items.filter((i) => i.id !== id), { id, subsectionId: subId, data, fileIds: payload.files.map((f) => f.id), updatedAt: now() }] },
-    // Only the date leaves the Coffre, so the e-mail reminder can be sent without knowing what it is about.
-    reminders: [...s.reminders.filter((r) => r.itemId !== id), ...(remind && expiry ? [{ itemId: id, date: expiry }] : [])],
   }));
   return id;
 }
@@ -135,10 +141,11 @@ export async function deleteItem(id: string) {
   ownerVmk();
   const st = useApp.getState();
   await Promise.all((st.vault.items.find((i) => i.id === id)?.fileIds ?? []).map((f) => del(`blob:${f}`)));
-  st.set((s) => ({ vault: { ...s.vault, items: s.vault.items.filter((i) => i.id !== id) }, reminders: s.reminders.filter((r) => r.itemId !== id) }));
+  st.set((s) => ({ vault: { ...s.vault, items: s.vault.items.filter((i) => i.id !== id) } }));
 }
 
 export async function encryptFile(subId: string, file: File): Promise<FileMeta> {
+  assertLaunched();
   const key = (await subsectionKey(subId))!;
   const id = uid();
   await idbSet(`blob:${id}`, await seal(key, new Uint8Array(await file.arrayBuffer()), fileAad(id)));
@@ -184,21 +191,45 @@ export async function rotate(subId: string) {
   st.set((s) => ({ vault: { ...s.vault, items, envelopes, ssk: { ...s.vault.ssk, [subId]: wrapped } } }));
 }
 
-export async function setRight(cardId: string, subId: string, moment: Moment) {
+// Rights belong to a person and apply to every active card of their 2-card pack.
+export async function setRight(personId: string, subId: string, moment: Moment) {
   ownerVmk();
   const st = useApp.getState();
-  const card = st.cards.find((c) => c.id === cardId);
-  if (!card?.boxPk) throw new Error("Cette carte doit d'abord être activée par son porteur.");
-  const prev = st.rights[cardId]?.[subId] ?? "jamais";
+  const prev = st.rights[personId]?.[subId] ?? "jamais";
   if (prev === moment) return;
-  const others = st.vault.envelopes.filter((e) => !(e.cardId === cardId && e.subsectionId === subId));
-  const envelopes = moment === "jamais" ? others : [...others, { cardId, subsectionId: subId, moment, sealed: await sealTo(card.boxPk, (await subsectionKey(subId))!) }];
-  st.set((s) => ({ rights: { ...s.rights, [cardId]: { ...s.rights[cardId], [subId]: moment } }, vault: { ...s.vault, envelopes } }));
+  const cards = packOf(st, personId).filter((c) => c.status === "active" && c.boxPk);
+  const others = st.vault.envelopes.filter((e) => !(cards.some((c) => c.id === e.cardId) && e.subsectionId === subId));
+  const key = moment === "jamais" ? null : (await subsectionKey(subId))!;
+  const added = key ? await Promise.all(cards.map(async (c) => ({ cardId: c.id, subsectionId: subId, moment: moment as Envelope["moment"], sealed: await sealTo(c.boxPk!, key) }))) : [];
+  st.set((s) => ({ rights: { ...s.rights, [personId]: { ...s.rights[personId], [subId]: moment } }, vault: { ...s.vault, envelopes: [...others, ...added] } }));
   if (moment === "jamais" && prev !== "jamais") await rotate(subId);
 }
 
-export async function setSectionRight(cardId: string, sectionId: string, moment: Moment) {
-  for (const sub of SECTIONS.find((s) => s.id === sectionId)!.subsections) await setRight(cardId, sub.id, moment);
+export async function setSectionRight(personId: string, sectionId: string, moment: Moment) {
+  for (const sub of SECTIONS.find((s) => s.id === sectionId)!.subsections) await setRight(personId, sub.id, moment);
+}
+
+// Seals the missing envelopes, e.g. for a card activated while the Coffre was closed (keys are only available when it is open).
+export async function syncEnvelopes() {
+  ownerVmk();
+  const st = useApp.getState();
+  const missing: Envelope[] = [];
+  for (const [personId, subs] of Object.entries(st.rights))
+    for (const card of packOf(st, personId).filter((c) => c.status === "active" && c.boxPk))
+      for (const [subId, m] of Object.entries(subs)) {
+        if (m === "jamais" || st.vault.envelopes.some((e) => e.cardId === card.id && e.subsectionId === subId)) continue;
+        const key = await subsectionKey(subId);
+        if (key) missing.push({ cardId: card.id, subsectionId: subId, moment: m, sealed: await sealTo(card.boxPk!, key) });
+      }
+  if (missing.length) st.set((s) => ({ vault: { ...s.vault, envelopes: [...s.vault.envelopes, ...missing] } }));
+}
+
+// The end of a Coffre: after the post-death access period, or at the end of the grace period for an unpaid subscription.
+export async function eraseCoffre() {
+  const st = useApp.getState();
+  await Promise.all(st.vault.items.flatMap((i) => i.fileIds).map((f) => del(`blob:${f}`)));
+  st.set({ vault: { ssk: {}, items: [], envelopes: [] }, rights: {} });
+  useSession.getState().setSession({ mode: "locked" });
 }
 
 // After a coup dur, the owner takes the keys back: every sub-section opened for that case gets a new key.

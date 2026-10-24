@@ -33,4 +33,19 @@ export async function sendEmail(to: { email: string; name?: string }, template: 
   return messageId as string;
 }
 
+// The end of a Coffre (after the post-death access period, or an unpaid subscription): ciphertext, files, keys, envelopes.
+export async function eraseCoffre(db: ReturnType<typeof admin>, ownerId: string) {
+  const bucket = db.storage.from("coffre");
+  const { data: folders } = await bucket.list(ownerId, { limit: 1000 });
+  for (const f of folders ?? []) {
+    const { data: files } = await bucket.list(`${ownerId}/${f.name}`, { limit: 1000 });
+    const paths = (files ?? []).map((x) => `${ownerId}/${f.name}/${x.name}`);
+    if (paths.length) await bucket.remove(paths);
+  }
+  await db.from("vault_items").delete().eq("owner_id", ownerId);
+  await db.from("envelopes").delete().eq("owner_id", ownerId);
+  await db.from("rights").delete().in("person_id", ((await db.from("people").select("id").eq("owner_id", ownerId)).data ?? []).map((p) => p.id));
+  await db.from("vaults").delete().eq("owner_id", ownerId);
+}
+
 export const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });

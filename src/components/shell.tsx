@@ -4,7 +4,7 @@ import { CircleAlert, House, LifeBuoy, Lock, LockOpen, ShieldCheck, Sparkles, Us
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
-import { activeProcedure, procedureStatus } from "@/lib/rules";
+import { activeProcedure, graceEnd, procedureStatus } from "@/lib/rules";
 import { personName, useApp, useSession } from "@/lib/store";
 import { lock } from "@/lib/vault";
 import { Alma } from "./alma";
@@ -72,6 +72,8 @@ export function EspaceShell({ children }: { children: ReactNode }) {
   const account = useApp((s) => s.account);
   const procedures = useApp((s) => s.procedures);
   const tourPending = useApp((s) => s.tourPending);
+  const phase = useApp((s) => s.phase);
+  const billing = useApp((s) => s.billing);
   const router = useRouter();
   const path = usePath();
   const t = useNow(5000);
@@ -89,11 +91,28 @@ export function EspaceShell({ children }: { children: ReactNode }) {
           <Link href="/espace" aria-label="Accueil">
             <Logo />
           </Link>
-          <Link href="/espace/compte" className="grid h-11 w-11 place-items-center rounded-full bg-ink font-display text-[1.05rem] font-semibold text-paper" aria-label="Mon compte">
-            {account.firstName[0]}
-            {account.lastName[0]}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Alma />
+            <Link href="/espace/compte" className="grid h-11 w-11 place-items-center rounded-full bg-ink font-display text-[1.05rem] font-semibold text-paper" aria-label="Mon compte">
+              {account.firstName[0]}
+              {account.lastName[0]}
+            </Link>
+          </div>
         </div>
+        {billing.status === "impaye" && billing.since && (
+          <Link href="/espace/compte" className="block bg-coral px-5 py-3 text-paper">
+            <div className="mx-auto flex max-w-lg items-center gap-3 text-[0.92rem] font-semibold">
+              <CircleAlert className="h-5 w-5 shrink-0" />
+              Paiement en retard : sans régularisation, votre Coffre sera effacé le {new Date(graceEnd(billing.since)).toLocaleDateString("fr-FR")}.
+              <span className="ml-auto shrink-0 underline">Régler</span>
+            </div>
+          </Link>
+        )}
+        {phase === "decouverte" && (
+          <div className="bg-gold-soft px-5 py-2.5 text-ink">
+            <div className="mx-auto max-w-lg text-[0.85rem] font-semibold">Phase découverte : tout est ouvert, sauf l&apos;ajout de documents dans le Coffre, qui ouvrira au lancement officiel.</div>
+          </div>
+        )}
         {alert && status !== "active" && path !== "/espace/procedures" && (
           <Link href="/espace/procedures" className="block bg-coral px-5 py-3 text-paper">
             <div className="mx-auto flex max-w-lg items-center gap-3 text-[0.95rem] font-semibold">
@@ -108,7 +127,6 @@ export function EspaceShell({ children }: { children: ReactNode }) {
         <Transition>{children}</Transition>
       </main>
       <AnimatePresence>{tourPending && <Tour key="tour" />}</AnimatePresence>
-      <Alma />
       <BottomNav
         items={[
           { href: "/espace", label: "Accueil", icon: House },
@@ -166,6 +184,7 @@ export function CoffreShell({ children }: { children: ReactNode }) {
           <Logo light />
           <div className="flex items-center gap-2">
             <span className="hidden rounded-full bg-sage/20 px-3 py-1 text-[0.75rem] font-bold text-sage-soft sm:inline">{holder ? `Carte de ${holder}` : "Coffre ouvert"}</span>
+            <Alma dark />
             <motion.button
               whileTap={{ scale: 0.92 }}
               onClick={() => {
@@ -182,7 +201,6 @@ export function CoffreShell({ children }: { children: ReactNode }) {
       <main className="relative mx-auto max-w-lg px-5 pb-40 pt-4">
         <Transition>{children}</Transition>
       </main>
-      <Alma dark />
       <BottomNav dark items={items} />
     </div>
   );

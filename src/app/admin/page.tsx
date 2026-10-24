@@ -9,11 +9,12 @@ import { Loader } from "@/components/shell";
 import { Badge, Button, Card, Segmented } from "@/components/ui";
 import { Logo } from "@/components/visuals";
 import { openFrom } from "@/lib/crypto";
-import { procedureStatus, verify } from "@/lib/rules";
+import { canConfirmDeath, procedureStatus, verify } from "@/lib/rules";
 import { now, useApp, type ConciergeCase } from "@/lib/store";
 import { conciergeKeys } from "@/lib/vault";
 
 type Tab = "deces" | "conciergerie" | "comptes";
+const Dot = ({ ok }: { ok: boolean }) => <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${ok ? "bg-sage" : "bg-coral"}`} />;
 const fmt = (t: number) => new Date(t).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
 
 // Back-office of the publisher: it sees the Espace (identity, procedures, cases), never the Coffre.
@@ -53,7 +54,7 @@ export default function Admin() {
         <div className="mt-6 space-y-4">
           {tab === "deces" && (
             <>
-              <p className="text-ink-soft">Chaque décès, signalé par un garant ou trouvé par la veille INSEE, est vérifié par une personne de l'équipe auprès de l'état civil avant l'ouverture du délai. Les correspondances douteuses ont d'abord été examinées par l'IA.</p>
+              <p className="text-ink-soft">Un décès n&apos;est confirmé que sur concordance : registre INSEE (ou signalement d&apos;un garant), acte de décès fourni par un bénéficiaire, et identité de ce bénéficiaire vérifiée. Les correspondances douteuses ont d&apos;abord été examinées par l&apos;IA. Ensuite seulement, le délai d&apos;annulation commence.</p>
               {queue.length === 0 && <Card className="text-center text-mist">Rien à vérifier.</Card>}
               {queue.map((p) => (
                 <Card key={p.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -61,7 +62,7 @@ export default function Admin() {
                     <div>
                       <div className="text-[1.15rem] font-semibold">{owner}</div>
                       <div className="text-[0.88rem] text-mist">
-                        {p.source === "insee" ? "Veille INSEE" : `Garant : ${p.declaredBy}`} · {fmt(p.declaredAt)}
+                        {p.source === "insee" ? "Veille INSEE" : p.source === "garant" ? `Garant : ${p.declaredBy}` : `Bénéficiaire : ${p.declaredBy}`} · {fmt(p.declaredAt)}
                       </div>
                     </div>
                     {p.match && <Badge tone={p.match.doubtful ? "coral" : "sage"}>{Math.round(p.match.score * 100)} %</Badge>}
@@ -70,12 +71,32 @@ export default function Admin() {
                     <div className="mt-3 grid gap-1 rounded-2xl bg-ink/[0.04] p-3 text-[0.9rem]">
                       <span>Né(e) le {new Date(s.account.birthDate).toLocaleDateString("fr-FR")} à {s.account.birthCity}</span>
                       {p.match?.reasons.length ? <span className="text-coral">À vérifier : {p.match.reasons.join(", ")}</span> : null}
-                      {p.note && <span>Note du garant : « {p.note} »</span>}
+                      {p.note && <span>Note : « {p.note} »</span>}
                     </div>
                   )}
+                  {/* Concordance: no notary by default, the team checks everything itself. */}
+                  <ul className="mt-3 space-y-1.5 text-[0.9rem]">
+                    <li className="flex items-center gap-2">
+                      <Dot ok={p.source === "insee" || !!p.match} /> Registre INSEE {p.source === "insee" ? "(correspondance trouvée)" : "(à consulter)"}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Dot ok={!!p.acte} /> Acte de décès {p.acte ? `déposé par ${p.acte.by} (${p.acte.file})` : "en attente d'un bénéficiaire"}
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Dot ok={!!p.acte?.idChecked} />
+                      {p.acte ? (
+                        <button className="font-semibold underline" onClick={() => s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === p.id && y.acte ? { ...y, acte: { ...y.acte, idChecked: !y.acte.idChecked } } : y)) }))}>
+                          {p.acte.idChecked ? "Identité et KYC du bénéficiaire vérifiés" : "Vérifier l'identité et le KYC du bénéficiaire"}
+                        </button>
+                      ) : (
+                        "Identité et KYC du bénéficiaire"
+                      )}
+                    </li>
+                  </ul>
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <Button
                       variant="danger"
+                      disabled={!canConfirmDeath(p)}
                       onClick={() => {
                         const v = verify(p, now());
                         s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === p.id ? v : y)) }));

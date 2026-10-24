@@ -89,14 +89,14 @@ export const SECTIONS: Section[] = [
   {
     id: "volontes",
     title: "Volontés et messages",
-    tagline: "Obsèques, lettres, vidéos, messages programmés, animaux",
+    tagline: "Obsèques, lettres, où sont mes vidéos, animaux",
     icon: "Feather",
     tone: "sage",
     subsections: [
       { id: "obseques", title: "Obsèques", hint: "Contrat obsèques, souhaits", fields: [{ key: "contract", label: "Contrat obsèques" }, { key: "wishes", label: "Mes souhaits", kind: "long" }, note] },
       { id: "lettres", title: "Lettres", hint: "Un mot pour chacun", fields: [{ key: "to", label: "Pour" }, { key: "text", label: "Ma lettre", kind: "long" }] },
-      { id: "videos", title: "Vidéos", hint: "Messages filmés", fields: [{ key: "to", label: "Pour" }, note] },
-      { id: "programmes", title: "Messages programmés", hint: "Remis à une date choisie", fields: [{ key: "to", label: "Pour" }, { key: "date", label: "À remettre le", kind: "date" }, { key: "text", label: "Message", kind: "long" }] },
+      // Filmed messages are not stored at launch: the Coffre only says where they are kept.
+      { id: "ou-videos", title: "Où se trouvent mes vidéos", hint: "Disque dur, clé USB, chez le notaire…", fields: [{ key: "support", label: "Support", placeholder: "Ex. Disque dur externe" }, { key: "where", label: "Où il se trouve", placeholder: "Ex. Chez Maître Roux" }, { key: "to", label: "Pour qui" }, note] },
       { id: "animaux", title: "Animaux", hint: "Qui les recueille, vétérinaire", fields: [{ key: "animal", label: "Animal" }, { key: "keeper", label: "Qui le recueille" }, note] },
     ],
   },

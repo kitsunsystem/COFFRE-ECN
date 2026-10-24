@@ -15,20 +15,22 @@ export async function seedDemo() {
   const t = Date.now();
   const card = (holderId: string, printedName: string, extra = false): Card => ({ id: uid(), holderId, printedName, status: "recue", orderedAt: t - 9 * 86_400_000, extra });
   const owner = [card("owner", "Claire Durand"), card("owner", "Claire Durand"), card("owner", "Claire Durand")];
-  const cMarc = card(marc.id, "Marc Durand", true);
-  const cLea = card(lea.id, "Léa Durand", true);
+  // Every beneficiary has a pack of 2 cards.
+  const packs = [marc, lea, paul].flatMap((p) => [card(p.id, `${p.firstName} ${p.lastName}`, true), card(p.id, `${p.firstName} ${p.lastName}`, true)]);
   st.set({
     account: { firstName: "Claire", lastName: "Durand", email: "claire.durand@exemple.fr", phone: "06 98 76 54 32", birthDate: "1972-03-14", birthCity: "Lyon", birthCountry: "France", address: "12 rue des Lilas\n69003 Lyon", situation: "Marié(e)", isBusinessOwner: true, kyc: "verifie", createdAt: t - 12 * 86_400_000 },
     people: [marc, lea, paul, sophie],
-    cards: [...owner, cMarc, cLea],
+    cards: [...owner, ...packs],
     guarantors: [
       { personId: marc.id, role: "Prévenir les enfants et déclarer un coup dur si je suis hospitalisée." },
       { personId: sophie.id, role: "Confirmer, avec Marc, s'il m'arrive quelque chose." },
     ],
+    phase: "lancement", // the demo shows the product as it will be after the official launch
+    reminderConsent: true,
+    reminders: [{ id: uid(), label: "Passeport", date: new Date(t + 40 * 86_400_000).toISOString().slice(0, 10) }],
   });
   for (const c of owner) await activateOwnerCard(c.id, DEMO_PIN);
-  await activateHolderCard(cMarc.id, DEMO_PIN);
-  await activateHolderCard(cLea.id, DEMO_PIN);
+  for (const c of packs) await activateHolderCard(c.id, DEMO_PIN);
 
   const items: [string, string, Record<string, string>][] = [
     ["a-prevenir", "Marc, mon mari", { name: "Marc Durand", phone: "06 12 34 56 78", note: "À appeler en premier, à toute heure." }],
@@ -45,14 +47,19 @@ export async function seedDemo() {
   ];
   for (const [sub, title, fields] of items) await saveItem(sub, { title, fields, files: [] });
 
-  await setSectionRight(cMarc.id, "urgence", "now");
-  await setRight(cMarc.id, "banques", "coup_dur");
-  await setRight(cMarc.id, "assurances", "deces");
-  await setRight(cMarc.id, "telephone", "coup_dur");
-  await setRight(cLea.id, "a-prevenir", "coup_dur");
-  await setRight(cLea.id, "lettres", "deces");
-  await setRight(cLea.id, "obseques", "deces");
-  await setRight(cLea.id, "juridique", "deces");
+  await setSectionRight(marc.id, "urgence", "now");
+  await setRight(marc.id, "banques", "coup_dur");
+  await setRight(marc.id, "assurances", "deces");
+  await setRight(marc.id, "telephone", "coup_dur");
+  await setRight(lea.id, "a-prevenir", "now");
+  await setRight(lea.id, "groupe-allergies", "now");
+  await setRight(lea.id, "lettres", "deces");
+  await setRight(lea.id, "obseques", "deces");
+  await setRight(lea.id, "juridique", "deces");
+  await setRight(paul.id, "a-prevenir", "now");
+  await setRight(paul.id, "groupe-allergies", "now");
+  await setRight(paul.id, "lettres", "deces");
+  await setRight(paul.id, "obseques", "deces");
   useSession.getState().setSession({ mode: "locked" });
   useApp.getState().set({ tourPending: true });
 }

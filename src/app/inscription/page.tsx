@@ -66,7 +66,7 @@ export default function Inscription() {
   }
 
   function verify() {
-    // shortcut: simulated; plug ECN's KYC system here (brief §4.2) — it returns verified identity data.
+    // shortcut: simulated; plug the group's existing KYC system here (brief §4.2) — it returns verified identity data.
     setKyc("checking");
     setTimeout(() => setKyc("done"), 2200);
   }
@@ -104,7 +104,7 @@ export default function Inscription() {
                     <AlmaFace size={120} speaking />
                   </div>
                   <h1 className="mt-6 text-[2.2rem] font-semibold leading-tight">Bonjour, je suis {ASSISTANT_NAME}.</h1>
-                  <p className="mt-3 text-[1.1rem] text-ink-soft">Je vais vous aider à créer votre Espace. Comptez cinq minutes. Vous pourrez tout modifier ensuite.</p>
+                  <p className="mt-3 text-[1.1rem] text-ink-soft">Je vais vous aider à créer votre Espace, vérification d&apos;identité comprise. Vous pourrez tout modifier ensuite.</p>
                   <Notice tone="ink">
                     <span className="font-semibold">Rien à retenir.</span> Vous ouvrirez votre Coffre avec une carte et un code, sans mot de passe compliqué.
                   </Notice>
@@ -271,7 +271,7 @@ export default function Inscription() {
                     </motion.span>
                   </div>
                   <h1 className="mt-8 text-[2.2rem] font-semibold leading-tight">Votre Espace est prêt, {d.firstName}.</h1>
-                  <p className="mt-3 text-[1.1rem] text-ink-soft">Prochaine étape : commander vos trois cartes. Ensuite, l'essentiel de votre Coffre en quinze minutes.</p>
+                  <p className="mt-3 text-[1.1rem] text-ink-soft">Prochaine étape : commander vos trois cartes et désigner vos bénéficiaires. Ensuite, l&apos;essentiel de votre Coffre, à votre rythme.</p>
                 </div>
               )}
             </motion.div>

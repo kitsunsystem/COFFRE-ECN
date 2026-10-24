@@ -1,23 +1,24 @@
 "use client";
 import { motion } from "motion/react";
-import { BadgeCheck, Bell, ChevronRight, CreditCard, FlaskConical, Info, LogOut, Mail, Users, Volume2 } from "lucide-react";
+import { BadgeCheck, Bell, CalendarClock, ChevronRight, CreditCard, FlaskConical, Info, LogOut, Mail, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { Badge, Button, Card, Field, PageTitle, Sheet, Toggle } from "@/components/ui";
+import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
-import { OFFER, SUPPORT_EMAIL } from "@/lib/config";
+import { LAUNCH, OFFER, SUPPORT_EMAIL } from "@/lib/config";
+import { graceEnd } from "@/lib/rules";
 import { useApp, type Account } from "@/lib/store";
 import { lock } from "@/lib/vault";
 
 export default function Compte() {
-  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, assistantVoice: x.assistantVoice, set: x.set, reset: x.reset })));
+  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, assistantVoice: x.assistantVoice, billing: x.billing, phase: x.phase, set: x.set, reset: x.reset })));
   const router = useRouter();
   const [edit, setEdit] = useState(false);
   const [mail, setMail] = useState<string | null>(null);
   const a = s.account;
-  const extra = s.cards.filter((c) => c.extra && c.status !== "perdue").length;
+  const packs = new Set(s.cards.filter((c) => c.holderId !== "owner").map((c) => c.holderId)).size;
   const opened = s.outbox.find((m) => m.id === mail);
 
   return (
@@ -71,22 +72,36 @@ export default function Compte() {
           <div className="flex items-center gap-3">
             <Users className="h-7 w-7 text-gold-deep" />
             <div className="flex-1">
-              <div className="font-semibold">Formule famille</div>
-              <div className="text-[0.88rem] text-mist">Pour le couple et les parents · {OFFER.includedCards} cartes incluses</div>
+              <div className="font-semibold">Formule simple</div>
+              <div className="text-[0.88rem] text-mist">
+                {OFFER.ownerCards} cartes incluses · un pack de {OFFER.packCards} cartes par bénéficiaire
+              </div>
             </div>
-            <Badge tone="sage">Active</Badge>
+            <Badge tone={s.billing.status === "a_jour" ? "sage" : "coral"}>{s.billing.status === "a_jour" ? "À jour" : s.billing.status === "impaye" ? "Impayé" : "Effacé"}</Badge>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 text-center">
             <div className="rounded-2xl bg-ink/[0.04] p-3">
-              <div className="font-display text-[1.6rem] font-semibold">{OFFER.familyPrice ? `${OFFER.familyPrice} €` : "—"}</div>
+              <div className="font-display text-[1.6rem] font-semibold">{OFFER.price ? `${OFFER.price} €` : "—"}</div>
               <div className="text-[0.8rem] text-mist">par an</div>
             </div>
             <div className="rounded-2xl bg-ink/[0.04] p-3">
-              <div className="font-display text-[1.6rem] font-semibold">{extra}</div>
-              <div className="text-[0.8rem] text-mist">carte{extra > 1 ? "s" : ""} supplémentaire{extra > 1 ? "s" : ""}</div>
+              <div className="font-display text-[1.6rem] font-semibold">{packs}</div>
+              <div className="text-[0.8rem] text-mist">pack{packs > 1 ? "s" : ""} bénéficiaire{packs > 1 ? "s" : ""}</div>
             </div>
           </div>
-          {!OFFER.familyPrice && <p className="mt-3 text-[0.85rem] text-mist">Tarifs communiqués au lancement.</p>}
+          {s.phase === "decouverte" && <p className="mt-3 text-[0.85rem] text-mist">Phase découverte{LAUNCH.discoveryPrice ? ` (${LAUNCH.discoveryPrice} €)` : ""} : tout est ouvert sauf l&apos;ajout de documents. Lancement officiel prévu {LAUNCH.plannedDate ?? "à une date communiquée prochainement"}.</p>}
+          {!OFFER.price && <p className="mt-2 text-[0.85rem] text-mist">Tarifs communiqués au lancement.</p>}
+          {s.billing.status === "impaye" && s.billing.since && (
+            <div className="mt-4">
+              <Notice tone="coral">
+                <p>Paiement non reçu. Sans régularisation avant le {new Date(graceEnd(s.billing.since)).toLocaleDateString("fr-FR", { dateStyle: "long" })}, votre Coffre sera effacé définitivement.</p>
+                <Button className="mt-3" variant="danger" onClick={() => s.set({ billing: { status: "a_jour" } })}>
+                  Régulariser (démo)
+                </Button>
+              </Notice>
+            </div>
+          )}
+          {s.billing.status === "efface" && <p className="mt-3 text-[0.88rem] font-semibold text-coral">Le délai de grâce est dépassé : le contenu du Coffre a été effacé.</p>}
         </Card>
       </motion.div>
 
@@ -95,6 +110,11 @@ export default function Compte() {
         <Link href="/espace/cartes" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
           <CreditCard className="h-6 w-6 text-gold-deep" />
           <span className="flex-1 font-semibold">Mes cartes</span>
+          <ChevronRight className="h-5 w-5 text-mist" />
+        </Link>
+        <Link href="/espace/echeances" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
+          <CalendarClock className="h-6 w-6 text-gold-deep" />
+          <span className="flex-1 font-semibold">Mes échéances et rappels</span>
           <ChevronRight className="h-5 w-5 text-mist" />
         </Link>
         <Link href="/espace/procedures" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">

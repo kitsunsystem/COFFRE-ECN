@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Button, Eyebrow } from "@/components/ui";
 import { Aurora, Emblem, Logo, NfcCard, Reveal, rise, stagger, TapDemo } from "@/components/visuals";
-import { APP_NAME } from "@/lib/config";
+import { APP_NAME, LAUNCH, OFFER } from "@/lib/config";
+import { moment, type Moment } from "@/lib/rules";
 
 function FloatChip({ icon: I, text, className, delay }: { icon: typeof Bell; text: string; className: string; delay: number }) {
   return (
@@ -65,7 +66,7 @@ function Hero() {
             .
           </motion.h1>
           <motion.p variants={rise} className="mt-7 max-w-xl text-[1.2rem] leading-relaxed text-ink-soft">
-            Vos papiers, vos contrats, vos codes et vos mots pour vos proches, rangés en quinze minutes. Utile tous les jours, et prêt le jour où quelque chose arrive.
+            Vos papiers, vos contrats, vos codes et vos mots pour vos proches, rangés au même endroit, à votre rythme. Utile tous les jours, et prêt le jour où quelque chose arrive.
           </motion.p>
           <motion.div variants={rise} className="mt-9 flex flex-wrap gap-3">
             <Button href="/inscription" variant="gold" icon={<ArrowRight className="h-5 w-5" />}>
@@ -107,17 +108,18 @@ function Hero() {
           </motion.div>
           <FloatChip icon={CalendarClock} text="Passeport : expire dans 30 jours" className="-left-2 top-0 sm:-left-10" delay={1.1} />
           <FloatChip icon={HeartPulse} text="Marc voit : Urgence et santé" className="-right-2 bottom-16 sm:-right-8" delay={1.3} />
-          <FloatChip icon={Sparkles} text="Famille protégée à 82 %" className="bottom-0 left-4" delay={1.5} />
+          <FloatChip icon={Sparkles} text="Famille préparée à 88 %" className="bottom-0 left-4" delay={1.5} />
         </div>
       </div>
     </section>
   );
 }
 
-const MOMENTS = [
-  { icon: CalendarClock, tone: "bg-sage-soft text-sage", title: "Le quotidien", text: "Partagez certains documents avec votre conjoint, gardez une fiche d'urgence, soyez prévenu avant l'échéance d'un passeport ou d'un contrat." },
-  { icon: Siren, tone: "bg-coral-soft text-coral", title: "Le coup dur", text: "Accident, hospitalisation, perte d'autonomie : vos proches accèdent seulement à ce que vous avez prévu pour ce cas." },
-  { icon: HandHeart, tone: "bg-gold-soft/70 text-gold-deep", title: "Le décès", text: "Chacun reçoit ce qui lui est destiné, et la famille est accompagnée dans chaque démarche." },
+// The three access levels, in the same colours as everywhere in the app (lib/rules.ts MOMENTS).
+const LEVELS = [
+  { icon: HeartPulse, tone: "bg-sage-soft text-sage", title: "Urgence", text: "Santé, personnes à prévenir : vos proches autorisés y accèdent tout de suite, à tout moment, avec leur carte. Et votre fiche médicale se copie dans votre téléphone." },
+  { icon: Siren, tone: "bg-coral-soft text-coral", title: "Coup dur", text: "Banques, codes, contrats : un garant signale la situation, un court délai s'écoule, puis seuls les éléments prévus pour ce cas s'ouvrent." },
+  { icon: HandHeart, tone: "bg-gold-soft/70 text-gold-deep", title: "Décès", text: "Veille du registre des décès, acte de décès, vérification par notre équipe : chaque bénéficiaire reçoit uniquement sa part." },
 ];
 
 function Moments() {
@@ -125,11 +127,11 @@ function Moments() {
     <section className="px-5 py-24">
       <div className="mx-auto max-w-6xl">
         <Reveal>
-          <Eyebrow>Trois moments de la vie</Eyebrow>
+          <Eyebrow>Trois niveaux d&apos;accès</Eyebrow>
           <h2 className="mt-3 max-w-2xl text-[2.3rem] font-semibold leading-tight sm:text-[3rem]">Pas seulement pour « après ». Pour toute la vie.</h2>
         </Reveal>
         <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {MOMENTS.map((m, i) => (
+          {LEVELS.map((m, i) => (
             <Reveal key={m.title} delay={i * 0.1}>
               <motion.div whileHover={{ y: -6 }} className="h-full rounded-[2rem] bg-paper p-7 shadow-soft ring-1 ring-line">
                 <span className={`grid h-14 w-14 place-items-center rounded-2xl ${m.tone}`}>
@@ -158,13 +160,13 @@ function CardSection() {
           <Reveal>
             <Eyebrow className="!text-gold-soft">Zéro phrase à retenir</Eyebrow>
             <h2 className="mt-3 text-[2.3rem] font-semibold leading-tight sm:text-[3rem]">Une carte, votre code. C'est tout.</h2>
-            <p className="mt-5 text-[1.1rem] text-paper/75">Vous recevez trois cartes ECN. Posez l'une d'elles au dos de votre téléphone, tapez votre code : votre Coffre s'ouvre. Si une carte se perd, les deux autres suffisent.</p>
+            <p className="mt-5 text-[1.1rem] text-paper/75">Vous recevez trois cartes. Posez l&apos;une d&apos;elles au dos de votre téléphone, tapez votre code ou utilisez Face ID : votre Coffre s&apos;ouvre. La carte est toujours nécessaire, le code ne la remplace jamais.</p>
           </Reveal>
           <div className="mt-10 space-y-4">
             {[
               ["1", "Recevez vos trois cartes", "Elles sont fabriquées pour vous et livrées chez vous."],
               ["2", "Activez-les avec votre téléphone", "La carte crée son secret dans sa puce : il n'en sort jamais."],
-              ["3", "Donnez une carte à vos proches", "Chaque carte n'ouvre que ce que vous lui avez attribué."],
+              ["3", "Chaque bénéficiaire reçoit 2 cartes", "À ranger dans deux endroits. Elles n'ouvrent que ce que vous lui avez attribué."],
             ].map(([n, t, d], i) => (
               <Reveal key={n} delay={i * 0.1}>
                 <div className="flex gap-4 rounded-3xl bg-paper/5 p-5 ring-1 ring-paper/10">
@@ -183,14 +185,12 @@ function CardSection() {
   );
 }
 
-const PEOPLE = [
-  { name: "Marc", role: "Conjoint", v: 2, rows: ["now", "now", "coup_dur", "deces"] },
-  { name: "Léa", role: "Fille", v: 1, rows: ["coup_dur", "deces", "deces", "deces"] },
-  { name: "Paul", role: "Fils", v: 3, rows: ["coup_dur", "jamais", "deces", "deces"] },
+const PEOPLE: { name: string; role: string; rows: Moment[] }[] = [
+  { name: "Marc", role: "Conjoint", rows: ["now", "now", "coup_dur", "deces"] },
+  { name: "Léa", role: "Fille", rows: ["now", "deces", "jamais", "deces"] },
+  { name: "Paul", role: "Fils", rows: ["now", "jamais", "jamais", "deces"] },
 ];
 const ROWS = ["Urgence et santé", "Documents", "Argent et contrats", "Volontés"];
-const PILL: Record<string, string> = { now: "bg-sage text-paper", coup_dur: "bg-coral text-paper", deces: "bg-gold text-ink", jamais: "bg-ink/10 text-mist" };
-const PILL_LABEL: Record<string, string> = { now: "Maintenant", coup_dur: "Coup dur", deces: "Décès", jamais: "Jamais" };
 
 function Rights() {
   const [who, setWho] = useState(0);
@@ -205,7 +205,7 @@ function Rights() {
         <Reveal>
           <Eyebrow>Qui voit quoi, et quand</Eyebrow>
           <h2 className="mt-3 text-[2.3rem] font-semibold leading-tight sm:text-[3rem]">Chacun voit ce que vous avez choisi. Rien de plus.</h2>
-          <p className="mt-5 text-[1.1rem] text-ink-soft">Pour chaque proche et chaque rubrique, vous choisissez le moment : tout de suite, en cas de coup dur, au décès, ou jamais. Vous pouvez changer d'avis quand vous voulez.</p>
+          <p className="mt-5 text-[1.1rem] text-ink-soft">Pour chaque bénéficiaire et chaque rubrique, vous choisissez le niveau : urgence, coup dur, décès, ou jamais. Vous pouvez changer d&apos;avis quand vous voulez.</p>
         </Reveal>
         <Reveal delay={0.1}>
           <div className="rounded-[2rem] bg-paper p-6 shadow-lift ring-1 ring-line">
@@ -223,8 +223,8 @@ function Rights() {
                 <div key={r} className="flex items-center justify-between gap-3 rounded-2xl bg-cream px-4 py-3.5">
                   <span className="font-semibold">{r}</span>
                   <AnimatePresence mode="popLayout">
-                    <motion.span key={p.name + i} initial={{ opacity: 0, scale: 0.7, y: 6 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.7 }} transition={{ delay: i * 0.05, type: "spring", stiffness: 300, damping: 20 }} className={`rounded-full px-3 py-1 text-[0.8rem] font-bold ${PILL[p.rows[i]]}`}>
-                      {PILL_LABEL[p.rows[i]]}
+                    <motion.span key={p.name + i} initial={{ opacity: 0, scale: 0.7, y: 6 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.7 }} transition={{ delay: i * 0.05, type: "spring", stiffness: 300, damping: 20 }} className={`rounded-full px-3 py-1 text-[0.8rem] font-bold ${moment(p.rows[i]).pill}`}>
+                      {moment(p.rows[i]).short}
                     </motion.span>
                   </AnimatePresence>
                 </div>
@@ -302,18 +302,27 @@ function Offer() {
     <section className="px-5 py-24">
       <div className="mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-paper shadow-lift ring-1 ring-line md:grid md:grid-cols-2">
         <div className="p-9 sm:p-12">
-          <Eyebrow>Une seule formule</Eyebrow>
-          <h2 className="mt-3 text-[2.2rem] font-semibold leading-tight">Toute la famille, un seul abonnement.</h2>
+          <Eyebrow>Formule simple</Eyebrow>
+          <h2 className="mt-3 text-[2.2rem] font-semibold leading-tight">Tout compris, sans surprise.</h2>
           <ul className="mt-7 space-y-3.5">
-            {["Le couple, et vos parents si vous le souhaitez", "Trois cartes incluses par titulaire", "Les outils d'aide pour les proches", "L'assistant, les rappels, la fiche d'urgence"].map((x) => (
+            {[`Votre Coffre et vos ${OFFER.ownerCards} cartes`, `Un pack de ${OFFER.packCards} cartes pour chaque bénéficiaire`, "Les listes, démarches et courriers pour vos proches", "L'assistante, les relances et la fiche d'urgence"].map((x) => (
               <li key={x} className="flex items-start gap-3 text-[1.02rem]">
                 <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-sage" /> {x}
               </li>
             ))}
           </ul>
-          <div className="mt-9">
+          {/* Pre-sale terms: to be validated by the lawyer before going live. */}
+          <div className="mt-7 rounded-2xl bg-gold-soft/40 p-4 ring-1 ring-gold/30">
+            <div className="font-semibold">Phase découverte{LAUNCH.discoveryPrice ? ` · ${LAUNCH.discoveryPrice} €` : ""}</div>
+            <ul className="mt-2 space-y-1.5 text-[0.92rem] text-ink-soft">
+              <li>Inclus dès maintenant : inscription, vérification d&apos;identité, famille, garants, réglages « qui voit quoi », fabrication et livraison des cartes.</li>
+              <li>Au lancement officiel{LAUNCH.plannedDate ? `, prévu le ${LAUNCH.plannedDate}` : " (date annoncée prochainement)"} : ouverture de l&apos;ajout de documents. Rien n&apos;est stocké avant.</li>
+              <li>Remboursé si le lancement n&apos;a pas lieu à la date annoncée.</li>
+            </ul>
+          </div>
+          <div className="mt-7">
             <Button href="/inscription" variant="gold" icon={<ArrowRight className="h-5 w-5" />}>
-              Commencer
+              Réserver ma place
             </Button>
             <p className="mt-3 text-[0.88rem] text-mist">Accès sur invitation de votre conseiller.</p>
           </div>
@@ -334,11 +343,12 @@ function Offer() {
 }
 
 const FAQ = [
-  ["Dois-je retenir un mot de passe ou une phrase secrète ?", "Non. Vous ouvrez votre Coffre avec votre carte et votre code, ou Face ID dans l'application."],
-  ["Que se passe-t-il si je perds une carte ?", "Vos deux autres cartes ouvrent toujours votre Coffre. La carte perdue est désactivée en un geste."],
+  ["Dois-je retenir un mot de passe ou une phrase secrète ?", "Non. Vous ouvrez votre Coffre avec votre carte, plus votre code ou Face ID. La carte est toujours nécessaire."],
+  ["Que se passe-t-il si je perds une carte ?", "Vos deux autres cartes ouvrent toujours votre Coffre. La carte perdue est désactivée en un geste, et une nouvelle peut être appairée."],
+  ["Et mes bénéficiaires ?", "Chacun reçoit un pack de 2 cartes à son nom, à ranger dans deux endroits différents. Après votre décès, un bénéficiaire qui aurait perdu ses deux cartes perdrait son accès : nous le lui expliquons à la réception, et nous lui demandons régulièrement si ses cartes sont toujours là."],
   ["Est-ce un testament ?", "Non. Le Coffre ne remplace ni un notaire ni un testament : il indique où se trouve l'original et aide vos proches à tout retrouver."],
-  ["Mes enfants peuvent-ils m'aider à le remplir ?", "Oui. Un enfant peut ouvrir et gérer le Coffre de son parent, qui reste le sien, avec ses propres cartes."],
-  ["Qui décide qu'il y a un coup dur ou un décès ?", "Vos garants, que vous choisissez. Pour un décès, une veille automatique et une vérification humaine s'ajoutent, puis un délai pendant lequel vous pouvez tout annuler."],
+  ["Qui décide qu'il y a un coup dur ou un décès ?", "Pour un coup dur, vos garants, que vous choisissez. Pour un décès : veille du registre des décès, acte de décès fourni par un bénéficiaire et vérification par notre équipe, puis un délai pendant lequel tout peut être annulé."],
+  ["Combien de temps mes proches ont-ils accès ?", "Après la confirmation du décès et le délai, vos bénéficiaires ont un temps limité pour tout récupérer. Ensuite, le Coffre est effacé définitivement."],
 ];
 
 function Faq() {
@@ -390,8 +400,8 @@ export default function Landing() {
             <Emblem /> <span className="font-display text-[1.2rem] font-semibold">{APP_NAME}</span>
           </span>
           <p className="text-center text-[0.85rem] text-mist">Ce service ne remplace ni un notaire ni un avocat. © {new Date().getFullYear()} {APP_NAME}</p>
-          <Link href="/admin" className="text-[0.85rem] text-mist hover:text-ink">
-            Espace équipe
+          <Link href="/beneficiaire" className="text-[0.85rem] font-semibold text-ink-soft hover:text-ink">
+            Un proche est décédé ? Espace bénéficiaire
           </Link>
         </div>
       </footer>

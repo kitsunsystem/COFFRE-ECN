@@ -9,6 +9,7 @@ import { CONCIERGE } from "@/lib/config";
 import { now, uid, useApp, type ConciergeCase } from "@/lib/store";
 
 const KINDS = [
+  { id: "mise-en-place", title: "Mettre en place mon Coffre", sub: "Cartes, bénéficiaires, l'essentiel : on le fait avec vous" },
   { id: "deces", title: "Démarches après un décès", sub: "Banques, assurances, caisses de retraite, résiliations" },
   { id: "hospitalisation", title: "Pendant une hospitalisation", sub: "Employeur, mutuelle, factures, quotidien" },
   { id: "autonomie", title: "Perte d'autonomie", sub: "Aides, aménagement, aide à domicile" },

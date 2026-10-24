@@ -6,7 +6,7 @@ import { useState } from "react";
 import { NamedIcon, TONES } from "@/components/icons";
 import { Button, Card, Notice } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
-import { downloadLetter, rubric } from "@/lib/aide";
+import { checklistFor, downloadLetter, rubric } from "@/lib/aide";
 import { useApp } from "@/lib/store";
 
 export function RubriqueView({ id }: { id: string }) {
@@ -15,10 +15,11 @@ export function RubriqueView({ id }: { id: string }) {
   const set = useApp((s) => s.set);
   const [open, setOpen] = useState<number | null>(0);
   const key = (c: string) => `${r.id}:${c}`;
-  const done = r.checklist.filter((c) => checklist[key(c.id)]).length;
+  const items = checklistFor(r, checklist);
+  const done = items.filter((c) => checklist[key(c.id)]).length;
   const toggle = (c: string) => set((s) => ({ checklist: { ...s.checklist, [key(c)]: !s.checklist[key(c)] } }));
   // Group the check-list by "when", keeping the order of the content file.
-  const groups = [...new Set(r.checklist.map((c) => c.when))].map((when) => ({ when, items: r.checklist.filter((c) => c.when === when) }));
+  const groups = [...new Set(items.map((c) => c.when))].map((when) => ({ when, items: items.filter((c) => c.when === when) }));
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
@@ -35,12 +36,29 @@ export function RubriqueView({ id }: { id: string }) {
         <p className="relative mt-2 text-[1.05rem] text-ink-soft">{r.intro}</p>
       </motion.div>
 
+      {r.profile && (
+        <motion.section variants={rise}>
+          <h2 className="text-[1.2rem] font-semibold">Pour adapter la liste</h2>
+          <p className="mb-3 text-[0.92rem] text-mist">Cochez ce qui correspond à la situation de votre proche.</p>
+          <div className="flex flex-wrap gap-2">
+            {r.profile.map((p) => {
+              const on = !!checklist[key(`profil:${p.id}`)];
+              return (
+                <motion.button key={p.id} type="button" whileTap={{ scale: 0.95 }} aria-pressed={on} onClick={() => toggle(`profil:${p.id}`)} className={`rounded-full px-4 py-2 text-[0.92rem] font-semibold ring-1 ${on ? "bg-ink text-paper ring-ink" : "bg-paper ring-line"}`}>
+                  {p.label}
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.section>
+      )}
+
       <motion.section variants={rise}>
         <div className="mb-3 flex items-end justify-between">
           <h2 className="text-[1.4rem] font-semibold">La liste à cocher</h2>
           <span className="font-display text-[1.2rem] font-semibold tabular-nums">
             {done}
-            <span className="text-mist">/{r.checklist.length}</span>
+            <span className="text-mist">/{items.length}</span>
           </span>
         </div>
         <div className="space-y-5">

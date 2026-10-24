@@ -18,6 +18,9 @@ Deno.serve(async (req) => {
     const [o, p] = await Promise.all([owner(record.owner_id), person(record.person_id)]);
     if (p.email) await sendEmail({ email: p.email, name: p.first_name }, "invitation-garant", { ownerName: `${o.first_name} ${o.last_name}`, role: record.role as string });
   } else if (table === "cards" && record.holder_person_id) {
+    // A beneficiary's pack is 2 cards: one e-mail, on the first one.
+    const { count } = await db.from("cards").select("id", { count: "exact", head: true }).eq("holder_person_id", record.holder_person_id);
+    if (count !== 1) return json({ skipped: true });
     const [o, p] = await Promise.all([owner(record.owner_id), person(record.holder_person_id)]);
     if (p.email) await sendEmail({ email: p.email, name: p.first_name }, "invitation-porteur", { ownerName: `${o.first_name} ${o.last_name}` });
   } else if (table === "cards") {

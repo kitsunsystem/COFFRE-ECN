@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DELAYS } from "./config";
-import { activeProcedure, declare, isReleased, procedureStatus, verify } from "./rules";
+import { DELAYS, GRACE_DAYS, POST_DEATH_ACCESS_DAYS } from "./config";
+import { accessEnd, activeProcedure, canConfirmDeath, declare, graceEnd, isReleased, procedureStatus, verify } from "./rules";
 
 const T = 1_700_000_000_000;
 
@@ -41,6 +41,17 @@ describe("décès", () => {
   it("a rejected report opens nothing", () => {
     const r = { ...verify(p, T), rejectedAt: T + 1 };
     expect(isReleased("deces", [r], T + DELAYS.deces * 2)).toBe(false);
+  });
+  it("needs a beneficiary's death certificate, checked, before it can be confirmed", () => {
+    expect(canConfirmDeath(p)).toBe(false);
+    expect(canConfirmDeath({ ...p, acte: { by: "Léa", file: "acte.pdf", idChecked: false, at: T } })).toBe(false);
+    expect(canConfirmDeath({ ...p, acte: { by: "Léa", file: "acte.pdf", idChecked: true, at: T } })).toBe(true);
+  });
+  it("keeps the Coffre open for a limited time after the delay, then it is erased", () => {
+    const v = verify(p, T);
+    expect(accessEnd(v)).toBe(v.endsAt! + POST_DEATH_ACCESS_DAYS * 86_400_000);
+    expect(accessEnd(p)).toBeUndefined();
+    expect(graceEnd(T)).toBe(T + GRACE_DAYS * 86_400_000);
   });
   it("'now' is always open, 'jamais' never", () => {
     expect(isReleased("now", [], T)).toBe(true);

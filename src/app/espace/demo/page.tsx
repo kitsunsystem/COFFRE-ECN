@@ -1,14 +1,15 @@
 "use client";
 import { motion } from "motion/react";
-import { Clock, FastForward, RotateCcw, ScanSearch, Sparkles, UserCog } from "lucide-react";
+import { Clock, FastForward, HeartHandshake, Rocket, RotateCcw, ScanSearch, Sparkles, UserCog } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useNow } from "@/components/providers";
-import { Button, Card, Notice, PageTitle } from "@/components/ui";
+import { Button, Card, Notice, PageTitle, Segmented } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
+import { GRACE_DAYS } from "@/lib/config";
 import { DEMO_PIN, seedDemo } from "@/lib/demo";
-import { activeProcedure, declare } from "@/lib/rules";
+import { accessEnd, activeProcedure, declare, graceEnd } from "@/lib/rules";
 import { now, useApp } from "@/lib/store";
 import { lock } from "@/lib/vault";
 import { findMatches, formatLine } from "../../../../supabase/functions/_shared/insee";
@@ -16,11 +17,13 @@ import { findMatches, formatLine } from "../../../../supabase/functions/_shared/
 const HOUR = 3_600_000;
 
 export default function Demo() {
-  const s = useApp(useShallow((x) => ({ account: x.account!, procedures: x.procedures, clockOffset: x.clockOffset, set: x.set, reset: x.reset })));
+  const s = useApp(useShallow((x) => ({ account: x.account!, procedures: x.procedures, clockOffset: x.clockOffset, phase: x.phase, billing: x.billing, set: x.set, reset: x.reset, email: x.email })));
   const t = useNow(1000);
   const router = useRouter();
   const [result, setResult] = useState<string | null>(null);
   const live = activeProcedure(s.procedures, t);
+  const death = s.procedures.find((p) => p.kind === "deces" && p.finalizedAt && !p.erasedAt);
+  const afterDeath = death && accessEnd(death);
 
   const jump = (ms: number) => s.set((x) => ({ clockOffset: x.clockOffset + ms }));
 
@@ -39,7 +42,7 @@ export default function Demo() {
     if (!m) return setResult("Aucune correspondance trouvée dans le registre.");
     const p = declare("deces", "insee", "Veille INSEE", now(), { match: { score: m.score, doubtful: m.doubtful, reasons: m.reasons } });
     s.set((x) => ({ procedures: [p, ...x.procedures] }));
-    setResult(`Correspondance à ${Math.round(m.score * 100)} %${m.doubtful ? ` (douteuse : ${m.reasons.join(", ")})` : ""}. Elle attend la vérification humaine dans l'administration.`);
+    setResult(`Correspondance à ${Math.round(m.score * 100)} %${m.doubtful ? ` (douteuse : ${m.reasons.join(", ")})` : ""}. Il faut maintenant l'acte de décès d'un bénéficiaire (Espace bénéficiaire), puis la vérification dans l'administration.`);
   }
 
   return (
@@ -57,9 +60,9 @@ export default function Demo() {
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2">
             {[
-              ["+1 h", HOUR],
               ["+1 jour", 24 * HOUR],
               ["+1 semaine", 7 * 24 * HOUR],
+              ["+1 mois", 30 * 24 * HOUR],
             ].map(([l, ms]) => (
               <Button key={l as string} variant="outline" className="!px-2" onClick={() => jump(ms as number)}>
                 {l}
@@ -69,6 +72,11 @@ export default function Demo() {
           {live?.endsAt && (
             <Button className="mt-2" full icon={<FastForward className="h-5 w-5" />} onClick={() => jump(live.endsAt! - t + 1000)}>
               Aller à la fin du délai
+            </Button>
+          )}
+          {afterDeath && (
+            <Button className="mt-2" full variant="outline" icon={<FastForward className="h-5 w-5" />} onClick={() => jump(afterDeath - t + 1000)}>
+              Aller à la fin de l&apos;accès des bénéficiaires
             </Button>
           )}
           {s.clockOffset !== 0 && (
@@ -101,9 +109,50 @@ export default function Demo() {
               <Notice tone="gold">{result}</Notice>
             </div>
           )}
-          <Button className="mt-3" full variant="ghost" icon={<UserCog className="h-5 w-5" />} href="/admin">
-            Ouvrir l'administration
-          </Button>
+          <div className="mt-3 grid gap-2">
+            <Button full variant="ghost" icon={<HeartHandshake className="h-5 w-5" />} href="/beneficiaire">
+              Espace bénéficiaire : déposer l&apos;acte de décès
+            </Button>
+            <Button full variant="ghost" icon={<UserCog className="h-5 w-5" />} href="/admin">
+              Administration : vérifier et confirmer
+            </Button>
+          </div>
+        </Card>
+      </motion.div>
+
+      <motion.div variants={rise}>
+        <Card>
+          <div className="flex items-center gap-3">
+            <Rocket className="h-7 w-7 text-gold-deep" />
+            <div className="flex-1">
+              <div className="font-semibold">Lancement en deux temps</div>
+              <div className="text-[0.88rem] text-mist">Découverte : tout est ouvert sauf l&apos;ajout de documents dans le Coffre</div>
+            </div>
+          </div>
+          <div className="mt-4">
+            <Segmented layoutKey="phase" value={s.phase} onChange={(phase) => s.set({ phase })} options={[{ id: "decouverte", label: "Phase découverte" }, { id: "lancement", label: "Lancement officiel" }]} />
+          </div>
+          <div className="mt-4 border-t border-line pt-4">
+            <div className="font-semibold">Abonnement</div>
+            <p className="text-[0.88rem] text-mist">En cas d&apos;impayé : relances pendant {GRACE_DAYS} jours, puis effacement de tout le Coffre.</p>
+            {s.billing.status === "a_jour" ? (
+              <Button
+                className="mt-3"
+                full
+                variant="outline"
+                onClick={() => {
+                  s.set({ billing: { status: "impaye", since: now() } });
+                  s.email(s.account.email, "impaye", { until: new Date(graceEnd(now())).toLocaleDateString("fr-FR", { dateStyle: "long" }) });
+                }}
+              >
+                Simuler un impayé
+              </Button>
+            ) : (
+              <Button className="mt-3" full variant="outline" onClick={() => s.set({ billing: { status: "a_jour" } })}>
+                {s.billing.status === "impaye" ? "Régulariser le paiement" : "Remettre l'abonnement à jour"}
+              </Button>
+            )}
+          </div>
         </Card>
       </motion.div>
 

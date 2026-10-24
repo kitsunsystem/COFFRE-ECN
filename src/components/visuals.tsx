@@ -70,29 +70,9 @@ export function CountUp({ to, className }: { to: number; className?: string }) {
   return <span ref={ref} className={className}>0</span>;
 }
 
-/* ---------- ECN card (Tangem) ---------- */
+/* ---------- Access card (Tangem) ---------- */
 
-// The client's card: matte black Tangem card, "ECN GROUP" on the front, "MEMBER" and the shield on the back.
-export function EcnLogo({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 132" className={className} role="img" aria-label="ECN Group">
-      <path d="M 40 58 A 62 62 0 0 1 160 58" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <circle cx="40" cy="58" r="5.5" fill="currentColor" />
-      <circle cx="160" cy="58" r="5.5" fill="currentColor" />
-      <path d="M100 2 L80 60 L100 49 Z" fill="currentColor" />
-      <path d="M100 2 L120 60 L100 49 Z" fill="currentColor" opacity="0.55" />
-      <text x="100" y="104" textAnchor="middle" className="font-display" fontSize="46" fontWeight="500" letterSpacing="3" fill="currentColor">
-        ECN
-      </text>
-      <line x1="44" y1="122" x2="64" y2="122" stroke="currentColor" strokeWidth="1.5" />
-      <text x="102" y="127" textAnchor="middle" fontSize="13" fontWeight="600" letterSpacing="5" fill="currentColor">
-        GROUP
-      </text>
-      <line x1="138" y1="122" x2="158" y2="122" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
+// Matte black Tangem card, neutral brand: product mark on the front, "Carte d'accès" and the shield on the back.
 function ShieldLock({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 72" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinejoin="round" strokeLinecap="round">
@@ -116,7 +96,7 @@ export function NfcCard({
   interactive = true,
 }: {
   name?: string;
-  flipped?: boolean; // show the "MEMBER" side
+  flipped?: boolean; // show the back: "Carte d'accès" and the holder's name
   spin?: boolean; // keeps turning, for showcases
   dim?: boolean;
   className?: string;
@@ -146,7 +126,7 @@ export function NfcCard({
   return (
     <div
       role="img"
-      aria-label={name ? `Carte ECN de ${name}` : "Carte ECN"}
+      aria-label={name ? `Carte d'accès de ${name}` : "Carte d'accès"}
       className={`relative aspect-[1.586] w-full select-none [container-type:inline-size] [perspective:1100px] ${dim ? "opacity-50 grayscale" : ""} ${interactive ? "cursor-pointer" : ""} ${className}`}
       onClick={() => interactive && setToggled((t) => !t)}
       onPointerMove={(e) => {
@@ -166,16 +146,18 @@ export function NfcCard({
         <div className={FACE} style={{ background: MATTE }}>
           {sheen}
           <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent animate-shine" />
-          <div className="grid h-full place-items-center">
-            <EcnLogo className="w-[46%] text-[#f1efea]" />
+          <div className="flex h-full flex-col items-center justify-center gap-[2cqw]">
+            <Emblem light className="h-[24cqw] w-[24cqw]" />
+            <span className="font-display text-[length:8cqw] font-medium leading-none tracking-[0.04em] text-[#f1efea]">{APP_NAME}</span>
+            <span className="text-[length:2.3cqw] font-semibold tracking-[0.32em] text-[#f1efea]/60">COFFRE FAMILIAL</span>
           </div>
         </div>
         <div className={FACE} style={{ background: MATTE, transform: "rotateY(180deg)" }}>
           {sheen}
           <div className="flex h-full items-center justify-between gap-[4cqw] px-[8%] text-[#f1efea]">
             <div className="min-w-0">
-              <div className="font-display text-[length:9cqw] font-medium leading-none tracking-[0.12em]">MEMBER</div>
-              <div className="mt-[1.6cqw] whitespace-nowrap text-[length:2.5cqw] font-semibold tracking-[0.2em]">PRIVATE BUSINESS NETWORK</div>
+              <div className="font-display text-[length:7.4cqw] font-medium leading-none tracking-[0.06em]">Carte d&apos;accès</div>
+              <div className="mt-[1.6cqw] whitespace-nowrap text-[length:2.5cqw] font-semibold tracking-[0.2em]">COFFRE FAMILIAL SÉCURISÉ</div>
               <div className="mt-[1.4cqw] flex items-center gap-[1cqw] opacity-70">
                 <span className="h-px flex-1 bg-current" />
                 <span className="h-[1cqw] w-[1cqw] rounded-full bg-current" />

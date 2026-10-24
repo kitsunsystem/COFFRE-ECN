@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { ArrowRight, Bell, Check, ChevronRight, Compass, ConciergeBell, CreditCard, HeartPulse, Lock, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, Bell, CalendarClock, Check, ChevronRight, Compass, ConciergeBell, CreditCard, HeartPulse, LifeBuoy, Lock, ShieldCheck, Users } from "lucide-react";
 import Link from "next/link";
 import { useShallow } from "zustand/react/shallow";
 import { NamedIcon, TONES } from "@/components/icons";
@@ -77,14 +77,32 @@ export default function Accueil() {
         </Card>
       </motion.div>
 
+      {next && (
+        <motion.div variants={rise}>
+          <Link href="/espace/services" className="flex items-center gap-4 rounded-[1.5rem] bg-paper p-4 shadow-soft ring-1 ring-line/70">
+            <ConciergeBell className="h-7 w-7 shrink-0 text-gold-deep" />
+            <span className="flex-1">
+              <span className="block font-semibold">Besoin d&apos;aide pour tout mettre en place ?</span>
+              <span className="text-[0.88rem] text-mist">La conciergerie le fait avec vous.</span>
+            </span>
+            <ChevronRight className="h-5 w-5 text-mist" />
+          </Link>
+        </motion.div>
+      )}
+
       {soon.length > 0 && (
         <motion.div variants={rise}>
           <Notice tone="coral">
             <div className="flex items-start gap-3">
               <Bell className="mt-0.5 h-5 w-5 shrink-0 text-coral" />
               <div>
-                <div className="font-semibold">{soon.length === 1 ? "Un document arrive à échéance" : `${soon.length} documents arrivent à échéance`}</div>
-                <div className="text-ink-soft">Le {new Date(soon[0].date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}. Ouvrez votre Coffre pour voir lequel.</div>
+                <div className="font-semibold">
+                  {soon[0].label} : échéance le {new Date(soon[0].date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                </div>
+                <div className="text-ink-soft">{soon.length > 1 ? `Et ${soon.length - 1} autre${soon.length > 2 ? "s" : ""} dans les 3 mois. ` : ""}Pensez à le renouveler, puis à mettre le Coffre à jour.</div>
+                <Link href="/espace/echeances" className="mt-1 inline-block font-semibold text-coral underline">
+                  Mes échéances
+                </Link>
               </div>
             </div>
           </Notice>
@@ -95,8 +113,10 @@ export default function Accueil() {
         {[
           { href: "/espace/cartes", icon: CreditCard, title: "Mes cartes", sub: `${activeCards} active${activeCards > 1 ? "s" : ""}` },
           { href: "/espace/famille", icon: Users, title: "Ma famille", sub: `${s.people.length} proche${s.people.length > 1 ? "s" : ""} · ${s.guarantors.length} garant${s.guarantors.length > 1 ? "s" : ""}` },
-          { href: "/coffre", icon: HeartPulse, title: "Fiche d'urgence", sub: "Dans votre Coffre" },
+          { href: "/espace/echeances", icon: CalendarClock, title: "Mes échéances", sub: `${s.reminders.length} suivie${s.reminders.length > 1 ? "s" : ""}` },
+          { href: "/coffre/rubriques/urgence", icon: HeartPulse, title: "Fiche d'urgence", sub: "À copier dans le téléphone" },
           { href: "/espace/services", icon: ConciergeBell, title: "Conciergerie", sub: "On s'occupe de tout" },
+          { href: "/espace/aide", icon: LifeBuoy, title: "Démarches", sub: "Listes et courriers" },
         ].map((x) => (
           <Link key={x.href + x.title} href={x.href}>
             <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} className="h-full rounded-[1.5rem] bg-paper p-4 shadow-soft ring-1 ring-line/70">

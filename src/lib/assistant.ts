@@ -3,24 +3,28 @@
 import { ASSISTANT_NAME } from "./config";
 
 const KB: { keys: string[]; answer: string }[] = [
-  { keys: ["commencer", "debut", "par ou", "quoi faire"], answer: "Commencez par l'essentiel : dix éléments, environ quinze minutes. Ouvrez votre Coffre avec votre carte, puis touchez « Remplir l'essentiel ». Vous pourrez compléter le reste plus tard, à votre rythme." },
-  { keys: ["carte", "nfc", "poser", "activer"], answer: "Votre carte s'utilise comme une carte sans contact : posez-la au dos de votre téléphone, puis tapez votre code. Vous avez trois cartes : si l'une est perdue, les deux autres ouvrent toujours votre Coffre." },
-  { keys: ["perdu", "perte", "vol"], answer: "Pas d'inquiétude : vos deux autres cartes ouvrent votre Coffre. Déclarez la carte perdue dans « Mes cartes » : elle ne pourra plus rien ouvrir, et vous pourrez en commander une nouvelle." },
+  { keys: ["commencer", "debut", "par ou", "quoi faire"], answer: "Commencez par vos cartes et vos bénéficiaires, puis par l'essentiel : dix éléments, à votre rythme. Ouvrez votre Coffre avec votre carte, puis touchez « Commencer par l'essentiel »." },
+  { keys: ["carte", "nfc", "poser", "activer"], answer: "Votre carte s'utilise comme une carte sans contact : posez-la au dos de votre téléphone, puis tapez votre code ou utilisez Face ID. La carte est toujours nécessaire. Vous avez trois cartes : si l'une est perdue, les deux autres ouvrent toujours votre Coffre." },
+  { keys: ["beneficiaire", "pack", "deux cartes", "2 cartes"], answer: "Chaque bénéficiaire reçoit obligatoirement un pack de 2 cartes à son nom, à ranger dans deux endroits différents. Tant que vous êtes en vie, une carte perdue se remplace. Après votre décès, un bénéficiaire qui perdrait ses deux cartes perdrait son accès." },
+  { keys: ["perdu", "perte", "vol"], answer: "Pas d'inquiétude : vos autres cartes ouvrent votre Coffre. Déclarez la carte perdue dans « Mes cartes » : elle ne pourra plus rien ouvrir, et une carte de remplacement pourra être appairée." },
   { keys: ["code", "oublie", "pin"], answer: "Le code se choisit à l'activation des cartes. Personne d'autre que vous ne le connaît, pas même nous : c'est ce qui protège votre Coffre si une carte est volée." },
   { keys: ["garant"], answer: "Les garants sont les personnes qui préviennent si un coup dur ou un décès survient. Vous en choisissez autant que vous voulez et vous écrivez vous-même leur rôle." },
-  { keys: ["droit", "qui voit", "acces", "partager", "conjoint"], answer: "Pour chaque proche qui a une carte, vous choisissez, rubrique par rubrique, quand il pourra voir : tout de suite, en cas de coup dur, au décès, ou jamais. Chacun ne voit que ce que vous lui avez attribué." },
+  { keys: ["droit", "qui voit", "acces", "partager", "conjoint", "niveau"], answer: "Pour chaque bénéficiaire, vous choisissez, rubrique par rubrique, le niveau : urgence (tout de suite, à tout moment), coup dur, décès, ou jamais. Chacun ne voit que ce que vous lui avez attribué." },
   { keys: ["coup dur", "accident", "hospital"], answer: "En cas de coup dur, un garant le signale. Vous êtes alerté partout et vous avez un court délai pour annuler. Ensuite, seules les rubriques prévues pour ce cas s'ouvrent, jamais tout le Coffre." },
-  { keys: ["deces", "mort", "insee"], answer: "Chaque mois, une veille compare les membres au fichier public des décès. Une personne vérifie toujours avant de lancer la procédure. Un délai d'annulation s'écoule, puis chacun reçoit sa part et les éléments « À effacer » sont détruits." },
+  { keys: ["deces", "mort", "insee", "acte"], answer: "Chaque mois, une veille compare les membres au fichier public des décès. Un bénéficiaire dépose l'acte de décès, et notre équipe vérifie tout : registre, acte et identité du bénéficiaire. Un délai d'annulation s'écoule, puis chacun ouvre sa part avec sa carte, pendant une durée limitée. Ensuite, le Coffre est effacé définitivement." },
+  { keys: ["paiement", "impaye", "payer", "efface"], answer: "Si l'abonnement n'est plus réglé, nous vous relançons pendant un délai de grâce. À la fin de ce délai, tout le Coffre est effacé définitivement." },
+  { keys: ["video", "film"], answer: "Les vidéos ne sont pas stockées dans le Coffre pour l'instant. Gardez-les sur un disque dur ou une clé, chez vous ou chez votre notaire, et indiquez où elles se trouvent dans « Volontés et messages »." },
+  { keys: ["decouverte", "lancement", "prevente"], answer: "Pendant la phase découverte, tout est ouvert : inscription, identité, famille, garants, réglages et cartes. Seul l'ajout de documents dans le Coffre attend le lancement officiel : rien n'est stocké avant." },
   { keys: ["effacer", "prive", "secret"], answer: "La rubrique « À effacer » n'est remise à personne. Le moment venu, son contenu est détruit sans avoir été lu." },
   { keys: ["securite", "chiffre", "lire", "confidentiel", "piratage"], answer: "Tout ce que vous mettez dans le Coffre est chiffré sur votre téléphone avant de partir. Ni nous, ni moi, ni la conciergerie ne pouvons le lire." },
   { keys: ["concierge", "aide", "demarche", "faire pour moi"], answer: "La conciergerie peut faire les démarches à votre place. C'est un service optionnel et payant. Elle ne voit que les documents que vous lui partagez, avec un mandat signé." },
-  { keys: ["parent", "procuration", "gerer pour"], answer: "Un enfant peut ouvrir et gérer le Coffre de son parent peu à l'aise avec le numérique. Le Coffre reste celui du parent, avec ses propres cartes, sur la base d'une procuration. Un modèle se trouve dans la rubrique « Perte d'autonomie »." },
-  { keys: ["urgence", "fiche", "sante", "allergie"], answer: "La rubrique « Urgence et santé » rassemble groupe sanguin, allergies, traitements, médecins et personnes à prévenir. Donnez-y l'accès « tout de suite » à votre conjoint : il l'aura toujours sous la main." },
-  { keys: ["echeance", "passeport", "expire", "rappel"], answer: "Quand vous indiquez une date d'expiration, nous vous prévenons avant l'échéance. Seule la date nous est transmise, jamais le document." },
+  { keys: ["parent", "procuration", "gerer pour"], answer: "La gestion du Coffre d'un parent par son enfant, avec une procuration signée, arrivera dans un second temps. Un modèle de procuration se trouve déjà dans la rubrique « Perte d'autonomie »." },
+  { keys: ["urgence", "fiche", "sante", "allergie", "pompier"], answer: "La rubrique « Urgence et santé » rassemble groupe sanguin, allergies, traitements, médecins et personnes à prévenir. Donnez-lui le niveau « Urgence » : vos bénéficiaires l'ouvrent à tout moment. Et touchez « Copier dans la fiche médicale de mon téléphone » : un pompier pourra la lire depuis l'écran verrouillé." },
+  { keys: ["echeance", "passeport", "expire", "rappel", "a jour"], answer: "Dans « Mes échéances », indiquez le type de document et sa date de fin : nous vous prévenons 30 puis 7 jours avant. Ces deux informations restent dans l'Espace, jamais le contenu du Coffre. Et tous les 3 mois, nous vous demandons si tout est à jour." },
   { keys: ["notaire", "avocat", "testament"], answer: "Le Coffre ne remplace ni un notaire ni un avocat, et il n'est pas un testament. Indiquez simplement où se trouve l'original de votre testament dans « Documents » : vos proches le retrouveront." },
   { keys: ["envoyer", "deposer", "telecharger", "fichier", "document"], answer: "Tout ce qui est personnel va dans le Coffre : c'est le seul endroit où l'on dépose des documents. Dans l'Espace, on télécharge seulement des modèles vierges." },
   { keys: ["mail", "proton", "adresse"], answer: "Pour votre adresse e-mail, nous recommandons Proton, un service de messagerie chiffrée. Ce n'est pas obligatoire." },
-  { keys: ["prix", "tarif", "abonnement", "combien"], answer: "Une seule formule couvre toute la famille : le couple et, si vous le souhaitez, vos parents. Trois cartes sont incluses ; les cartes supplémentaires sont payantes." },
+  { keys: ["prix", "tarif", "abonnement", "combien", "formule"], answer: "La formule simple comprend votre Coffre et vos trois cartes, et un pack de 2 cartes pour chaque bénéficiaire. Les tarifs seront communiqués au lancement." },
   { keys: ["identite", "kyc", "verification"], answer: "La vérification d'identité se fait avec le système de votre conseiller. Ces informations restent dans votre Espace : c'est ce qui permet la veille des décès." },
 ];
 
@@ -32,7 +36,7 @@ export const SUGGESTIONS: Record<string, string[]> = {
   default: ["Par où commencer ?", "Comment marche ma carte ?", "Qui verra mes documents ?"],
   coffre: ["Que mettre dans l'essentiel ?", "Qui voit quoi ?", "C'est vraiment confidentiel ?"],
   aide: ["Que faire après un décès ?", "Comment déclarer un accident ?", "Gérer le Coffre de mon parent"],
-  cartes: ["J'ai perdu une carte", "J'ai oublié mon code", "Donner une carte à mon conjoint"],
+  cartes: ["J'ai perdu une carte", "J'ai oublié mon code", "Les 2 cartes d'un bénéficiaire"],
 };
 
 export async function ask(question: string, place: string): Promise<string> {

@@ -75,6 +75,9 @@ export default function Verrou() {
                   {tap === "reading" ? "Lecture de la carte…" : "Poser ma carte"}
                 </Button>
               )}
+              <Link href="/beneficiaire" className="mt-4 text-[0.9rem] font-semibold text-paper/70 underline">
+                Un proche est décédé ? Espace bénéficiaire
+              </Link>
             </motion.div>
           ) : (
             <motion.div key="code" className="flex flex-1 flex-col justify-center pt-6" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>

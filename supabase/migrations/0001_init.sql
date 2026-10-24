@@ -21,10 +21,23 @@ create table public.profiles (
   situation text,
   is_business_owner boolean not null default false,
   kyc text not null default 'a_faire' check (kyc in ('a_faire', 'en_cours', 'verifie')),
-  kyc_ref text, -- référence du dossier dans le système KYC du réseau
+  kyc_ref text, -- référence du dossier dans le système KYC du groupe
   assistant_voice boolean not null default true,
+  billing_status text not null default 'a_jour' check (billing_status in ('a_jour', 'impaye', 'efface')),
+  billing_since timestamptz, -- début de l'impayé : relances pendant le délai de grâce, puis effacement
+  reminder_consent boolean not null default false, -- accord pour enregistrer type et date des échéances
   created_at timestamptz not null default now()
 );
+
+-- Lancement en deux temps : tant que launched = false (phase découverte), aucun document ne peut être stocké.
+create table public.app_settings (
+  id boolean primary key default true check (id), -- une seule ligne
+  launched boolean not null default false,
+  planned_launch date,
+  post_death_access interval not null default interval '6 months', -- 4, 6 ou 12 mois : à décider
+  grace_period interval not null default interval '30 days' -- délai de grâce : à décider
+);
+insert into public.app_settings default values;
 
 create table public.people (
   id uuid primary key default gen_random_uuid(),
@@ -64,19 +77,20 @@ create table public.cards (
 );
 create index on public.cards (owner_id);
 
--- Droits : métadonnées affichées dans l'Espace (le secret, lui, est dans les enveloppes).
+-- Droits : par bénéficiaire, valables pour les 2 cartes de son pack (le secret, lui, est dans les enveloppes, par carte).
+-- now = Urgence (tout de suite, à tout moment), coup_dur, deces, jamais.
 create table public.rights (
-  card_id uuid not null references public.cards on delete cascade,
+  person_id uuid not null references public.people on delete cascade,
   subsection_id text not null,
   moment text not null check (moment in ('now', 'coup_dur', 'deces', 'jamais')),
-  primary key (card_id, subsection_id)
+  primary key (person_id, subsection_id)
 );
 
 create table public.procedures (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references public.profiles on delete cascade,
   kind text not null check (kind in ('coup_dur', 'deces')),
-  source text not null check (source in ('garant', 'insee')),
+  source text not null check (source in ('garant', 'insee', 'beneficiaire')),
   declared_by text not null,
   declared_by_user uuid references auth.users,
   declared_at timestamptz not null default now(),
@@ -90,15 +104,25 @@ create table public.procedures (
   finalized_at timestamptz,
   alerted_at timestamptz, -- alerte envoyée au titulaire à l'ouverture du délai
   last_call_at timestamptz, -- dernière alerte, 24 h avant la fin du délai
+  erased_at timestamptz, -- décès : Coffre effacé à la fin de la période d'accès des bénéficiaires
+  end_warned_at timestamptz, -- bénéficiaires prévenus de la fin prochaine de l'accès
   note text,
-  match jsonb
+  match jsonb,
+  -- Concordance du décès : acte fourni par un bénéficiaire (fichier dans le bucket privé "verification"), identité vérifiée par l'équipe.
+  acte_path text,
+  acte_by uuid references public.people,
+  acte_id_checked boolean not null default false,
+  -- Pas de notaire par défaut : un décès ne peut être confirmé qu'avec l'acte et l'identité du bénéficiaire vérifiée.
+  constraint death_needs_certificate check (kind <> 'deces' or verified_at is null or (acte_path is not null and acte_id_checked))
 );
 create index on public.procedures (owner_id);
 
+-- Échéances saisies dans l'Espace, avec l'accord de la personne : type de document et date de fin, jamais le contenu du Coffre.
 create table public.reminders (
-  item_id uuid primary key,
+  id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references public.profiles on delete cascade,
-  date date not null, -- seule la date sort du Coffre
+  label text not null,
+  date date not null,
   sent_30 boolean not null default false,
   sent_7 boolean not null default false
 );
@@ -219,6 +243,43 @@ returns boolean language sql stable security definer set search_path = public as
 $$;
 
 -- Un garant déclare ; il ne peut ni vérifier, ni raccourcir le délai.
+-- Fin de l'accès des bénéficiaires après un décès (miroir de accessEnd dans src/lib/rules.ts).
+create or replace function public.access_end(p public.procedures)
+returns timestamptz language sql stable as $$
+  select case when p.kind = 'deces' and p.ends_at is not null then p.ends_at + (select post_death_access from app_settings) end
+$$;
+
+-- Fin du délai de grâce d'un impayé (miroir de graceEnd), lisible comme une colonne calculée de profiles.
+create or replace function public.grace_end(p public.profiles)
+returns timestamptz language sql stable as $$
+  select p.billing_since + (select grace_period from app_settings)
+$$;
+
+create or replace function public.is_launched()
+returns boolean language sql stable security definer set search_path = public as $$
+  select launched from app_settings
+$$;
+
+-- Un bénéficiaire (porteur d'une carte active) déclare un décès avec l'acte ; l'équipe vérifie ensuite la concordance.
+create or replace function public.declare_death_with_certificate(owner uuid, certificate_path text)
+returns uuid language plpgsql security definer set search_path = public as $$
+declare id uuid; ben people;
+begin
+  select p.* into ben from people p join cards c on c.holder_person_id = p.id
+   where p.owner_id = owner and p.user_id = auth.uid() and c.status = 'active' limit 1;
+  if ben.id is null then raise exception 'not a beneficiary'; end if;
+  -- Une correspondance INSEE en attente reçoit l'acte ; sinon une nouvelle procédure est ouverte.
+  update procedures set acte_path = certificate_path, acte_by = ben.id
+   where procedures.owner_id = owner and kind = 'deces' and procedure_status(procedures) = 'verification' and acte_path is null
+  returning procedures.id into id;
+  if id is null then
+    insert into procedures (owner_id, kind, source, declared_by, declared_by_user, needs_verification, acte_path, acte_by)
+    values (owner, 'deces', 'beneficiaire', ben.first_name || ' ' || ben.last_name, auth.uid(), true, certificate_path, ben.id)
+    returning procedures.id into id;
+  end if;
+  return id;
+end $$;
+
 create or replace function public.declare_procedure(owner uuid, kind text, note text default null)
 returns uuid language plpgsql security definer set search_path = public as $$
 declare id uuid;
@@ -260,6 +321,9 @@ alter table public.vaults enable row level security;
 alter table public.vault_items enable row level security;
 alter table public.envelopes enable row level security;
 alter table public.concierge_shares enable row level security;
+alter table public.app_settings enable row level security;
+create policy read on public.app_settings for select using (true);
+create policy admin on public.app_settings for update using (is_staff('admin'));
 
 -- Espace : le titulaire (ou l'enfant mandaté) gère tout ; l'équipe lit.
 create policy own on public.profiles for all using (acts_for(id)) with check (acts_for(id));
@@ -269,7 +333,7 @@ create policy me on public.people for select using (user_id = auth.uid());
 create policy own on public.guarantors for all using (acts_for(owner_id)) with check (acts_for(owner_id));
 create policy own on public.cards for all using (acts_for(owner_id)) with check (acts_for(owner_id));
 create policy holder on public.cards for select using (my_card(id));
-create policy own on public.rights for all using (acts_for((select owner_id from cards where id = card_id)));
+create policy own on public.rights for all using (acts_for((select owner_id from people where id = person_id)));
 create policy own_read on public.procedures for select using (acts_for(owner_id) or is_guarantor_of(owner_id));
 -- Pas d'UPDATE direct pour le titulaire : il annule ou clôt via cancel_procedure / close_procedure, rien d'autre.
 create policy staff on public.procedures for all using (is_staff('verification'));
@@ -282,7 +346,11 @@ create policy self on public.staff for select using (user_id = auth.uid());
 
 -- Coffre : le titulaire seul écrit. Aucune politique pour l'équipe : l'éditeur ne lit pas le Coffre.
 create policy own on public.vaults for all using (acts_for(owner_id)) with check (acts_for(owner_id));
-create policy own on public.vault_items for all using (acts_for(owner_id)) with check (acts_for(owner_id));
+-- Phase découverte : aucun document ne peut être écrit tant que app_settings.launched est faux (lecture et suppression restent permises).
+create policy own_read on public.vault_items for select using (acts_for(owner_id));
+create policy own_delete on public.vault_items for delete using (acts_for(owner_id));
+create policy own_write on public.vault_items for insert with check (acts_for(owner_id) and is_launched());
+create policy own_update on public.vault_items for update using (acts_for(owner_id)) with check (acts_for(owner_id) and is_launched());
 create policy own on public.envelopes for all using (acts_for(owner_id)) with check (acts_for(owner_id));
 -- Un proche ne reçoit ses enveloppes, et les éléments qu'elles ouvrent, qu'au moment prévu.
 create policy holder on public.envelopes for select using (my_card(card_id) and is_released(owner_id, moment));
@@ -296,7 +364,12 @@ create policy staff on public.concierge_shares for select using (is_staff('conci
 -- Fichiers chiffrés : bucket privé "coffre", chemin = <owner_id>/<subsection_id>/<file_id>.
 insert into storage.buckets (id, name, public) values ('coffre', 'coffre', false) on conflict do nothing;
 create policy coffre_own on storage.objects for all using (bucket_id = 'coffre' and acts_for(((storage.foldername(name))[1])::uuid))
-  with check (bucket_id = 'coffre' and acts_for(((storage.foldername(name))[1])::uuid));
+  with check (bucket_id = 'coffre' and acts_for(((storage.foldername(name))[1])::uuid) and is_launched());
+
+-- Actes de décès déposés par les bénéficiaires : bucket privé "verification", lu seulement par l'équipe de vérification.
+insert into storage.buckets (id, name, public) values ('verification', 'verification', false) on conflict do nothing;
+create policy verification_upload on storage.objects for insert with check (bucket_id = 'verification' and auth.uid() is not null);
+create policy verification_staff on storage.objects for select using (bucket_id = 'verification' and is_staff('verification'));
 create policy coffre_holder on storage.objects for select using (
   bucket_id = 'coffre' and exists (
     select 1 from envelopes e where e.owner_id = ((storage.foldername(name))[1])::uuid and e.subsection_id = (storage.foldername(name))[2]

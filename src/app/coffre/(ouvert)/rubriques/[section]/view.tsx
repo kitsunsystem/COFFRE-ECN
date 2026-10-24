@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { ArrowLeft, Bell, ChevronRight, EyeOff, Paperclip, Plus } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, ClipboardCopy, EyeOff, Lock, Paperclip, Plus, Smartphone } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NamedIcon } from "@/components/icons";
@@ -16,8 +16,9 @@ export function SectionView({ id }: { id: string }) {
   const section = SECTIONS.find((s) => s.id === id)!;
   const items = useApp((s) => s.vault.items);
   const envelopes = useApp((s) => s.vault.envelopes);
-  const reminders = useApp((s) => s.reminders);
   const account = useApp((s) => s.account);
+  const launched = useApp((s) => s.phase) === "lancement";
+  const [copied, setCopied] = useState(false);
   useApp((s) => s.procedures);
   useNow(5000);
   const mode = useSession((s) => s.session.mode);
@@ -50,6 +51,21 @@ export function SectionView({ id }: { id: string }) {
 
   const current = open && subs.find((s) => s.id === open.subId);
 
+  // The emergency sheet lives outside the card: the person pastes it into the phone's medical ID, readable from the lock screen.
+  async function copyMedical() {
+    const f = (sub: string) => (entries[sub] ?? []).map((e) => e.payload.fields);
+    const line = (label: string, v?: string) => (v?.trim() ? [`${label} : ${v.trim()}`] : []);
+    const text = [
+      `FICHE D'URGENCE${account ? ` — ${account.firstName} ${account.lastName}` : ""}`,
+      ...f("groupe-allergies").flatMap((x) => [...line("Groupe sanguin", x.blood), ...line("Allergies", x.allergies)]),
+      ...f("traitements").flatMap((x) => line("Traitement", [x.drug, x.dose].filter(Boolean).join(", "))),
+      ...f("medecins").flatMap((x) => line("Médecin", [x.name, x.phone].filter(Boolean).join(" — "))),
+      ...f("a-prevenir").flatMap((x) => line("À prévenir", [x.name, x.phone].filter(Boolean).join(" — "))),
+    ].join("\n");
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+  }
+
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-5">
       <motion.div variants={rise}>
@@ -67,6 +83,29 @@ export function SectionView({ id }: { id: string }) {
         </div>
       </motion.header>
 
+      {section.id === "urgence" && subs.length > 0 && (
+        <motion.div variants={rise} className="rounded-[1.6rem] bg-gradient-to-br from-sage/30 to-night-2 p-4 ring-1 ring-sage/30">
+          <div className="flex items-start gap-3">
+            <Smartphone className="mt-0.5 h-6 w-6 shrink-0 text-sage-soft" />
+            <div className="flex-1">
+              <div className="font-semibold">Fiche médicale du téléphone</div>
+              <p className="text-[0.88rem] text-paper/65">Un pompier peut la lire depuis l&apos;écran verrouillé, sans carte.</p>
+            </div>
+          </div>
+          <Button className="mt-3" full variant="light" icon={copied ? <Check className="h-5 w-5" /> : <ClipboardCopy className="h-5 w-5" />} onClick={copyMedical}>
+            {copied ? "Copié : collez-le dans votre téléphone" : "Copier dans la fiche médicale de mon téléphone"}
+          </Button>
+          {copied && <p className="mt-3 text-[0.85rem] text-paper/70">iPhone : app Santé › votre photo › Fiche médicale › Modifier. Android : Paramètres › Sécurité et urgence › Informations médicales. Collez le texte, puis activez « Afficher en mode verrouillé ».</p>}
+        </motion.div>
+      )}
+
+      {owner && !launched && (
+        <motion.div variants={rise} className="flex items-start gap-3 rounded-2xl bg-gold/15 p-4 ring-1 ring-gold/30">
+          <Lock className="mt-0.5 h-5 w-5 shrink-0 text-gold-soft" />
+          <p className="text-[0.92rem] text-paper/80">Phase découverte : l&apos;ajout de documents ouvrira au lancement officiel. Rien n&apos;est stocké avant que l&apos;hébergement certifié et le chiffrement définitif soient en place.</p>
+        </motion.div>
+      )}
+
       {section.id === "effacer" && (
         <motion.div variants={rise} className="flex items-start gap-3 rounded-2xl bg-paper/5 p-4 ring-1 ring-paper/10">
           <EyeOff className="mt-0.5 h-5 w-5 shrink-0 text-gold-soft" />
@@ -83,7 +122,7 @@ export function SectionView({ id }: { id: string }) {
                 <h2 className="text-[1.15rem] font-semibold">{sub.title}</h2>
                 <p className="text-[0.85rem] text-paper/55">{sub.hint}</p>
               </div>
-              {owner && (
+              {owner && launched && (
                 <motion.button whileTap={{ scale: 0.9 }} onClick={() => setOpen({ subId: sub.id })} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-ink" aria-label={`Ajouter dans ${sub.title}`}>
                   <Plus className="h-5 w-5" />
                 </motion.button>
@@ -102,7 +141,6 @@ export function SectionView({ id }: { id: string }) {
                             <Paperclip className="h-3 w-3" /> {e.payload.files.length}
                           </span>
                         )}
-                        {reminders.some((r) => r.itemId === e.item.id) && <Bell className="h-3 w-3 text-gold-soft" />}
                       </span>
                     </span>
                     <ChevronRight className="h-4 w-4 text-paper/40" />
@@ -110,7 +148,7 @@ export function SectionView({ id }: { id: string }) {
                 ))}
               </div>
             )}
-            {list.length === 0 && owner && (
+            {list.length === 0 && owner && launched && (
               <button onClick={() => setOpen({ subId: sub.id })} className="mt-3 w-full rounded-2xl border border-dashed border-paper/15 p-4 text-[0.9rem] text-paper/50 hover:border-gold/50 hover:text-paper/80">
                 Rien pour l'instant. Ajouter un élément
               </button>

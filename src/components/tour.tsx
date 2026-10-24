@@ -1,12 +1,15 @@
 "use client";
 // Guided tour of the demo, shown at the first entry in the Espace (and again from the dashboard).
 import { animate, AnimatePresence, motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
-import { ArrowLeft, ArrowRight, CreditCard, Feather, FileText, KeyRound, Landmark, LifeBuoy, Lock, ShieldCheck, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CreditCard, KeyRound, LifeBuoy, Lock, ShieldCheck, Users, X } from "lucide-react";
 import Link from "next/link";
 import { Fragment, useEffect, useState, type ReactNode } from "react";
-import { DELAYS } from "@/lib/config";
+import { DELAYS, POST_DEATH_ACCESS_DAYS } from "@/lib/config";
 import { DEMO_PIN } from "@/lib/demo";
+import { moment, type Moment } from "@/lib/rules";
+import { SECTIONS } from "@/lib/sections";
 import { useApp } from "@/lib/store";
+import { NamedIcon } from "./icons";
 import { Button } from "./ui";
 import { Aurora, NfcCard, TapDemo } from "./visuals";
 
@@ -19,19 +22,15 @@ const FAMILY = [
   { ini: "SM", n: "Sophie" },
 ];
 
-// An ellipse orbit with depth (scale, opacity, stacking): reads as 3D without fragile nested CSS 3D.
+// A slow circular orbit, wide enough that no circle ever covers another (or a name).
 function Orbiter({ t, i, ini, n }: { t: MotionValue<number>; i: number; ini: string; n: string }) {
-  const a = useTransform(t, (v) => (v + i / FAMILY.length) * Math.PI * 2);
-  const x = useTransform(a, (v) => Math.cos(v) * 120);
-  const y = useTransform(a, (v) => Math.sin(v) * 56);
-  const depth = useTransform(a, (v) => (Math.sin(v) + 1) / 2);
-  const scale = useTransform(depth, [0, 1], [0.72, 1.08]);
-  const opacity = useTransform(depth, [0, 1], [0.5, 1]);
-  const zIndex = useTransform(depth, (d) => (d > 0.5 ? 10 : 1));
+  const a = useTransform(t, (v) => (v + i / FAMILY.length) * Math.PI * 2 - Math.PI / 2);
+  const x = useTransform(a, (v) => Math.cos(v) * 112);
+  const y = useTransform(a, (v) => Math.sin(v) * 100);
   return (
-    <motion.div style={{ x, y, scale, opacity, zIndex }} className="absolute inset-0 m-auto flex h-fit w-fit flex-col items-center">
-      <span className="grid h-14 w-14 place-items-center rounded-full bg-paper font-display text-[1.1rem] font-semibold text-ink shadow-lift">{ini}</span>
-      <span className="mt-1 text-[0.8rem] font-semibold text-paper/80">{n}</span>
+    <motion.div style={{ x, y }} className="absolute inset-0 m-auto flex h-fit w-fit flex-col items-center">
+      <span className="grid h-12 w-12 place-items-center rounded-full bg-paper font-display text-[1rem] font-semibold text-ink shadow-lift">{ini}</span>
+      <span className="mt-1 rounded-full bg-night/60 px-1.5 text-[0.78rem] font-semibold text-paper/90">{n}</span>
     </motion.div>
   );
 }
@@ -39,15 +38,15 @@ function Orbiter({ t, i, ini, n }: { t: MotionValue<number>; i: number; ini: str
 function FamilyOrbit() {
   const t = useMotionValue(0);
   useEffect(() => {
-    const c = animate(t, 1, { duration: 16, repeat: Infinity, ease: "linear" });
+    const c = animate(t, 1, { duration: 40, repeat: Infinity, ease: "linear" });
     return () => c.stop();
   }, [t]);
   return (
-    <div className="relative mx-auto h-60 w-72">
-      <div className="absolute left-1/2 top-1/2 h-[112px] w-[240px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-gold/30" />
-      <div className="absolute inset-0 z-[5] m-auto flex h-fit w-fit flex-col items-center">
-        <span className="grid h-24 w-24 place-items-center rounded-full bg-gradient-to-b from-gold-soft to-gold font-display text-[1.7rem] font-semibold text-ink shadow-glow">CD</span>
-        <span className="mt-1 text-[0.85rem] font-bold">Claire</span>
+    <div className="relative mx-auto h-[19rem] w-72">
+      <div className="absolute left-1/2 top-1/2 h-[200px] w-[224px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-gold/30" />
+      <div className="absolute inset-0 m-auto flex h-fit w-fit flex-col items-center">
+        <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-b from-gold-soft to-gold font-display text-[1.5rem] font-semibold text-ink shadow-glow">CD</span>
+        <span className="mt-1 text-[0.8rem] font-bold">Claire</span>
       </div>
       {FAMILY.map((p, i) => (
         <Orbiter key={p.n} t={t} i={i} {...p} />
@@ -75,46 +74,46 @@ function TwoWorlds() {
         {row(LifeBuoy, "Aide")}
         <div className="pt-1 text-[0.72rem] text-mist">Rien de personnel</div>
       </motion.div>
-      <motion.div initial={{ rotateY: 0, opacity: 0, x: -40 }} animate={{ rotateY: -20, opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.1 }} className="w-1/2 origin-left space-y-2.5 rounded-[1.4rem] bg-night-2 p-4 shadow-glow ring-1 ring-gold/30">
+      <motion.div initial={{ rotateY: 0, opacity: 0, x: -40 }} animate={{ rotateY: -20, opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.1 }} className="w-1/2 origin-left space-y-2 rounded-[1.4rem] bg-night-2 p-4 shadow-glow ring-1 ring-gold/30">
         <div className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-gold-soft">Coffre</div>
-        {row(FileText, "Papiers", true)}
-        {row(KeyRound, "Codes", true)}
-        {row(Landmark, "Contrats", true)}
-        {row(Feather, "Lettres", true)}
+        {/* The real section names (lib/sections.ts). */}
+        {SECTIONS.filter((s) => !s.optional && s.id !== "effacer").map((s) => (
+          <div key={s.id} className="flex items-center gap-2 text-[0.78rem] font-semibold leading-tight">
+            <NamedIcon name={s.icon} className="h-3.5 w-3.5 shrink-0 text-gold-soft" />
+            <span className="flex-1">{s.title}</span>
+          </div>
+        ))}
         <div className="pt-1 text-[0.72rem] text-paper/55">Chiffré, illisible pour nous</div>
       </motion.div>
     </div>
   );
 }
 
-const PILL = {
-  now: ["Maintenant", "bg-sage text-paper"],
-  coup_dur: ["Coup dur", "bg-coral text-paper"],
-  deces: ["Décès", "bg-gold text-ink"],
-  jamais: ["Jamais", "bg-paper/10 text-paper/45"],
-} as const;
-// Same rights as the demo family (lib/demo.ts).
-const MATRIX: [string, keyof typeof PILL, keyof typeof PILL][] = [
-  ["Groupe sanguin, allergies", "now", "jamais"],
-  ["Personnes à prévenir", "now", "coup_dur"],
-  ["Banques", "coup_dur", "jamais"],
-  ["Assurance-vie", "deces", "jamais"],
-  ["Lettres", "jamais", "deces"],
+// Same rights as the demo family (lib/demo.ts), same colours as everywhere (lib/rules.ts).
+const MATRIX: [string, Moment, Moment, Moment][] = [
+  ["Groupe sanguin, allergies", "now", "now", "now"],
+  ["Personnes à prévenir", "now", "now", "now"],
+  ["Banques", "coup_dur", "jamais", "jamais"],
+  ["Assurance-vie", "deces", "jamais", "jamais"],
+  ["Lettres", "jamais", "deces", "deces"],
 ];
 
 function RightsMatrix() {
   return (
-    <div className="mx-auto max-w-sm rounded-[1.6rem] bg-paper/[0.06] p-4 ring-1 ring-paper/10 [perspective:800px]">
-      <div className="grid grid-cols-[1fr_5.4rem_5.4rem] items-center gap-x-2 gap-y-2.5 text-[0.85rem]">
+    <div className="mx-auto max-w-sm rounded-[1.6rem] bg-paper/[0.06] p-3.5 ring-1 ring-paper/10 [perspective:800px]">
+      <div className="grid grid-cols-[1fr_4.3rem_4.3rem_4.3rem] items-center gap-x-1.5 gap-y-2.5 text-[0.82rem]">
         <span />
-        <span className="text-center font-bold">Marc</span>
-        <span className="text-center font-bold">Léa</span>
-        {MATRIX.map(([label, m, l], r) => (
+        {["Marc", "Léa", "Paul"].map((n) => (
+          <span key={n} className="text-center font-bold">
+            {n}
+          </span>
+        ))}
+        {MATRIX.map(([label, ...cells], r) => (
           <Fragment key={label}>
             <span className="text-left leading-tight text-paper/80">{label}</span>
-            {[m, l].map((v, c) => (
-              <motion.span key={c} initial={{ rotateX: -90, opacity: 0 }} animate={{ rotateX: 0, opacity: 1 }} transition={{ delay: 0.25 + r * 0.12 + c * 0.06, type: "spring", stiffness: 200, damping: 16 }} className={`rounded-full py-1 text-center text-[0.74rem] font-bold ${PILL[v][1]}`}>
-                {PILL[v][0]}
+            {cells.map((v, c) => (
+              <motion.span key={c} initial={{ rotateX: -90, opacity: 0 }} animate={{ rotateX: 0, opacity: 1 }} transition={{ delay: 0.25 + r * 0.12 + c * 0.06, type: "spring", stiffness: 200, damping: 16 }} className={`rounded-full py-1 text-center text-[0.68rem] font-bold ${moment(v).pill}`}>
+                {moment(v).short}
               </motion.span>
             ))}
           </Fragment>
@@ -124,15 +123,18 @@ function RightsMatrix() {
   );
 }
 
-function Track({ title, tone, items, delay }: { title: string; tone: string; items: string[]; delay: number }) {
+function Track({ level, items, delay }: { level: Moment; items: string[]; delay: number }) {
+  const m = moment(level);
   return (
-    <div className="rounded-[1.4rem] bg-paper/[0.06] p-4 ring-1 ring-paper/10">
-      <div className={`text-[0.75rem] font-bold uppercase tracking-[0.18em] ${tone}`}>{title}</div>
-      <ol className="relative mt-3 space-y-3">
-        <motion.span aria-hidden className="absolute bottom-2 left-[7px] top-2 w-0.5 origin-top bg-gold/60" initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay, duration: items.length * 0.4, ease: "easeInOut" }} />
+    <div className="rounded-[1.4rem] bg-paper/[0.06] p-4 text-left ring-1 ring-paper/10">
+      <div className="flex items-center gap-2 text-[0.75rem] font-bold uppercase tracking-[0.18em]">
+        <span className={`h-2.5 w-2.5 rounded-full ${m.dot}`} /> {m.short}
+      </div>
+      <ol className="relative mt-3 space-y-2.5">
+        <motion.span aria-hidden className={`absolute bottom-2 left-[7px] top-2 w-0.5 origin-top opacity-60 ${m.dot}`} initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay, duration: items.length * 0.35, ease: "easeInOut" }} />
         {items.map((t, k) => (
-          <motion.li key={t} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: delay + k * 0.4 }} className="relative flex gap-2.5 text-[0.88rem] leading-snug">
-            <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 border-gold bg-night" />
+          <motion.li key={t} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: delay + k * 0.35 }} className="relative flex gap-2.5 text-[0.86rem] leading-snug">
+            <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border-[3px] border-night ${m.dot}`} />
             {t}
           </motion.li>
         ))}
@@ -143,22 +145,51 @@ function Track({ title, tone, items, delay }: { title: string; tone: string; ite
 
 const hours = Math.round(DELAYS.coupDur / 3_600_000);
 const days = Math.round(DELAYS.deces / 86_400_000);
+const months = Math.round(POST_DEATH_ACCESS_DAYS / 30);
+
+// Claire's card, and one 2-card pack per beneficiary.
+function Packs() {
+  return (
+    <div className="mx-auto max-w-sm">
+      <div className="mx-auto w-52">
+        <NfcCard name="Claire Durand" spin />
+      </div>
+      <div className="mt-6 grid grid-cols-3 gap-3">
+        {["Marc", "Léa", "Paul"].map((n, i) => (
+          <motion.div key={n} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.12 }}>
+            <div className="relative h-16">
+              <div className="absolute inset-x-0 top-0 -rotate-6">
+                <NfcCard name={`${n} Durand`} flipped interactive={false} />
+              </div>
+              <div className="absolute inset-x-0 top-3 rotate-3">
+                <NfcCard name={`${n} Durand`} flipped interactive={false} />
+              </div>
+            </div>
+            <div className="mt-3 text-[0.8rem] font-semibold">
+              {n} · 2 cartes
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /* ---------- Steps ---------- */
 
 const SCENARIO = [
-  ["Ouvrez le Coffre avec la carte de Claire", `code ${DEMO_PIN}`],
-  ["Rouvrez-le avec la carte de Marc", "il ne voit que l'urgence"],
-  ["Compte → Coup dur et décès → Signaler comme garant", "un coup dur est déclaré"],
-  ["Compte → Mode démonstration → Aller à la fin du délai", "puis rouvrez avec Marc"],
-  ["Mode démonstration → simulez un décès", "et confirmez-le dans l'administration"],
+  ["Ouvrez le Coffre avec une carte de Claire", `code ${DEMO_PIN} · essayez « Copier dans la fiche médicale »`],
+  ["Rouvrez-le avec une carte de Marc", "il ne voit que l'urgence"],
+  ["Compte → Coup dur et décès → Signaler comme garant", "puis Mode démonstration → Aller à la fin du délai, et rouvrez avec Marc"],
+  ["Mode démonstration → simulez un décès (INSEE)", "puis Espace bénéficiaire : Léa dépose l'acte de décès"],
+  ["Administration → vérifiez l'identité et confirmez", "fin du délai, puis Léa ouvre avec sa carte et exporte en PDF"],
 ];
 
 const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; extra?: ReactNode }[] = [
   {
     eyebrow: "Bienvenue",
     title: "Voici la famille Durand",
-    text: "Claire a préparé son Coffre pour Marc, son mari, et leurs enfants Léa et Paul. Sophie, une amie, est garante. Deux minutes suffisent pour tout comprendre.",
+    text: "Claire a préparé son Coffre pour ses bénéficiaires : Marc, son mari, et leurs enfants Léa et Paul. Sophie, une amie, est garante. Suivez la visite, tout est expliqué pas à pas.",
     visual: <FamilyOrbit />,
   },
   {
@@ -168,19 +199,15 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
     visual: <TwoWorlds />,
   },
   {
-    eyebrow: "La carte ECN",
+    eyebrow: "Les cartes",
     title: "Votre carte, c'est votre clé",
-    text: "Claire a reçu trois cartes ECN : chacune ouvre tout son Coffre. Marc et Léa ont chacun la leur, qui n'ouvre que ce que Claire leur a confié. Touchez la carte pour la retourner.",
-    visual: (
-      <div className="mx-auto w-64 py-8">
-        <NfcCard name="Claire Durand" spin />
-      </div>
-    ),
+    text: "Claire a trois cartes : chacune ouvre tout son Coffre. Chaque bénéficiaire reçoit un pack de 2 cartes à son nom, à ranger dans deux endroits différents. Elles n'ouvrent que ce que Claire lui a confié.",
+    visual: <Packs />,
   },
   {
     eyebrow: "Ouvrir le Coffre",
     title: "Posez la carte, tapez le code",
-    text: "On pose la carte au dos du téléphone, puis on tape son code. Pas de mot de passe, pas de phrase secrète à retenir.",
+    text: "On pose la carte au dos du téléphone, puis on tape son code ou on utilise Face ID. La carte est toujours nécessaire : le code ne la remplace jamais.",
     visual: <TapDemo light />,
     extra: (
       <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-gold/15 px-4 py-2 font-semibold text-gold-soft ring-1 ring-gold/40">
@@ -191,17 +218,18 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
   {
     eyebrow: "Qui voit quoi",
     title: "Chacun voit ce que Claire a choisi",
-    text: "Pour chaque proche et chaque rubrique, Claire choisit le moment : tout de suite, en cas de coup dur, au décès, ou jamais. Elle peut changer d'avis quand elle veut.",
+    text: "Pour chaque bénéficiaire et chaque rubrique, Claire choisit le niveau : urgence, coup dur, décès, ou jamais. Elle peut changer d'avis quand elle veut.",
     visual: <RightsMatrix />,
   },
   {
-    eyebrow: "Si quelque chose arrive",
-    title: "Rien ne s'ouvre sans délai",
-    text: "Claire est prévenue partout et peut tout annuler. Pour un décès, une personne vérifie toujours avant.",
+    eyebrow: "Trois niveaux d'accès",
+    title: "Chaque niveau a ses règles",
+    text: "L'urgence est toujours ouverte aux bénéficiaires autorisés. Le reste ne s'ouvre jamais sans délai, et Claire peut tout annuler.",
     visual: (
-      <div className="mx-auto grid max-w-sm gap-3 sm:max-w-lg sm:grid-cols-2">
-        <Track title="Coup dur" tone="text-coral-soft" delay={0.2} items={["Un garant signale", `${hours} h pour annuler`, "Seul le « coup dur » s'ouvre"]} />
-        <Track title="Décès" tone="text-gold-soft" delay={0.5} items={["Veille INSEE ou garant", "Vérification par une personne", `${days} jours pour annuler`, "Chacun reçoit sa part, « À effacer » est détruit"]} />
+      <div className="mx-auto grid max-w-sm gap-3 sm:max-w-3xl sm:grid-cols-3">
+        <Track level="now" delay={0.15} items={["Ouvert tout de suite, à tout moment", "Sans délai ni contrôle", "Fiche médicale copiée dans le téléphone"]} />
+        <Track level="coup_dur" delay={0.4} items={["Un garant signale", `${hours} h pour annuler`, "Seul le « coup dur » s'ouvre"]} />
+        <Track level="deces" delay={0.65} items={["Registre INSEE ou garant", "Acte de décès déposé par un bénéficiaire", "Vérification par notre équipe", `${days} jours pour annuler`, `Accès ${months} mois, puis effacement définitif`]} />
       </div>
     ),
   },

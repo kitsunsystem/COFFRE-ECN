@@ -6,7 +6,7 @@ import { useApp } from "@/lib/store";
 import { NamedIcon, TONES } from "@/components/icons";
 import { PageTitle } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
-import { RUBRICS } from "@/lib/aide";
+import { checklistFor, RUBRICS } from "@/lib/aide";
 
 export default function Aide() {
   const checklist = useApp((s) => s.checklist);
@@ -15,7 +15,8 @@ export default function Aide() {
       <PageTitle eyebrow="Aide" title="Si quelque chose arrive" lead="Des listes claires, des étapes simples et des courriers prêts à imprimer. Sans rien déposer ici : tout ce qui est personnel va dans le Coffre." />
       <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
         {RUBRICS.map((r) => {
-          const done = r.checklist.filter((c) => checklist[`${r.id}:${c.id}`]).length;
+          const items = checklistFor(r, checklist);
+          const done = items.filter((c) => checklist[`${r.id}:${c.id}`]).length;
           return (
             <motion.div key={r.id} variants={rise}>
               <Link href={`/espace/aide/${r.id}`}>
@@ -29,7 +30,7 @@ export default function Aide() {
                       <div className="text-ink-soft">{r.tagline}</div>
                       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[0.85rem] font-semibold text-ink-soft">
                         <span>
-                          {done}/{r.checklist.length} étapes faites
+                          {done}/{items.length} étapes faites
                         </span>
                         <span className="flex items-center gap-1">
                           <Download className="h-3.5 w-3.5" /> {r.letters.length} courrier{r.letters.length > 1 ? "s" : ""}
@@ -39,7 +40,7 @@ export default function Aide() {
                     <ArrowRight className="mt-1 h-5 w-5 shrink-0" />
                   </div>
                   <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-paper/70">
-                    <motion.div className="h-full rounded-full bg-ink" initial={{ width: 0 }} animate={{ width: `${(done / r.checklist.length) * 100}%` }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} />
+                    <motion.div className="h-full rounded-full bg-ink" initial={{ width: 0 }} animate={{ width: `${(done / items.length) * 100}%` }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} />
                   </div>
                 </motion.div>
               </Link>

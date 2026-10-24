@@ -14,7 +14,8 @@ export interface Rubric {
   icon: string;
   tone: "coral" | "gold" | "sage" | "ink";
   intro: string;
-  checklist: { id: string; label: string; when: string }[];
+  profile?: { id: string; label: string }[]; // answers that personalise the check-list
+  checklist: { id: string; label: string; when: string; if?: string }[];
   steps: { title: string; body: string }[];
   letters: Letter[];
 }
@@ -103,17 +104,31 @@ export const RUBRICS: Rubric[] = [
     tagline: "Les démarches, une par une",
     icon: "Flower2",
     tone: "gold",
-    intro: "Perdre un proche est une épreuve. Les démarches sont nombreuses mais toutes ne sont pas urgentes. Voici l'ordre dans lequel les faire, et des courriers prêts à compléter.",
+    intro: "Perdre un proche est une épreuve. Les démarches sont nombreuses mais toutes ne sont pas urgentes. Répondez à quelques questions : la liste s'adapte à votre situation, dans l'ordre où faire les choses.",
+    profile: [
+      { id: "salarie", label: "Il ou elle travaillait" },
+      { id: "retraite", label: "Retraité(e)" },
+      { id: "proprio", label: "Propriétaire" },
+      { id: "vehicule", label: "Un véhicule" },
+      { id: "entreprise", label: "Chef d'entreprise" },
+      { id: "enfants", label: "Des enfants mineurs" },
+    ],
     checklist: [
-      { id: "d1", label: "Faire constater le décès et obtenir le certificat", when: "Dans les 24 heures" },
-      { id: "d2", label: "Déclarer le décès en mairie", when: "Dans les 24 heures" },
-      { id: "d3", label: "Contacter les pompes funèbres", when: "Dans les 24 heures" },
-      { id: "d4", label: "Prévenir l'employeur ou la caisse de retraite", when: "La première semaine" },
-      { id: "d5", label: "Prévenir les banques", when: "La première semaine" },
-      { id: "d6", label: "Contacter un notaire si nécessaire", when: "Le premier mois" },
-      { id: "d7", label: "Prévenir les assureurs et l'assurance-vie", when: "Le premier mois" },
-      { id: "d8", label: "Résilier ou transférer les abonnements", when: "Les premiers mois" },
-      { id: "d9", label: "Déclarer les revenus du défunt", when: "Dans les 6 mois" },
+      { id: "d1", label: "Faire constater le décès par un médecin et obtenir le certificat", when: "Les premiers jours" },
+      { id: "d2", label: "Déclarer le décès en mairie (souvent fait par les pompes funèbres)", when: "Les premiers jours" },
+      { id: "d3", label: "Contacter les pompes funèbres et consulter ses volontés dans le Coffre", when: "Les premiers jours" },
+      { id: "d4", label: "Demander plusieurs actes de décès à la mairie", when: "Les premiers jours" },
+      { id: "d5", label: "Prévenir l'employeur", when: "Les premiers jours", if: "salarie" },
+      { id: "d6", label: "Prévenir les banques", when: "Les premières semaines" },
+      { id: "d7", label: "Prévenir la caisse de retraite et la complémentaire", when: "Les premières semaines", if: "retraite" },
+      { id: "d8", label: "Prévenir l'Assurance maladie et la mutuelle", when: "Les premières semaines" },
+      { id: "d9", label: "Prévenir les assureurs et les assureurs vie", when: "Les premières semaines" },
+      { id: "d10", label: "Prévenir les associés, la banque professionnelle et le greffe", when: "Les premières semaines", if: "entreprise" },
+      { id: "d11", label: "Organiser la garde ou la tutelle des enfants mineurs", when: "Les premières semaines", if: "enfants" },
+      { id: "d12", label: "Résilier ou transférer les abonnements (téléphone, énergie, internet)", when: "Les premiers mois" },
+      { id: "d13", label: "Ouvrir la succession chez un notaire (obligatoire pour un bien immobilier)", when: "Les premiers mois", if: "proprio" },
+      { id: "d14", label: "Changer la carte grise ou vendre le véhicule", when: "Les premiers mois", if: "vehicule" },
+      { id: "d15", label: "Déclarer les revenus du défunt (dans les 6 mois)", when: "Les premiers mois" },
     ],
     steps: [
       { title: "Les premiers jours", body: "Certificat de décès, déclaration en mairie, organisation des obsèques. Si votre proche avait un Coffre, ses volontés pour les obsèques vous attendent peut-être." },
@@ -131,6 +146,8 @@ export const RUBRICS: Rubric[] = [
 ];
 
 export const rubric = (id: string) => RUBRICS.find((r) => r.id === id);
+// Personalised check-list: items tied to a profile answer only show when that answer is ticked.
+export const checklistFor = (r: Rubric, checks: Record<string, boolean>) => r.checklist.filter((c) => !c.if || checks[`${r.id}:profil:${c.if}`]);
 
 const rtfEscape = (s: string) =>
   s.replace(/\\/g, "\\\\").replace(/[{}]/g, (c) => `\\${c}`).replace(/[^\x00-\x7f]/g, (c) => `\\u${c.charCodeAt(0)}?`).replace(/\n/g, "\\par\n");
