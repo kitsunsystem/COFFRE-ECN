@@ -22,23 +22,24 @@ function BottomNav({ items, dark }: { items: NavItem[]; dark?: boolean }) {
   const active = (h: string) => (h === "/espace" || h === "/coffre/rubriques" ? path === h : path.startsWith(h));
   return (
     <nav className={`fixed inset-x-0 bottom-0 z-40 safe-bottom ${dark ? "bg-night/80" : "bg-cream/85"} backdrop-blur-xl`}>
-      <div className={`mx-auto flex max-w-lg items-end justify-around border-t px-2 pt-2 ${dark ? "border-paper/10" : "border-line"}`}>
+      {/* Equal flexible columns: fixed minimum widths overflowed 360 px phones. */}
+      <div className={`mx-auto flex max-w-lg items-end border-t px-1.5 pt-2 ${dark ? "border-paper/10" : "border-line"}`}>
         {items.map((it) => {
           const on = active(it.href);
           if (it.center)
             return (
-              <Link key={it.href} href={it.href} className="-mt-7 flex flex-col items-center gap-1" aria-label={it.label}>
+              <Link key={it.href} href={it.href} className="-mt-7 flex min-w-0 flex-1 flex-col items-center gap-1" aria-label={it.label}>
                 <motion.span whileTap={{ scale: 0.92 }} whileHover={{ y: -2 }} className="grid h-16 w-16 place-items-center rounded-[1.4rem] bg-gradient-to-b from-gold-soft to-gold text-ink shadow-glow">
                   <it.icon className="h-7 w-7" />
                 </motion.span>
-                <span className={`text-[0.72rem] font-bold ${dark ? "text-paper" : "text-ink"}`}>{it.label}</span>
+                <span className={`text-[0.7rem] font-bold ${dark ? "text-paper" : "text-ink"}`}>{it.label}</span>
               </Link>
             );
           return (
-            <Link key={it.href} href={it.href} className="relative flex min-w-[4rem] flex-col items-center gap-1 px-2 py-1.5">
+            <Link key={it.href} href={it.href} className="relative flex min-w-0 flex-1 flex-col items-center gap-1 px-1 py-1.5">
               {on && <motion.span layoutId={dark ? "navDark" : "nav"} className={`absolute inset-0 rounded-2xl ${dark ? "bg-paper/10" : "bg-ink/[0.06]"}`} transition={{ type: "spring", stiffness: 400, damping: 32 }} />}
               <it.icon className={`relative h-6 w-6 ${on ? (dark ? "text-gold-soft" : "text-ink") : "text-mist"}`} />
-              <span className={`relative text-[0.72rem] font-bold ${on ? (dark ? "text-paper" : "text-ink") : "text-mist"}`}>{it.label}</span>
+              <span className={`relative max-w-full truncate text-[0.7rem] font-bold ${on ? (dark ? "text-paper" : "text-ink") : "text-mist"}`}>{it.label}</span>
             </Link>
           );
         })}

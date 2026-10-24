@@ -37,6 +37,41 @@ function SecretInput({ f, value, onChange }: { f: FieldDef; value: string; onCha
   );
 }
 
+const words = (v: string) => v.trim().split(/\s+/).filter(Boolean);
+
+// Recovery phrase: masked while typing (like a password), with a word count to catch a missing word.
+function SeedInput({ f, value, onChange }: { f: FieldDef; value: string; onChange: (v: string) => void }) {
+  const [shown, setShown] = useState(false);
+  const n = words(value).length;
+  return (
+    <label className="block">
+      <span className="mb-1.5 flex items-center gap-1.5 text-[0.92rem] font-semibold text-ink-soft">
+        <Lock className="h-3.5 w-3.5" /> {f.label}
+      </span>
+      <span className="relative block">
+        <textarea
+          rows={4}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="mot1 mot2 mot3…"
+          className={`w-full rounded-2xl bg-paper px-4 py-3.5 pr-12 font-mono text-[1rem] outline-none ring-1 ring-line focus:ring-2 focus:ring-gold ${shown ? "" : "[-webkit-text-security:disc]"}`}
+        />
+        <button type="button" onClick={() => setShown(!shown)} className="absolute right-2 top-2 p-2 text-mist" aria-label={shown ? "Masquer" : "Afficher"}>
+          {shown ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
+      </span>
+      <span className={`mt-1.5 block text-[0.85rem] ${n === 0 || n === 12 || n === 24 ? "text-mist" : "font-semibold text-coral"}`}>
+        {n} mot{n > 1 ? "s" : ""}
+        {n !== 0 && n !== 12 && n !== 24 ? " : une phrase de récupération compte en général 12 ou 24 mots" : " · jamais envoyée en clair, chiffrée sur votre téléphone"}
+      </span>
+    </label>
+  );
+}
+
 export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: Entry; onDone: () => void }) {
   const sub = subsection(subId);
   const concierge = useApp((s) => s.concierge).filter((c) => c.status !== "demande" && c.status !== "termine");
@@ -71,6 +106,8 @@ export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: En
       {sub.fields.map((f) =>
         f.kind === "secret" ? (
           <SecretInput key={f.key} f={f} value={fields[f.key] ?? ""} onChange={(v) => setFields({ ...fields, [f.key]: v })} />
+        ) : f.kind === "seed" ? (
+          <SeedInput key={f.key} f={f} value={fields[f.key] ?? ""} onChange={(v) => setFields({ ...fields, [f.key]: v })} />
         ) : (
           <Field
             key={f.key}
@@ -192,6 +229,36 @@ export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: En
   );
 }
 
+// Hidden until asked, then numbered: the words have to be copied in order to restore the wallet.
+function SeedView({ label, value }: { label: string; value: string }) {
+  const [shown, setShown] = useState(false);
+  const list = words(value);
+  return (
+    <div className="rounded-2xl bg-paper p-4 ring-1 ring-line">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-[0.8rem] font-semibold text-mist">
+          {label} · {list.length} mots
+        </div>
+        <button type="button" onClick={() => setShown(!shown)} className="flex items-center gap-1.5 text-[0.85rem] font-semibold text-ink">
+          {shown ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />} {shown ? "Masquer" : "Afficher"}
+        </button>
+      </div>
+      {shown ? (
+        <ol className="mt-3 grid grid-cols-3 gap-1.5">
+          {list.map((w, i) => (
+            <li key={i} className="flex min-w-0 items-baseline gap-1 rounded-lg bg-ink/[0.04] px-2 py-1.5 font-mono text-[0.85rem]">
+              <span className="text-[0.7rem] text-mist">{i + 1}</span>
+              <span className="truncate">{w}</span>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="mt-2 text-[0.9rem] text-mist">Masqués par sécurité. Assurez-vous d&apos;être seul avant de les afficher.</p>
+      )}
+    </div>
+  );
+}
+
 // What a card holder sees: read-only, documents downloadable.
 export function ItemView({ subId, entry }: { subId: string; entry: Entry }) {
   const sub = subsection(subId);
@@ -200,10 +267,12 @@ export function ItemView({ subId, entry }: { subId: string; entry: Entry }) {
       {sub.fields.map((f) => {
         const v = entry.payload.fields[f.key];
         if (!v) return null;
+        if (f.kind === "seed") return <SeedView key={f.key} label={f.label} value={v} />;
         return (
           <div key={f.key} className="rounded-2xl bg-paper p-4 ring-1 ring-line">
             <div className="text-[0.8rem] font-semibold text-mist">{f.label}</div>
-            <div className="mt-0.5 whitespace-pre-wrap text-[1.05rem]">{f.kind === "date" ? new Date(v).toLocaleDateString("fr-FR", { dateStyle: "long" }) : v}</div>
+            {/* Wallet addresses and transaction hashes are long unbroken strings: let them wrap on phones. */}
+            <div className="mt-0.5 whitespace-pre-wrap text-[1.05rem] [overflow-wrap:anywhere]">{f.kind === "date" ? new Date(v).toLocaleDateString("fr-FR", { dateStyle: "long" }) : v}</div>
           </div>
         );
       })}

@@ -30,7 +30,11 @@ export default function Rubriques() {
   const end = death && accessEnd(death);
   const visible = new Set(visibleSubsections());
   const owner = mode === "owner";
-  const sections = SECTIONS.filter((s) => (s.optional ? account?.isBusinessOwner : true)).filter((s) => owner || s.subsections.some((x) => visible.has(x.id)));
+  const shown = SECTIONS.filter((s) => (s.optional ? account?.isBusinessOwner : true)).filter((s) => owner || s.subsections.some((x) => visible.has(x.id)));
+  // Two-column grid: the first section and "À effacer" (always last) span both columns; so does a leftover odd tile.
+  const sections = [...shown.filter((s) => s.id !== "effacer"), ...shown.filter((s) => s.id === "effacer")];
+  const narrow = sections.filter((s, i) => i > 0 && s.id !== "effacer");
+  const isWide = (s: (typeof sections)[number], i: number) => i === 0 || s.id === "effacer" || (narrow.length % 2 === 1 && s === narrow[narrow.length - 1]);
   const done = essentialsDone({ vault });
 
   return (
@@ -76,7 +80,7 @@ export default function Rubriques() {
         {sections.map((s, i) => {
           const subs = s.subsections.filter((x) => owner || visible.has(x.id)).map((x) => x.id);
           const count = vault.items.filter((it) => subs.includes(it.subsectionId)).length;
-          const wide = i === 0 || s.id === "effacer";
+          const wide = isWide(s, i);
           return (
             <motion.div key={s.id} variants={rise} className={wide ? "col-span-2" : ""}>
               <Link href={`/coffre/rubriques/${s.id}`}>

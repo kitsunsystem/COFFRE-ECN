@@ -1,7 +1,7 @@
-import { BedDouble, Building, EyeOff, Feather, FileText, Flower2, HandHeart, HeartPulse, Landmark, Siren, Smartphone, type LucideIcon } from "lucide-react";
+import { BedDouble, Bitcoin, Building, EyeOff, Feather, FileText, Flower2, HandHeart, HeartPulse, Landmark, Siren, Smartphone, type LucideIcon } from "lucide-react";
 
 // Icons referenced by name from content files (sections, help rubrics).
-const BY_NAME: Record<string, LucideIcon> = { BedDouble, Building, EyeOff, Feather, FileText, Flower2, HandHeart, HeartPulse, Landmark, Siren, Smartphone };
+const BY_NAME: Record<string, LucideIcon> = { BedDouble, Bitcoin, Building, EyeOff, Feather, FileText, Flower2, HandHeart, HeartPulse, Landmark, Siren, Smartphone };
 
 export function NamedIcon({ name, className }: { name: string; className?: string }) {
   const I = BY_NAME[name] ?? FileText;

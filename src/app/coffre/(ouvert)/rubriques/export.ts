@@ -1,5 +1,5 @@
 // Printable export (save as PDF) for a notary or a hospital, built only from what the person opening the Coffre may see.
-// Codes and passwords are left out: they are never needed by a notary or a hospital.
+// Codes, passwords and recovery phrases are left out: they are never needed by a notary or a hospital.
 import { SECTIONS } from "@/lib/sections";
 import { readItems, visibleSubsections } from "@/lib/vault";
 
@@ -18,7 +18,7 @@ export async function exportPdf(owner: string, reader: string) {
       if (!list.length) continue;
       const items = list.map(({ payload }) => {
         const rows = sub.fields
-          .filter((f) => f.kind !== "secret" && payload.fields[f.key]?.trim())
+          .filter((f) => f.kind !== "secret" && f.kind !== "seed" && payload.fields[f.key]?.trim())
           .map((f) => `<tr><th>${esc(f.label)}</th><td>${esc(payload.fields[f.key]).replace(/\n/g, "<br>")}</td></tr>`);
         if (payload.files.length) rows.push(`<tr><th>Documents</th><td>${payload.files.map((f) => esc(f.name)).join(", ")}</td></tr>`);
         return `<div class="item"><h4>${esc(payload.title)}</h4><table>${rows.join("")}</table></div>`;

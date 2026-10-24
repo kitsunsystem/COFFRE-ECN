@@ -49,13 +49,14 @@ function Hero() {
       </nav>
 
       <div className="relative mx-auto mt-14 grid max-w-6xl items-center gap-14 lg:mt-24 lg:grid-cols-[1.1fr_1fr]">
-        <motion.div variants={stagger} initial="hidden" animate="show">
+        <motion.div variants={stagger} initial="hidden" animate="show" className="min-w-0">
           <motion.div variants={rise}>
             <span className="inline-flex items-center gap-2 rounded-full bg-paper/80 px-4 py-2 text-[0.85rem] font-semibold ring-1 ring-line backdrop-blur">
               <Sparkles className="h-4 w-4 text-gold-deep" /> De son vivant comme après
             </span>
           </motion.div>
-          <motion.h1 variants={rise} className="mt-6 text-[2.75rem] font-semibold leading-[1.02] sm:text-[3.6rem] lg:text-[4.4rem]">
+          {/* Sized so "au même endroit" (kept on one line for its underline) fits a 360 px phone. */}
+          <motion.h1 variants={rise} className="mt-6 text-[2.2rem] font-semibold leading-[1.05] min-[400px]:text-[2.6rem] sm:text-[3.6rem] lg:text-[4.4rem]">
             Tout ce dont votre famille aura besoin,{" "}
             <span className="relative whitespace-nowrap italic text-gold-deep">
               au même endroit
@@ -108,7 +109,7 @@ function Hero() {
           </motion.div>
           <FloatChip icon={CalendarClock} text="Passeport : expire dans 30 jours" className="-left-2 top-0 sm:-left-10" delay={1.1} />
           <FloatChip icon={HeartPulse} text="Marc voit : Urgence et santé" className="-right-2 bottom-16 sm:-right-8" delay={1.3} />
-          <FloatChip icon={Sparkles} text="Famille préparée à 88 %" className="bottom-0 left-4" delay={1.5} />
+          <FloatChip icon={Sparkles} text="Famille préparée à 89 %" className="bottom-0 left-4" delay={1.5} />
         </div>
       </div>
     </section>

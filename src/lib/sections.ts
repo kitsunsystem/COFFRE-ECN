@@ -1,7 +1,7 @@
 ﻿// Coffre structure from the client brief (section 6): few sections, one level of sub-sections.
 // The final list of sub-sections is still "à décider": edit it here only.
 
-export type FieldKind = "text" | "long" | "date" | "secret" | "phone";
+export type FieldKind = "text" | "long" | "date" | "secret" | "phone" | "seed"; // seed = recovery phrase (12 or 24 words)
 export interface Field {
   key: string;
   label: string;
@@ -70,6 +70,19 @@ export const SECTIONS: Section[] = [
       { id: "placements", title: "Placements", hint: "Épargne, comptes-titres, retraite", fields: [{ key: "product", label: "Placement" }, { key: "where", label: "Établissement" }, note] },
       { id: "credits", title: "Crédits", hint: "Prêts en cours, assurance emprunteur", fields: [{ key: "loan", label: "Crédit" }, { key: "lender", label: "Organisme" }, note] },
       { id: "abonnements", title: "Abonnements", hint: "Téléphone, internet, énergie, presse, plateformes", fields: [{ key: "service", label: "Service" }, { key: "account", label: "Identifiant client" }, { key: "expiry", label: "Échéance", kind: "date" }, note] },
+    ],
+  },
+  {
+    id: "crypto",
+    title: "Crypto-actifs",
+    tagline: "Phrases de récupération, portefeuilles, plateformes, transactions",
+    icon: "Bitcoin",
+    tone: "gold",
+    subsections: [
+      { id: "phrases", title: "Phrases de récupération", hint: "Les 12 ou 24 mots de chaque portefeuille", fields: [{ key: "wallet", label: "Portefeuille concerné", placeholder: "Ex. Ledger de Claire" }, { key: "words", label: "Les mots, dans l'ordre", kind: "seed" }, { key: "passphrase", label: "Passphrase (25e mot), si utilisée", kind: "secret" }, { key: "where", label: "Où se trouve la copie papier ou métal" }, note] },
+      { id: "portefeuilles", title: "Portefeuilles", hint: "Ledger, Trezor, MetaMask, Phantom…", fields: [{ key: "name", label: "Portefeuille" }, { key: "type", label: "Type", placeholder: "Matériel, logiciel ou plateforme" }, { key: "assets", label: "Actifs détenus", placeholder: "Ex. BTC, ETH, USDC" }, { key: "address", label: "Adresse publique" }, { key: "pin", label: "Code PIN de l'appareil", kind: "secret" }, { key: "device", label: "Où se trouve l'appareil" }, note] },
+      { id: "plateformes", title: "Plateformes d'échange", hint: "Binance, Coinbase, Kraken…", fields: [{ key: "platform", label: "Plateforme" }, { key: "login", label: "Identifiant" }, { key: "password", label: "Mot de passe", kind: "secret" }, { key: "twofa", label: "Double authentification : où sont les codes", kind: "secret" }, note] },
+      { id: "transactions", title: "Transactions", hint: "Achats, ventes, transferts importants", fields: [{ key: "date", label: "Date", kind: "date" }, { key: "kind", label: "Type", placeholder: "Achat, vente, transfert" }, { key: "asset", label: "Actif et quantité", placeholder: "Ex. 0,5 BTC" }, { key: "value", label: "Valeur en euros" }, { key: "from", label: "Depuis" }, { key: "to", label: "Vers (adresse ou plateforme)" }, { key: "txid", label: "Identifiant de transaction (hash)" }, note] },
     ],
   },
   {
