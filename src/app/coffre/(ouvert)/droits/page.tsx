@@ -8,7 +8,7 @@ import { Button, Segmented } from "@/components/ui";
 import { moment, MOMENTS, type Moment } from "@/lib/rules";
 import { SECTIONS } from "@/lib/sections";
 import { packOf, useApp, useSession } from "@/lib/store";
-import { readCategories, setRight, setSectionRight } from "@/lib/vault";
+import { setRight, setSectionRight } from "@/lib/vault";
 
 const OPTIONS = MOMENTS.map((m) => ({ id: m.id, label: m.short }));
 
@@ -27,13 +27,6 @@ export default function Droits() {
   const [error, setError] = useState<string | null>(null);
   const r = (personId && rights[personId]) || {};
   const activeCards = personId ? packOf({ cards }, personId).filter((c) => c.status === "active").length : 0;
-  // "Partie sensible": its rows are the owner's own categories, whose names are decrypted here.
-  const custom = useApp((s) => s.vault.custom);
-  const [cats, setCats] = useState<{ id: string; title: string }[]>([]);
-  useEffect(() => {
-    readCategories().then((list) => setCats(list.map((c) => ({ id: c.id, title: c.meta.title }))));
-  }, [custom]);
-  const subsOf = (s: (typeof SECTIONS)[number]) => (s.custom ? cats : s.subsections);
 
   useEffect(() => {
     if (mode === "holder") router.replace("/coffre/rubriques");
@@ -89,8 +82,8 @@ export default function Droits() {
 
           <div className="mt-5 space-y-3">
             {sections.map((s) => {
-              const values = subsOf(s).map((x) => r[x.id] ?? "jamais");
-              const same = values.length && values.every((v) => v === values[0]) ? values[0] : null;
+              const values = s.subsections.map((x) => r[x.id] ?? "jamais");
+              const same = values.every((v) => v === values[0]) ? values[0] : null;
               const expanded = open === s.id;
               return (
                 <div key={s.id} className="overflow-hidden rounded-[1.5rem] bg-night-2 ring-1 ring-paper/10">
@@ -124,8 +117,7 @@ export default function Droits() {
                               <Segmented layoutKey={`all-${s.id}`} options={OPTIONS} value={same ?? ("" as Moment)} onChange={(m) => change(s.id, () => setSectionRight(personId, s.id, m))} />
                             </div>
                           </div>
-                          {s.custom && cats.length === 0 && <p className="text-[0.88rem] text-paper/60">Créez d&apos;abord une catégorie dans la Partie sensible.</p>}
-                          {subsOf(s).map((x) => (
+                          {s.subsections.map((x) => (
                             <div key={x.id}>
                               <div className="mb-1.5 flex items-center gap-2 text-[0.92rem] font-semibold">
                                 <span className={`h-2 w-2 rounded-full ${moment(r[x.id] ?? "jamais").dot}`} />

@@ -1,5 +1,5 @@
 // Printable export (save as PDF) for a notary or a hospital, built only from what the person opening the Coffre may see.
-// Codes and passwords are left out, and so is the "Partie sensible": never needed by a notary or a hospital.
+// Codes and passwords are left out: never needed by a notary or a hospital.
 import { SECTIONS } from "@/lib/sections";
 import { readItems, visibleSubsections } from "@/lib/vault";
 

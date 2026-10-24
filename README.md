@@ -29,7 +29,6 @@ Parcours à montrer :
 - **Décès** : veille INSEE ou garant, **acte de décès déposé par un bénéficiaire**, vérification par l'équipe (identité et KYC du bénéficiaire), pas de notaire par défaut ; délai d'annulation ; **accès limité dans le temps puis effacement définitif**.
 - **Fiche d'urgence** copiée dans la fiche médicale du téléphone ; **export PDF** de ce que la personne a le droit de voir.
 - **Vidéos** retirées du lancement : « Où se trouvent mes vidéos » dans Volontés et messages.
-- **Partie sensible** (rubrique du Coffre) : un espace libre où la personne crée ses propres catégories et choisit ce que chacune accepte (PDF, images, notes, tout fichier). Les noms des catégories sont chiffrés ; chaque catégorie se règle dans « Qui voit quoi » ; jamais incluse dans l'export PDF.
 - **Échéances** saisies dans l'Espace avec consentement ; relances « tout est-il à jour ? » tous les 3 mois ; contrôle des cartes des bénéficiaires tous les 6 mois.
 - **Lancement en deux temps** : phase découverte payante (tout sauf l'ajout de documents, bloqué aussi en base), puis lancement officiel.
 - **Impayé** : relances pendant le délai de grâce, puis effacement.

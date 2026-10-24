@@ -107,7 +107,7 @@ export default function Services() {
         <Card className="!p-5">
           <MailCheck className="h-7 w-7 text-sage" />
           <div className="mt-3 font-semibold">Une messagerie chiffrée pour la famille</div>
-          <p className="mt-1 text-ink-soft">Pour échanger des documents sensibles entre proches, nous recommandons une messagerie chiffrée de bout en bout, comme Proton Mail.</p>
+          <p className="mt-1 text-ink-soft">Pour échanger des documents confidentiels entre proches, nous recommandons une messagerie chiffrée de bout en bout, comme Proton Mail.</p>
         </Card>
       </motion.section>
 

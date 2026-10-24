@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NamedIcon } from "@/components/icons";
 import { ItemEditor, ItemView, type Entry } from "@/components/item-editor";
-import { SensibleView } from "@/components/sensible";
 import { useNow } from "@/components/providers";
 import { Button, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
@@ -113,8 +112,6 @@ export function SectionView({ id }: { id: string }) {
           <p className="text-[0.95rem] text-paper/75">Cette rubrique n'est attribuée à personne et ne peut pas l'être. Au décès confirmé, elle est détruite sans avoir été lue.</p>
         </motion.div>
       )}
-
-      {section.custom && <SensibleView owner={owner} launched={launched} />}
 
       {subs.map((sub) => {
         const list = entries[sub.id] ?? [];

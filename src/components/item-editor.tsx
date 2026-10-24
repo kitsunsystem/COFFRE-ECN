@@ -37,8 +37,9 @@ function SecretInput({ f, value, onChange }: { f: FieldDef; value: string; onCha
   );
 }
 
-// `accept`: file types allowed (an <input accept> list); "" means notes only, no files.
-export function ItemEditor({ subId, entry, onDone, accept = "image/*,application/pdf" }: { subId: string; entry?: Entry; onDone: () => void; accept?: string }) {
+const ACCEPT = ["image/", "application/pdf"];
+
+export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: Entry; onDone: () => void }) {
   const sub = subsection(subId);
   const concierge = useApp((s) => s.concierge).filter((c) => c.status !== "demande" && c.status !== "termine");
   const [title, setTitle] = useState(entry?.payload.title ?? "");
@@ -95,7 +96,6 @@ export function ItemEditor({ subId, entry, onDone, accept = "image/*,application
         </p>
       )}
 
-      {accept && (
       <div>
         <div className="mb-2 text-[0.92rem] font-semibold text-ink-soft">Documents</div>
         <div className="space-y-2">
@@ -127,23 +127,21 @@ export function ItemEditor({ subId, entry, onDone, accept = "image/*,application
           ref={input}
           type="file"
           multiple
-          accept={accept}
+          accept="image/*,application/pdf"
           className="hidden"
           onChange={(e) => {
             const list = [...(e.target.files ?? [])];
-            // The picker's filter is only a hint: re-check against the types this category accepts.
-            const allowed = (f: File) => accept === "*/*" || accept.split(",").some((a) => (a.endsWith("/*") ? f.type.startsWith(a.slice(0, -1)) : f.type === a));
-            const refused = list.filter((f) => f.size > MAX_FILE || !allowed(f));
-            setError(refused.length ? `Refusé (type non accepté ici ou plus de 20 Mo) : ${refused.map((f) => f.name).join(", ")}` : null);
+            // The picker's filter is only a hint: re-check the type here.
+            const refused = list.filter((f) => f.size > MAX_FILE || !ACCEPT.some((a) => f.type.startsWith(a)));
+            setError(refused.length ? `Refusé (photo ou PDF uniquement, 20 Mo maximum) : ${refused.map((f) => f.name).join(", ")}` : null);
             setPending([...pending, ...list.filter((f) => !refused.includes(f))]);
             e.target.value = "";
           }}
         />
         <Button type="button" variant="outline" full className="mt-2" icon={<Paperclip className="h-5 w-5" />} onClick={() => input.current?.click()}>
-          {accept === "image/*,application/pdf" ? "Ajouter une photo ou un PDF" : "Ajouter un document"}
+          Ajouter une photo ou un PDF
         </Button>
       </div>
-      )}
 
       {error && <p className="font-semibold text-coral">{error}</p>}
       <Button full variant="gold" disabled={busy || !title.trim()} onClick={save}>
@@ -208,7 +206,7 @@ export function ItemView({ subId, entry }: { subId: string; entry: Entry }) {
         return (
           <div key={f.key} className="rounded-2xl bg-paper p-4 ring-1 ring-line">
             <div className="text-[0.8rem] font-semibold text-mist">{f.label}</div>
-            {/* Wallet addresses and transaction hashes are long unbroken strings: let them wrap on phones. */}
+            {/* Account numbers and references can be long unbroken strings: let them wrap on phones. */}
             <div className="mt-0.5 whitespace-pre-wrap text-[1.05rem] [overflow-wrap:anywhere]">{f.kind === "date" ? new Date(v).toLocaleDateString("fr-FR", { dateStyle: "long" }) : v}</div>
           </div>
         );

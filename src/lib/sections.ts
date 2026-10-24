@@ -21,19 +21,8 @@ export interface Section {
   icon: string; // lucide icon name, resolved in components/icons.tsx
   tone: "coral" | "gold" | "sage" | "ink" | "mist";
   optional?: boolean;
-  custom?: boolean; // sub-sections are categories created by the owner, not listed here
   subsections: Subsection[];
 }
-
-// What a custom category can hold.
-export type Accept = "pdf" | "image" | "note" | "any";
-export const ACCEPTS: { id: Accept; label: string; mime: string }[] = [
-  { id: "pdf", label: "PDF", mime: "application/pdf" },
-  { id: "image", label: "Images", mime: "image/*" },
-  { id: "note", label: "Notes", mime: "" },
-  { id: "any", label: "Tous fichiers", mime: "*/*" },
-];
-export const CUSTOM_PREFIX = "custom-";
 
 const note: Field = { key: "note", label: "Précisions", kind: "long", placeholder: "Tout ce qui peut aider vos proches" };
 const contact = (who: string): Field[] => [
@@ -78,20 +67,10 @@ export const SECTIONS: Section[] = [
     subsections: [
       { id: "banques", title: "Banques", hint: "Établissements, conseillers, comptes", fields: [{ key: "bank", label: "Banque" }, { key: "advisor", label: "Conseiller" }, { key: "phone", label: "Téléphone", kind: "phone" }, note] },
       { id: "assurances", title: "Assurances et assurance-vie", hint: "Assureur, numéro de contrat, bénéficiaires", fields: [{ key: "insurer", label: "Assureur" }, { key: "contract", label: "Numéro de contrat" }, { key: "beneficiaries", label: "Bénéficiaires" }, { key: "expiry", label: "Échéance", kind: "date" }, note] },
-      { id: "placements", title: "Placements", hint: "Épargne, comptes-titres, retraite", fields: [{ key: "product", label: "Placement" }, { key: "where", label: "Établissement" }, note] },
+      { id: "placements", title: "Placements", hint: "Épargne, comptes-titres, retraite, autres comptes", fields: [{ key: "product", label: "Placement" }, { key: "where", label: "Établissement" }, note] },
       { id: "credits", title: "Crédits", hint: "Prêts en cours, assurance emprunteur", fields: [{ key: "loan", label: "Crédit" }, { key: "lender", label: "Organisme" }, note] },
       { id: "abonnements", title: "Abonnements", hint: "Téléphone, internet, énergie, presse, plateformes", fields: [{ key: "service", label: "Service" }, { key: "account", label: "Identifiant client" }, { key: "expiry", label: "Échéance", kind: "date" }, note] },
     ],
-  },
-  {
-    // A sandbox: the owner creates the categories (their names are encrypted too), see vault.ts createCategory.
-    id: "sensible",
-    title: "Partie sensible",
-    tagline: "Vos propres catégories, vos documents, comme vous voulez",
-    icon: "LockKeyhole",
-    tone: "coral",
-    custom: true,
-    subsections: [],
   },
   {
     id: "numerique",
@@ -149,10 +128,7 @@ export const SECTIONS: Section[] = [
 
 export const ALL_SUBSECTIONS = SECTIONS.flatMap((s) => s.subsections.map((sub) => ({ ...sub, sectionId: s.id })));
 export const sectionOf = (subsectionId: string) => SECTIONS.find((s) => s.subsections.some((x) => x.id === subsectionId))!;
-// Custom categories all share one simple form: a title, free notes, and the files the category accepts.
-const CUSTOM_FIELDS: Field[] = [{ key: "note", label: "Informations", kind: "long", placeholder: "Tout ce que vous voulez garder ici" }];
-export const subsection = (id: string) =>
-  ALL_SUBSECTIONS.find((s) => s.id === id) ?? { id, title: "Catégorie", hint: "", fields: CUSTOM_FIELDS, sectionId: "sensible" };
+export const subsection = (id: string) => ALL_SUBSECTIONS.find((s) => s.id === id)!;
 
 // Guided start: "commencer par l'essentiel".
 export const ESSENTIALS: { subsectionId: string; title: string; why: string }[] = [

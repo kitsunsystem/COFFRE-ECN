@@ -1,6 +1,6 @@
 // Demo family, so the whole service can be shown before Supabase is connected. Code for every card: 123456.
 import { uid, useApp, useSession, type Card, type Person } from "./store";
-import { activateHolderCard, activateOwnerCard, createCategory, lock, saveItem, setRight, setSectionRight } from "./vault";
+import { activateHolderCard, activateOwnerCard, lock, saveItem, setRight, setSectionRight } from "./vault";
 
 export const DEMO_PIN = "123456";
 
@@ -46,16 +46,11 @@ export async function seedDemo() {
     ["prive", "Journal", { title: "Mon journal", note: "À détruire sans le lire." }],
   ];
   for (const [sub, title, fields] of items) await saveItem(sub, { title, fields, files: [] });
-  // "Partie sensible": categories Claire created herself.
-  const contrats = await createCategory({ title: "Contrats et actes privés", accept: ["pdf", "note"] });
-  await saveItem(contrats, { title: "Reconnaissance de dette", fields: { note: "Prêt de 5 000 € à un ami en 2023, remboursé à moitié. L'original signé est dans le classeur bleu." }, files: [] });
-  await createCategory({ title: "Photos importantes", accept: ["image"] });
 
   await setSectionRight(marc.id, "urgence", "now");
   await setRight(marc.id, "banques", "coup_dur");
   await setRight(marc.id, "assurances", "deces");
   await setRight(marc.id, "telephone", "coup_dur");
-  await setRight(marc.id, contrats, "deces");
   await setRight(lea.id, "a-prevenir", "now");
   await setRight(lea.id, "groupe-allergies", "now");
   await setRight(lea.id, "lettres", "deces");
