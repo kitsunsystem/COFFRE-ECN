@@ -1,6 +1,6 @@
 // Demo family, so the whole service can be shown before Supabase is connected. Code for every card: 123456.
 import { uid, useApp, useSession, type Card, type Person } from "./store";
-import { activateHolderCard, activateOwnerCard, lock, saveItem, setRight, setSectionRight } from "./vault";
+import { activateHolderCard, activateOwnerCard, createCategory, lock, saveItem, setRight, setSectionRight } from "./vault";
 
 export const DEMO_PIN = "123456";
 
@@ -43,19 +43,19 @@ export async function seedDemo() {
     ["juridique", "Testament", { doc: "Testament olographe", where: "Chez Maître Roux, notaire à Lyon", pro: "Maître Roux", note: "" }],
     ["obseques", "Mes souhaits", { contract: "Contrat obsèques Sérénité", wishes: "Une cérémonie simple, avec de la musique.", note: "" }],
     ["lettres", "Pour Léa", { to: "Léa", text: "Ma chérie, je suis si fière de toi…" }],
-    ["portefeuilles", "Ledger de Claire", { name: "Ledger Nano X", type: "Matériel", assets: "BTC, ETH", address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh", pin: "1 9 7 2", device: "Boîte grise, tiroir du bureau", note: "" }],
-    // Fictitious demo phrase (the first 24 words of the standard list): it opens no real wallet.
-    ["phrases", "Phrase du Ledger", { wallet: "Ledger de Claire", words: "abandon ability able about above absent absorb abstract absurd abuse access accident account accuse achieve acid acoustic acquire across act action actor actress actual", passphrase: "", where: "Plaque en métal chez Maître Roux", note: "Exemple fictif" }],
-    ["transactions", "Achat de bitcoin", { date: "2024-03-12", kind: "Achat", asset: "0,25 BTC", value: "15 000 €", from: "Coinbase", to: "Ledger de Claire", txid: "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16", note: "Transféré sur le Ledger le jour même" }],
     ["prive", "Journal", { title: "Mon journal", note: "À détruire sans le lire." }],
   ];
   for (const [sub, title, fields] of items) await saveItem(sub, { title, fields, files: [] });
+  // "Partie sensible": categories Claire created herself.
+  const contrats = await createCategory({ title: "Contrats et actes privés", accept: ["pdf", "note"] });
+  await saveItem(contrats, { title: "Reconnaissance de dette", fields: { note: "Prêt de 5 000 € à un ami en 2023, remboursé à moitié. L'original signé est dans le classeur bleu." }, files: [] });
+  await createCategory({ title: "Photos importantes", accept: ["image"] });
 
   await setSectionRight(marc.id, "urgence", "now");
   await setRight(marc.id, "banques", "coup_dur");
   await setRight(marc.id, "assurances", "deces");
   await setRight(marc.id, "telephone", "coup_dur");
-  await setSectionRight(marc.id, "crypto", "deces");
+  await setRight(marc.id, contrats, "deces");
   await setRight(lea.id, "a-prevenir", "now");
   await setRight(lea.id, "groupe-allergies", "now");
   await setRight(lea.id, "lettres", "deces");

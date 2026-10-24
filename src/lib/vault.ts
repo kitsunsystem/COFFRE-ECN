@@ -4,7 +4,7 @@ import { del, get, set as idbSet } from "idb-keyval";
 import { cardAndCode, demoChip, holderKeys } from "./cards";
 import { na, newKey, newSalt, open, openFrom, openJson, seal, sealJson, sealTo, toB64, type Sealed } from "./crypto";
 import { isReleased, type Moment } from "./rules";
-import { ALL_SUBSECTIONS, SECTIONS } from "./sections";
+import { ALL_SUBSECTIONS, CUSTOM_PREFIX, SECTIONS, type Accept } from "./sections";
 import { now, packOf, uid, useApp, useSession, type Envelope, type VaultItem } from "./store";
 
 export interface FileMeta {
@@ -106,7 +106,7 @@ export async function subsectionKey(subId: string): Promise<Uint8Array | null> {
 export function visibleSubsections(): string[] {
   const ses = useSession.getState().session;
   const st = useApp.getState();
-  if (ses.mode === "owner") return ALL_SUBSECTIONS.map((s) => s.id);
+  if (ses.mode === "owner") return [...ALL_SUBSECTIONS.map((s) => s.id), ...st.vault.custom.map((c) => c.id)];
   if (ses.mode === "holder")
     return st.vault.envelopes.filter((e) => e.cardId === ses.cardId && isReleased(e.moment, st.procedures, now())).map((e) => e.subsectionId);
   return [];
@@ -188,7 +188,54 @@ export async function rotate(subId: string) {
     }
   }
   const wrapped = await seal(vmk, fresh, sskAad(subId));
-  st.set((s) => ({ vault: { ...s.vault, items, envelopes, ssk: { ...s.vault.ssk, [subId]: wrapped } } }));
+  // A custom category's name is sealed with its key too: re-seal it with the new key.
+  const custom = await Promise.all(st.vault.custom.map(async (c) => (c.id === subId ? { id: c.id, meta: await sealJson(fresh, await openJson(oldKey, c.meta, catAad(c.id)), catAad(c.id)) } : c)));
+  st.set((s) => ({ vault: { ...s.vault, items, envelopes, custom, ssk: { ...s.vault.ssk, [subId]: wrapped } } }));
+}
+
+/* ---------- "Partie sensible": categories created by the owner ---------- */
+
+export interface CategoryMeta {
+  title: string;
+  accept: Accept[];
+}
+const catAad = (id: string) => `cat:${id}`;
+
+export async function createCategory(meta: CategoryMeta) {
+  const vmk = ownerVmk();
+  const id = `${CUSTOM_PREFIX}${uid()}`;
+  const key = await newKey();
+  const [wrapped, sealed] = [await seal(vmk, key, sskAad(id)), await sealJson(key, meta, catAad(id))];
+  useApp.getState().set((s) => ({ vault: { ...s.vault, ssk: { ...s.vault.ssk, [id]: wrapped }, custom: [...s.vault.custom, { id, meta: sealed }] } }));
+  return id;
+}
+
+export async function updateCategory(id: string, meta: CategoryMeta) {
+  ownerVmk();
+  const sealed = await sealJson((await subsectionKey(id))!, meta, catAad(id));
+  useApp.getState().set((s) => ({ vault: { ...s.vault, custom: s.vault.custom.map((c) => (c.id === id ? { id, meta: sealed } : c)) } }));
+}
+
+// Removes the category with everything in it: documents, files, key, envelopes and rights.
+export async function deleteCategory(id: string) {
+  ownerVmk();
+  const st = useApp.getState();
+  await Promise.all(st.vault.items.filter((i) => i.subsectionId === id).flatMap((i) => i.fileIds).map((f) => del(`blob:${f}`)));
+  const { [id]: _key, ...ssk } = st.vault.ssk;
+  st.set((s) => ({
+    vault: { ...s.vault, ssk, items: s.vault.items.filter((i) => i.subsectionId !== id), envelopes: s.vault.envelopes.filter((e) => e.subsectionId !== id), custom: s.vault.custom.filter((c) => c.id !== id) },
+    rights: Object.fromEntries(Object.entries(s.rights).map(([p, r]) => [p, Object.fromEntries(Object.entries(r).filter(([sub]) => sub !== id))])),
+  }));
+}
+
+// The categories the current session can open (all of them for the owner, the released ones for a holder).
+export async function readCategories(): Promise<{ id: string; meta: CategoryMeta }[]> {
+  const out = [];
+  for (const c of useApp.getState().vault.custom) {
+    const key = await subsectionKey(c.id);
+    if (key) out.push({ id: c.id, meta: await openJson<CategoryMeta>(key, c.meta, catAad(c.id)) });
+  }
+  return out;
 }
 
 // Rights belong to a person and apply to every active card of their 2-card pack.
@@ -206,7 +253,9 @@ export async function setRight(personId: string, subId: string, moment: Moment) 
 }
 
 export async function setSectionRight(personId: string, sectionId: string, moment: Moment) {
-  for (const sub of SECTIONS.find((s) => s.id === sectionId)!.subsections) await setRight(personId, sub.id, moment);
+  const section = SECTIONS.find((s) => s.id === sectionId)!;
+  const ids = section.custom ? useApp.getState().vault.custom.map((c) => c.id) : section.subsections.map((s) => s.id);
+  for (const id of ids) await setRight(personId, id, moment);
 }
 
 // Seals the missing envelopes, e.g. for a card activated while the Coffre was closed (keys are only available when it is open).
@@ -228,7 +277,7 @@ export async function syncEnvelopes() {
 export async function eraseCoffre() {
   const st = useApp.getState();
   await Promise.all(st.vault.items.flatMap((i) => i.fileIds).map((f) => del(`blob:${f}`)));
-  st.set({ vault: { ssk: {}, items: [], envelopes: [] }, rights: {} });
+  st.set({ vault: { ssk: {}, items: [], envelopes: [], custom: [] }, rights: {} });
   useSession.getState().setSession({ mode: "locked" });
 }
 

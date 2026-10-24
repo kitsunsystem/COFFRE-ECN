@@ -1,7 +1,7 @@
 ﻿// Coffre structure from the client brief (section 6): few sections, one level of sub-sections.
 // The final list of sub-sections is still "à décider": edit it here only.
 
-export type FieldKind = "text" | "long" | "date" | "secret" | "phone" | "seed"; // seed = recovery phrase (12 or 24 words)
+export type FieldKind = "text" | "long" | "date" | "secret" | "phone";
 export interface Field {
   key: string;
   label: string;
@@ -21,8 +21,19 @@ export interface Section {
   icon: string; // lucide icon name, resolved in components/icons.tsx
   tone: "coral" | "gold" | "sage" | "ink" | "mist";
   optional?: boolean;
+  custom?: boolean; // sub-sections are categories created by the owner, not listed here
   subsections: Subsection[];
 }
+
+// What a custom category can hold.
+export type Accept = "pdf" | "image" | "note" | "any";
+export const ACCEPTS: { id: Accept; label: string; mime: string }[] = [
+  { id: "pdf", label: "PDF", mime: "application/pdf" },
+  { id: "image", label: "Images", mime: "image/*" },
+  { id: "note", label: "Notes", mime: "" },
+  { id: "any", label: "Tous fichiers", mime: "*/*" },
+];
+export const CUSTOM_PREFIX = "custom-";
 
 const note: Field = { key: "note", label: "Précisions", kind: "long", placeholder: "Tout ce qui peut aider vos proches" };
 const contact = (who: string): Field[] => [
@@ -73,17 +84,14 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    id: "crypto",
-    title: "Crypto-actifs",
-    tagline: "Phrases de récupération, portefeuilles, plateformes, transactions",
-    icon: "Bitcoin",
-    tone: "gold",
-    subsections: [
-      { id: "phrases", title: "Phrases de récupération", hint: "Les 12 ou 24 mots de chaque portefeuille", fields: [{ key: "wallet", label: "Portefeuille concerné", placeholder: "Ex. Ledger de Claire" }, { key: "words", label: "Les mots, dans l'ordre", kind: "seed" }, { key: "passphrase", label: "Passphrase (25e mot), si utilisée", kind: "secret" }, { key: "where", label: "Où se trouve la copie papier ou métal" }, note] },
-      { id: "portefeuilles", title: "Portefeuilles", hint: "Ledger, Trezor, MetaMask, Phantom…", fields: [{ key: "name", label: "Portefeuille" }, { key: "type", label: "Type", placeholder: "Matériel, logiciel ou plateforme" }, { key: "assets", label: "Actifs détenus", placeholder: "Ex. BTC, ETH, USDC" }, { key: "address", label: "Adresse publique" }, { key: "pin", label: "Code PIN de l'appareil", kind: "secret" }, { key: "device", label: "Où se trouve l'appareil" }, note] },
-      { id: "plateformes", title: "Plateformes d'échange", hint: "Binance, Coinbase, Kraken…", fields: [{ key: "platform", label: "Plateforme" }, { key: "login", label: "Identifiant" }, { key: "password", label: "Mot de passe", kind: "secret" }, { key: "twofa", label: "Double authentification : où sont les codes", kind: "secret" }, note] },
-      { id: "transactions", title: "Transactions", hint: "Achats, ventes, transferts importants", fields: [{ key: "date", label: "Date", kind: "date" }, { key: "kind", label: "Type", placeholder: "Achat, vente, transfert" }, { key: "asset", label: "Actif et quantité", placeholder: "Ex. 0,5 BTC" }, { key: "value", label: "Valeur en euros" }, { key: "from", label: "Depuis" }, { key: "to", label: "Vers (adresse ou plateforme)" }, { key: "txid", label: "Identifiant de transaction (hash)" }, note] },
-    ],
+    // A sandbox: the owner creates the categories (their names are encrypted too), see vault.ts createCategory.
+    id: "sensible",
+    title: "Partie sensible",
+    tagline: "Vos propres catégories, vos documents, comme vous voulez",
+    icon: "LockKeyhole",
+    tone: "coral",
+    custom: true,
+    subsections: [],
   },
   {
     id: "numerique",
@@ -141,7 +149,10 @@ export const SECTIONS: Section[] = [
 
 export const ALL_SUBSECTIONS = SECTIONS.flatMap((s) => s.subsections.map((sub) => ({ ...sub, sectionId: s.id })));
 export const sectionOf = (subsectionId: string) => SECTIONS.find((s) => s.subsections.some((x) => x.id === subsectionId))!;
-export const subsection = (id: string) => ALL_SUBSECTIONS.find((s) => s.id === id)!;
+// Custom categories all share one simple form: a title, free notes, and the files the category accepts.
+const CUSTOM_FIELDS: Field[] = [{ key: "note", label: "Informations", kind: "long", placeholder: "Tout ce que vous voulez garder ici" }];
+export const subsection = (id: string) =>
+  ALL_SUBSECTIONS.find((s) => s.id === id) ?? { id, title: "Catégorie", hint: "", fields: CUSTOM_FIELDS, sectionId: "sensible" };
 
 // Guided start: "commencer par l'essentiel".
 export const ESSENTIALS: { subsectionId: string; title: string; why: string }[] = [

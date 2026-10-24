@@ -100,6 +100,7 @@ export interface Vault {
   ssk: Record<string, Sealed>; // sub-section keys wrapped by the vault key
   items: VaultItem[];
   envelopes: Envelope[];
+  custom: { id: string; meta: Sealed }[]; // "Partie sensible" categories: name and accepted types, sealed with the category's own key
 }
 
 interface State {
@@ -133,7 +134,7 @@ const initial: State = {
   cards: [],
   guarantors: [],
   rights: {},
-  vault: { ssk: {}, items: [], envelopes: [] },
+  vault: { ssk: {}, items: [], envelopes: [], custom: [] },
   procedures: [],
   reminders: [],
   reminderConsent: false,
@@ -159,8 +160,8 @@ export const useApp = create<State & Actions>()(
       },
       reset: () => set({ ...initial }),
     }),
-    // v2: rights per person (2-card packs) and reminders typed in the Espace; older demo data is simply ignored.
-    { name: "sillage-demo-2", skipHydration: true },
+    // Bumped whenever the stored shape changes (v3: "Partie sensible" categories); older demo data is simply ignored.
+    { name: "sillage-demo-3", skipHydration: true },
   ),
 );
 

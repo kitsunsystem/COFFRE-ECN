@@ -164,7 +164,8 @@ create table public.staff (
 create table public.vaults (
   owner_id uuid primary key references public.profiles on delete cascade,
   salt text not null,
-  ssk jsonb not null -- clés de sous-rubriques, chiffrées par la clé du Coffre
+  ssk jsonb not null, -- clés de sous-rubriques, chiffrées par la clé du Coffre
+  custom jsonb not null default '[]' -- « Partie sensible » : catégories créées par la personne, nom et types chiffrés
 );
 
 create table public.vault_items (

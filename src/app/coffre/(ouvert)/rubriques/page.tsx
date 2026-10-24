@@ -30,7 +30,8 @@ export default function Rubriques() {
   const end = death && accessEnd(death);
   const visible = new Set(visibleSubsections());
   const owner = mode === "owner";
-  const shown = SECTIONS.filter((s) => (s.optional ? account?.isBusinessOwner : true)).filter((s) => owner || s.subsections.some((x) => visible.has(x.id)));
+  const idsOf = (s: (typeof SECTIONS)[number]) => (s.custom ? vault.custom.map((c) => c.id) : s.subsections.map((x) => x.id));
+  const shown = SECTIONS.filter((s) => (s.optional ? account?.isBusinessOwner : true)).filter((s) => owner || idsOf(s).some((id) => visible.has(id)));
   // Two-column grid: the first section and "À effacer" (always last) span both columns; so does a leftover odd tile.
   const sections = [...shown.filter((s) => s.id !== "effacer"), ...shown.filter((s) => s.id === "effacer")];
   const narrow = sections.filter((s, i) => i > 0 && s.id !== "effacer");
@@ -78,7 +79,7 @@ export default function Rubriques() {
 
       <div className="grid grid-cols-2 gap-3">
         {sections.map((s, i) => {
-          const subs = s.subsections.filter((x) => owner || visible.has(x.id)).map((x) => x.id);
+          const subs = idsOf(s).filter((id) => owner || visible.has(id));
           const count = vault.items.filter((it) => subs.includes(it.subsectionId)).length;
           const wide = isWide(s, i);
           return (

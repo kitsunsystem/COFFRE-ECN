@@ -109,7 +109,7 @@ function Hero() {
           </motion.div>
           <FloatChip icon={CalendarClock} text="Passeport : expire dans 30 jours" className="-left-2 top-0 sm:-left-10" delay={1.1} />
           <FloatChip icon={HeartPulse} text="Marc voit : Urgence et santé" className="-right-2 bottom-16 sm:-right-8" delay={1.3} />
-          <FloatChip icon={Sparkles} text="Famille préparée à 89 %" className="bottom-0 left-4" delay={1.5} />
+          <FloatChip icon={Sparkles} text="Famille préparée à 88 %" className="bottom-0 left-4" delay={1.5} />
         </div>
       </div>
     </section>
