@@ -16,7 +16,7 @@ jobs:
   zap:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: zaproxy/action-baseline@v0.14.0
         with:
           target: ${{ inputs.target }}

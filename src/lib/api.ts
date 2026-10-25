@@ -129,7 +129,6 @@ export async function createProfile(draft: Omit<Account, "kyc" | "createdAt">, p
   await q(sb().from("profiles").insert(profileRow(id, draft)));
   if (people.length) await q(sb().from("people").insert(people.map((p) => personRow(p, id))));
   await loadAll();
-  st().set({ tourPending: true });
 }
 
 // Manual identity check while the group's KYC system is not connected: the document goes to a private bucket for the team.

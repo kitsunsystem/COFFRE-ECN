@@ -135,7 +135,8 @@ export function EspaceShell({ children }: { children: ReactNode }) {
       <main className="relative mx-auto max-w-lg px-5 pb-40 pt-4">
         <Transition>{children}</Transition>
       </main>
-      <AnimatePresence>{tourPending && <Tour key="tour" />}</AnimatePresence>
+      {/* The guided tour shows the fictitious Durand family: demo only. */}
+      <AnimatePresence>{!PROD && tourPending && <Tour key="tour" />}</AnimatePresence>
       <BottomNav
         items={[
           { href: "/espace", label: "Accueil", icon: House },

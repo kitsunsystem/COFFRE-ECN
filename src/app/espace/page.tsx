@@ -8,6 +8,7 @@ import { useNow } from "@/components/providers";
 import { Card, Eyebrow, Notice } from "@/components/ui";
 import { rise, ScoreRing, stagger } from "@/components/visuals";
 import { RUBRICS } from "@/lib/aide";
+import { PROD } from "@/lib/env";
 import { progress } from "@/lib/score";
 import { useApp } from "@/lib/store";
 
@@ -31,9 +32,11 @@ export default function Accueil() {
             {hour < 18 ? "Bonjour" : "Bonsoir"}, {s.account.firstName}
           </h1>
         </div>
-        <motion.button whileTap={{ scale: 0.95 }} onClick={() => s.set({ tourPending: true })} className="mb-1 flex shrink-0 items-center gap-1.5 rounded-full bg-paper px-3.5 py-2 text-[0.85rem] font-semibold shadow-soft ring-1 ring-line">
-          <Compass className="h-4 w-4 text-gold-deep" /> Visite guidée
-        </motion.button>
+        {!PROD && (
+          <motion.button whileTap={{ scale: 0.95 }} onClick={() => s.set({ tourPending: true })} className="mb-1 flex shrink-0 items-center gap-1.5 rounded-full bg-paper px-3.5 py-2 text-[0.85rem] font-semibold shadow-soft ring-1 ring-line">
+            <Compass className="h-4 w-4 text-gold-deep" /> Visite guidée
+          </motion.button>
+        )}
       </motion.div>
 
       <motion.div variants={rise}>
