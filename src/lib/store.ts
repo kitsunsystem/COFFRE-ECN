@@ -6,6 +6,7 @@ import { persist } from "zustand/middleware";
 import { render, type TemplateId } from "../../supabase/functions/_shared/templates";
 import { LAUNCH } from "./config";
 import type { Sealed } from "./crypto";
+import { PROD } from "./env";
 import type { Moment, Procedure } from "./rules";
 
 export interface Person {
@@ -34,6 +35,7 @@ export interface Account {
 }
 
 export type CardStatus = "commandee" | "en_route" | "recue" | "active" | "perdue";
+export type CardKind = "demo" | "fido" | "tangem";
 export interface Card {
   id: string;
   holderId: "owner" | string;
@@ -42,6 +44,8 @@ export interface Card {
   orderedAt: number;
   activatedAt?: number;
   extra: boolean; // beyond the 3 included cards (paid)
+  kind?: CardKind; // known once activated
+  chipId?: string; // FIDO2 credential id or Tangem card key: recognises the card when it is tapped
   wrappedVmk?: Sealed; // owner cards: vault key wrapped by card + code
   boxPk?: string; // holder cards: public key that envelopes are sealed to
   salt?: string; // holder cards: Argon2id salt for the holder's code
@@ -102,7 +106,34 @@ export interface Vault {
   envelopes: Envelope[];
 }
 
+// Production: what the signed-in person is for others (guarantor, beneficiary with a pack of cards).
+export interface Trust {
+  ownerId: string;
+  ownerName: string;
+  personId: string;
+  guarantorRole?: string;
+  cards: Card[];
+  procedures: (Procedure & { acteByMe?: boolean; hasActe?: boolean })[];
+}
+
+// Production: someone else's Coffre opened with a beneficiary card (only what is released to that card).
+export interface HolderView {
+  ownerId: string;
+  ownerName: string;
+  holderName: string;
+  items: VaultItem[];
+  envelopes: Envelope[];
+  procedures: Procedure[];
+}
+
 interface State {
+  ready: boolean; // demo: local data loaded; production: session restored and data fetched
+  me?: { userId: string; email: string }; // production only
+  staffRole?: string;
+  conciergeKey?: string; // production: the partner's public key, items confided to it are sealed to it
+  trusts: Trust[];
+  holder?: HolderView;
+  toast?: { id: number; text: string; tone: "error" | "ok" };
   account?: Account;
   people: Person[];
   cards: Card[];
@@ -129,6 +160,8 @@ interface Actions {
 }
 
 const initial: State = {
+  ready: false,
+  trusts: [],
   people: [],
   cards: [],
   guarantors: [],
@@ -153,19 +186,30 @@ export const useApp = create<State & Actions>()(
       ...initial,
       set: (patch) => set(patch as never),
       email: (to, template, data) => {
-        // shortcut: queued in a local outbox; the "send-email" Edge Function sends it through Brevo once configured.
+        // Demo only: a local outbox shows the e-mails. In production the database queues them and "mailer" sends them (Brevo).
+        if (PROD) return;
         const e = render(template, data);
         set((s) => ({ outbox: [{ id: crypto.randomUUID(), to, template, subject: e.subject, title: e.title, body: e.body, at: Date.now() + s.clockOffset }, ...s.outbox] }));
       },
-      reset: () => set({ ...initial }),
+      reset: () => set({ ...initial, ready: true }),
     }),
-    // Bumped whenever the stored shape changes; older demo data is simply ignored.
-    { name: "sillage-demo-4", skipHydration: true },
+    {
+      // Bumped whenever the stored shape changes; older demo data is simply ignored.
+      name: "sillage-demo-5",
+      skipHydration: true,
+      // Production keeps nothing on the device (shared phones): the server is the only copy.
+      partialize: (s) => {
+        if (PROD) return {};
+        const { ready: _r, me: _m, staffRole: _s, conciergeKey: _c, trusts: _t, holder: _h, toast: _o, ...kept } = s;
+        return kept;
+      },
+    },
   ),
 );
 
 export const now = () => Date.now() + useApp.getState().clockOffset;
 export const uid = () => crypto.randomUUID();
+export const toast = (text: string, tone: "error" | "ok" = "error") => useApp.getState().set({ toast: { id: Date.now(), text, tone } });
 
 export const ownerCards = (s: { cards: Card[] }) => s.cards.filter((c) => c.holderId === "owner");
 export const holderCards = (s: { cards: Card[] }) => s.cards.filter((c) => c.holderId !== "owner");

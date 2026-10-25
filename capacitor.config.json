@@ -2,11 +2,16 @@
   "appId": "app.sillage.famille",
   "appName": "Sillage",
   "webDir": "out",
+  "server": {
+    "androidScheme": "https"
+  },
   "ios": {
-    "contentInset": "never"
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": false
   },
   "android": {
-    "allowMixedContent": false
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
   },
   "plugins": {
     "SplashScreen": {

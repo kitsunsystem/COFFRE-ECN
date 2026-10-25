@@ -56,6 +56,23 @@ export async function open(key: Uint8Array, sealed: Sealed, aad: string) {
   return s.crypto_aead_xchacha20poly1305_ietf_decrypt(null, fromB64(s, sealed.c), aad, fromB64(s, sealed.n), key);
 }
 
+// Files: nonce and ciphertext in a single byte array (no base64, files can be large).
+export async function sealBytes(key: Uint8Array, data: Uint8Array, aad: string) {
+  const s = await na();
+  const n = s.randombytes_buf(s.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+  const c = s.crypto_aead_xchacha20poly1305_ietf_encrypt(data, aad, null, n, key);
+  const out = new Uint8Array(n.length + c.length);
+  out.set(n);
+  out.set(c, n.length);
+  return out;
+}
+
+export async function openBytes(key: Uint8Array, bytes: Uint8Array, aad: string) {
+  const s = await na();
+  const N = s.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES;
+  return s.crypto_aead_xchacha20poly1305_ietf_decrypt(null, bytes.subarray(N), aad, bytes.subarray(0, N), key);
+}
+
 export const sealJson = (key: Uint8Array, value: unknown, aad: string) => seal(key, utf8.encode(JSON.stringify(value)), aad);
 export async function openJson<T>(key: Uint8Array, sealed: Sealed, aad: string): Promise<T> {
   return JSON.parse(fromUtf8.decode(await open(key, sealed, aad))) as T;

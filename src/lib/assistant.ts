@@ -1,6 +1,9 @@
 // Alma, the assistant (brief §10). It only knows WHERE the user is (the page), never what they type in the Coffre.
-// shortcut: answers from a local knowledge base until the AI/avatar provider is chosen; then set NEXT_PUBLIC_ASSISTANT_URL.
+// Answers from the "assistant" function when connected, otherwise (demo, offline, provider down) from a local knowledge base.
 import { ASSISTANT_NAME } from "./config";
+import { PROD } from "./env";
+import { useApp } from "./store";
+import { sb } from "./supabase";
 
 const KB: { keys: string[]; answer: string }[] = [
   { keys: ["commencer", "debut", "par ou", "quoi faire"], answer: "Commencez par vos cartes et vos bénéficiaires, puis par l'essentiel : dix éléments, à votre rythme. Ouvrez votre Coffre avec votre carte, puis touchez « Commencer par l'essentiel »." },
@@ -40,13 +43,12 @@ export const SUGGESTIONS: Record<string, string[]> = {
 };
 
 export async function ask(question: string, place: string): Promise<string> {
-  const remote = process.env.NEXT_PUBLIC_ASSISTANT_URL;
-  if (remote) {
-    // Only the question and the page name leave the device: never Coffre content.
-    // shortcut: anon key for now; send the signed-in user's access token once Supabase Auth is wired.
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const r = await fetch(remote, { method: "POST", headers: { "content-type": "application/json", ...(key ? { authorization: `Bearer ${key}`, apikey: key } : {}) }, body: JSON.stringify({ question, place }) }).catch(() => null);
-    if (r?.ok) return (await r.json()).answer as string;
+  // Production, signed in: the "assistant" function. Only the question and the page name leave the device, never Coffre content.
+  if (PROD && useApp.getState().me) {
+    const { data } = await sb()
+      .functions.invoke("assistant", { body: { question, place } })
+      .catch(() => ({ data: null }));
+    if (data?.answer) return data.answer as string;
   }
   const q = norm(question);
   const best = KB.map((e) => ({ e, hits: e.keys.filter((k) => q.includes(k)).length })).sort((a, b) => b.hits - a.hits)[0];

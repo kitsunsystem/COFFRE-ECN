@@ -6,9 +6,12 @@ import { useEffect, useState } from "react";
 // Big keys, high contrast: designed for people who are not at ease with phones.
 export function PinPad({ length = 6, onComplete, dark, error, label }: { length?: number; onComplete: (pin: string) => void; dark?: boolean; error?: string | null; label?: string }) {
   const [pin, setPin] = useState("");
-  useEffect(() => {
+  // A new error clears what was typed (adjusted during render, not in an effect).
+  const [seen, setSeen] = useState(error);
+  if (error !== seen) {
+    setSeen(error);
     if (error) setPin("");
-  }, [error]);
+  }
   const press = (d: string) => {
     const next = (pin + d).slice(0, length);
     setPin(next);

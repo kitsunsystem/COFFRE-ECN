@@ -2,6 +2,8 @@
 import { motion } from "motion/react";
 import { ArrowRight, FileDown, Hourglass, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { useCoffreView } from "@/components/coffre-view";
 import { NamedIcon } from "@/components/icons";
 import { useNow } from "@/components/providers";
 import { Button } from "@/components/ui";
@@ -9,7 +11,7 @@ import { rise, stagger } from "@/components/visuals";
 import { accessEnd } from "@/lib/rules";
 import { essentialsDone } from "@/lib/score";
 import { ESSENTIALS, SECTIONS } from "@/lib/sections";
-import { personName, useApp, useSession } from "@/lib/store";
+import { useApp } from "@/lib/store";
 import { visibleSubsections } from "@/lib/vault";
 import { exportPdf } from "./export";
 
@@ -17,31 +19,25 @@ const GLOW: Record<string, string> = { coral: "from-coral/35", gold: "from-gold/
 
 export default function Rubriques() {
   const vault = useApp((s) => s.vault);
-  const account = useApp((s) => s.account);
-  const procedures = useApp((s) => s.procedures); // re-render when a moment is reached
-  const people = useApp((s) => s.people);
-  const cards = useApp((s) => s.cards);
-  const session = useSession((s) => s.session);
-  useNow(5000);
-  const mode = session.mode;
-  const ownerName = account ? `${account.firstName} ${account.lastName}` : "votre proche";
-  const holderName = session.mode === "holder" ? personName(people, cards.find((c) => c.id === session.cardId)?.holderId ?? "") : "";
+  const view = useCoffreView();
+  useNow(5000); // re-render when a moment is reached
+  const { owner, ownerName, holderName, procedures } = view;
   const death = procedures.find((p) => p.kind === "deces" && p.finalizedAt && !p.erasedAt);
   const end = death && accessEnd(death);
   const visible = new Set(visibleSubsections());
-  const owner = mode === "owner";
-  const shown = SECTIONS.filter((s) => (s.optional ? account?.isBusinessOwner : true)).filter((s) => owner || s.subsections.some((x) => visible.has(x.id)));
+  const shown = SECTIONS.filter((s) => (s.optional ? view.business : true)).filter((s) => owner || s.subsections.some((x) => visible.has(x.id)));
   // Two-column grid: the first section and "À effacer" (always last) span both columns; so does a leftover odd tile.
   const sections = [...shown.filter((s) => s.id !== "effacer"), ...shown.filter((s) => s.id === "effacer")];
   const narrow = sections.filter((s, i) => i > 0 && s.id !== "effacer");
   const isWide = (s: (typeof sections)[number], i: number) => i === 0 || s.id === "effacer" || (narrow.length % 2 === 1 && s === narrow[narrow.length - 1]);
   const done = essentialsDone({ vault });
+  const [exporting, setExporting] = useState(false);
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show">
       <motion.header variants={rise} className="mb-6">
         <div className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-gold-soft">{owner ? "Coffre ouvert" : "Ce qui vous a été confié"}</div>
-        <h1 className="mt-2 text-[2.1rem] font-semibold leading-tight">{owner ? "Tout ce qui est personnel, ici" : `De la part de ${account?.firstName ?? "votre proche"}`}</h1>
+        <h1 className="mt-2 text-[2.1rem] font-semibold leading-tight">{owner ? "Tout ce qui est personnel, ici" : `De la part de ${ownerName.split(" ")[0]}`}</h1>
         <p className="mt-2 text-paper/65">{owner ? "Chiffré sur votre téléphone avant d'être envoyé. Personne d'autre ne peut le lire." : "Vous ne voyez que ce qui vous a été attribué, au moment prévu."}</p>
       </motion.header>
 
@@ -79,7 +75,7 @@ export default function Rubriques() {
       <div className="grid grid-cols-2 gap-3">
         {sections.map((s, i) => {
           const subs = s.subsections.map((x) => x.id).filter((id) => owner || visible.has(id));
-          const count = vault.items.filter((it) => subs.includes(it.subsectionId)).length;
+          const count = view.items.filter((it) => subs.includes(it.subsectionId)).length;
           const wide = isWide(s, i);
           return (
             <motion.div key={s.id} variants={rise} className={wide ? "col-span-2" : ""}>
@@ -105,10 +101,22 @@ export default function Rubriques() {
 
       {sections.length > 0 && (
         <motion.div variants={rise} className="mt-6">
-          <Button full variant="light" icon={<FileDown className="h-5 w-5" />} onClick={() => exportPdf(ownerName, owner ? ownerName : holderName)}>
-            Exporter en PDF (notaire, hôpital)
+          <Button
+            full
+            variant="light"
+            disabled={exporting}
+            icon={<FileDown className="h-5 w-5" />}
+            onClick={async () => {
+              setExporting(true);
+              await exportPdf(ownerName, owner ? ownerName : holderName).catch(console.error);
+              setExporting(false);
+            }}
+          >
+            {exporting ? "Préparation du PDF…" : owner ? "Télécharger en PDF (notaire, hôpital)" : "Télécharger ce qui m'est confié (PDF)"}
           </Button>
-          <p className="mt-2 text-center text-[0.8rem] text-paper/50">Seulement ce que {owner ? "vous voyez" : "vous avez le droit de voir"}, sans les codes ni les mots de passe.</p>
+          <p className="mt-2 text-center text-[0.8rem] text-paper/50">
+            {owner ? "Tout votre Coffre" : "Uniquement ce que vous avez le droit de voir"}, sans les codes ni les mots de passe, ni la rubrique « À effacer ».
+          </p>
         </motion.div>
       )}
     </motion.div>

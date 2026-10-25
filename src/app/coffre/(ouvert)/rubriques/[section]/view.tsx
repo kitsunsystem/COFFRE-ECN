@@ -3,19 +3,20 @@ import { motion } from "motion/react";
 import { ArrowLeft, Check, ChevronRight, ClipboardCopy, EyeOff, Lock, Paperclip, Plus, Smartphone } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useCoffreView } from "@/components/coffre-view";
 import { NamedIcon } from "@/components/icons";
 import { ItemEditor, ItemView, type Entry } from "@/components/item-editor";
 import { useNow } from "@/components/providers";
 import { Button, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
+import { copyText } from "@/lib/native";
 import { SECTIONS } from "@/lib/sections";
 import { useApp, useSession } from "@/lib/store";
 import { readItems, visibleSubsections } from "@/lib/vault";
 
 export function SectionView({ id }: { id: string }) {
   const section = SECTIONS.find((s) => s.id === id)!;
-  const items = useApp((s) => s.vault.items);
-  const envelopes = useApp((s) => s.vault.envelopes);
+  const { items, envelopes, business } = useCoffreView();
   const account = useApp((s) => s.account);
   const launched = useApp((s) => s.phase) === "lancement";
   const [copied, setCopied] = useState(false);
@@ -39,13 +40,11 @@ export function SectionView({ id }: { id: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, envelopes, subKey]);
 
-  if (section.optional && !account?.isBusinessOwner)
+  if (section.optional && !business)
     return (
       <div className="text-center">
         <p className="text-paper/75">La rubrique « {section.title} » est réservée aux chefs d'entreprise.</p>
-        <Button className="mt-4" variant="light" href="/espace/compte">
-          L'activer dans mon compte
-        </Button>
+        <p className="mt-2 text-[0.88rem] text-paper/55">Pour l&apos;activer : fermez le Coffre, puis Espace › Mon compte.</p>
       </div>
     );
 
@@ -62,7 +61,7 @@ export function SectionView({ id }: { id: string }) {
       ...f("medecins").flatMap((x) => line("Médecin", [x.name, x.phone].filter(Boolean).join(" — "))),
       ...f("a-prevenir").flatMap((x) => line("À prévenir", [x.name, x.phone].filter(Boolean).join(" — "))),
     ].join("\n");
-    await navigator.clipboard.writeText(text);
+    await copyText(text);
     setCopied(true);
   }
 
@@ -83,7 +82,8 @@ export function SectionView({ id }: { id: string }) {
         </div>
       </motion.header>
 
-      {section.id === "urgence" && subs.length > 0 && (
+      {/* For the owner's own phone only: a beneficiary copies single values from each element instead. */}
+      {section.id === "urgence" && owner && (
         <motion.div variants={rise} className="rounded-[1.6rem] bg-gradient-to-br from-sage/30 to-night-2 p-4 ring-1 ring-sage/30">
           <div className="flex items-start gap-3">
             <Smartphone className="mt-0.5 h-6 w-6 shrink-0 text-sage-soft" />

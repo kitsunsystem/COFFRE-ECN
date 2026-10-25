@@ -1,11 +1,11 @@
 "use client";
 import { motion } from "motion/react";
-import { ConciergeBell, Download, Eye, EyeOff, Lock, Paperclip, Trash, X } from "lucide-react";
+import { Check, ConciergeBell, Copy, Download, Eye, EyeOff, Lock, Paperclip, Trash, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { copyText, saveFile } from "@/lib/native";
 import { subsection, type Field as FieldDef } from "@/lib/sections";
 import { useApp, type VaultItem } from "@/lib/store";
 import { decryptFile, deleteItem, encryptFile, saveItem, shareWithConcierge, type FileMeta, type ItemPayload } from "@/lib/vault";
-import Link from "next/link";
 import { Button, Field, Notice } from "./ui";
 
 export type Entry = { item: VaultItem; payload: ItemPayload };
@@ -13,12 +13,7 @@ export type Entry = { item: VaultItem; payload: ItemPayload };
 const MAX_FILE = 20 * 1024 * 1024;
 const size = (n: number) => (n > 1_048_576 ? `${(n / 1_048_576).toFixed(1)} Mo` : `${Math.max(1, Math.round(n / 1024))} Ko`);
 
-async function download(subId: string, f: FileMeta) {
-  const url = URL.createObjectURL(await decryptFile(subId, f));
-  const a = Object.assign(document.createElement("a"), { href: url, download: f.name });
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
-}
+const download = async (subId: string, f: FileMeta) => saveFile(await decryptFile(subId, f), f.name);
 
 function SecretInput({ f, value, onChange }: { f: FieldDef; value: string; onChange: (v: string) => void }) {
   const [shown, setShown] = useState(false);
@@ -88,11 +83,7 @@ export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: En
       )}
       {dated && (
         <p className="text-[0.88rem] text-mist">
-          Pour être prévenu avant cette date, ajoutez-la dans{" "}
-          <Link href="/espace/echeances" className="font-semibold text-ink underline">
-            Mes échéances
-          </Link>{" "}
-          (dans l&apos;Espace, avec votre accord).
+          Pour être prévenu avant cette date, ajoutez-la dans <b className="text-ink">Mes échéances</b>, dans l&apos;Espace, une fois le Coffre fermé.
         </p>
       )}
 
@@ -195,19 +186,34 @@ export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: En
   );
 }
 
-// What a card holder sees: read-only, documents downloadable.
+// What a card holder sees: read-only, every value copyable, documents downloadable.
 export function ItemView({ subId, entry }: { subId: string; entry: Entry }) {
   const sub = subsection(subId);
+  const [copied, setCopied] = useState<string | null>(null);
   return (
     <div className="space-y-3">
       {sub.fields.map((f) => {
         const v = entry.payload.fields[f.key];
         if (!v) return null;
+        const shown = f.kind === "date" ? new Date(v).toLocaleDateString("fr-FR", { dateStyle: "long" }) : v;
         return (
-          <div key={f.key} className="rounded-2xl bg-paper p-4 ring-1 ring-line">
-            <div className="text-[0.8rem] font-semibold text-mist">{f.label}</div>
-            {/* Account numbers and references can be long unbroken strings: let them wrap on phones. */}
-            <div className="mt-0.5 whitespace-pre-wrap text-[1.05rem] [overflow-wrap:anywhere]">{f.kind === "date" ? new Date(v).toLocaleDateString("fr-FR", { dateStyle: "long" }) : v}</div>
+          <div key={f.key} className="flex items-start gap-2 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <div className="min-w-0 flex-1">
+              <div className="text-[0.8rem] font-semibold text-mist">{f.label}</div>
+              {/* Account numbers and references can be long unbroken strings: let them wrap on phones. */}
+              <div className="mt-0.5 whitespace-pre-wrap text-[1.05rem] [overflow-wrap:anywhere]">{shown}</div>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                await copyText(shown);
+                setCopied(f.key);
+              }}
+              className="shrink-0 rounded-full p-2 text-mist hover:bg-ink/5"
+              aria-label={`Copier ${f.label}`}
+            >
+              {copied === f.key ? <Check className="h-4 w-4 text-sage" /> : <Copy className="h-4 w-4" />}
+            </button>
           </div>
         );
       })}

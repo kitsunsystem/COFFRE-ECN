@@ -5,46 +5,17 @@ import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
-import { uid, useApp, type Person } from "@/lib/store";
+import { removeGuarantor, removePerson, saveGuarantor, savePerson } from "@/lib/api";
+import { useApp, type Person } from "@/lib/store";
 
 const RELATIONS = ["Conjoint(e)", "Enfant", "Parent", "Frère ou sœur", "Ami(e)", "Autre"];
 const empty: Person = { id: "", firstName: "", lastName: "", relation: "Enfant", email: "", phone: "" };
 
 export default function Famille() {
-  const s = useApp(useShallow((x) => ({ people: x.people, guarantors: x.guarantors, cards: x.cards, account: x.account!, set: x.set, email: x.email })));
+  const s = useApp(useShallow((x) => ({ people: x.people, guarantors: x.guarantors, cards: x.cards })));
   const [edit, setEdit] = useState<Person | null>(null);
   const [garant, setGarant] = useState<{ personId: string; role: string } | null>(null);
-  const owner = `${s.account.firstName} ${s.account.lastName}`;
-
-  function savePerson(p: Person) {
-    const isNew = !p.id;
-    const person = { ...p, id: p.id || uid() };
-    s.set((x) => ({ people: isNew ? [...x.people, person] : x.people.map((y) => (y.id === person.id ? person : y)) }));
-    setEdit(null);
-  }
-
-  function removePerson(id: string) {
-    // Their cards stop opening anything at once.
-    const cardIds = s.cards.filter((c) => c.holderId === id).map((c) => c.id);
-    s.set((x) => ({
-      people: x.people.filter((p) => p.id !== id),
-      guarantors: x.guarantors.filter((g) => g.personId !== id),
-      cards: x.cards.map((c) => (cardIds.includes(c.id) ? { ...c, status: "perdue", boxPk: undefined } : c)),
-      rights: Object.fromEntries(Object.entries(x.rights).filter(([k]) => k !== id)),
-      vault: { ...x.vault, envelopes: x.vault.envelopes.filter((e) => !cardIds.includes(e.cardId)) },
-    }));
-    setEdit(null);
-  }
-
-  function saveGarant(g: { personId: string; role: string }) {
-    const exists = s.guarantors.some((x) => x.personId === g.personId);
-    s.set((x) => ({ guarantors: exists ? x.guarantors.map((y) => (y.personId === g.personId ? g : y)) : [...x.guarantors, g] }));
-    if (!exists) {
-      const p = s.people.find((x) => x.id === g.personId)!;
-      s.email(p.email || `${p.firstName} ${p.lastName}`, "invitation-garant", { ownerName: owner, role: g.role });
-    }
-    setGarant(null);
-  }
+  const close = (setter: (v: null) => void) => (ok: boolean) => ok && setter(null);
 
   const card = (id: string) => s.cards.find((c) => c.holderId === id && c.status !== "perdue");
 
@@ -110,7 +81,7 @@ export default function Famille() {
                   <button onClick={() => setGarant(g)} aria-label="Modifier le rôle" className="rounded-full p-2 hover:bg-ink/5">
                     <Pencil className="h-4 w-4 text-mist" />
                   </button>
-                  <button onClick={() => s.set((x) => ({ guarantors: x.guarantors.filter((y) => y.personId !== g.personId) }))} aria-label="Retirer ce garant" className="rounded-full p-2 hover:bg-coral/10">
+                  <button onClick={() => removeGuarantor(g.personId)} aria-label="Retirer ce garant" className="rounded-full p-2 hover:bg-coral/10">
                     <Trash className="h-4 w-4 text-coral" />
                   </button>
                 </div>
@@ -131,7 +102,7 @@ export default function Famille() {
       </motion.section>
 
       <Sheet open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? "Modifier ce proche" : "Ajouter un proche"}>
-        {edit && <PersonForm value={edit} onSave={savePerson} onDelete={edit.id ? () => removePerson(edit.id) : undefined} />}
+        {edit && <PersonForm value={edit} onSave={(p) => savePerson(p).then(close(setEdit))} onDelete={edit.id ? () => removePerson(edit.id).then(close(setEdit)) : undefined} />}
       </Sheet>
 
       <Sheet open={!!garant} onClose={() => setGarant(null)} title="Garant">
@@ -154,7 +125,7 @@ export default function Famille() {
             </label>
             <Field label="Son rôle, avec vos mots" multiline value={garant.role} onChange={(role) => setGarant({ ...garant, role })} placeholder="Ex. Prévenir les enfants et appeler le notaire" />
             <p className="text-[0.88rem] text-mist">Il ou elle recevra un e-mail pour l'en informer. Être garant ne donne accès à rien dans votre Coffre.</p>
-            <Button full variant="gold" disabled={!garant.role.trim()} onClick={() => saveGarant({ ...garant, role: garant.role.trim() })}>
+            <Button full variant="gold" disabled={!garant.role.trim()} onClick={() => saveGuarantor({ ...garant, role: garant.role.trim() }).then(close(setGarant))}>
               Enregistrer
             </Button>
           </div>

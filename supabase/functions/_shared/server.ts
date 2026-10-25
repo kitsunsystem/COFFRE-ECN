@@ -1,5 +1,5 @@
 // Shared by the Edge Functions (Deno). Secrets are set with `supabase secrets set` (see .env.example).
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import { render, toHtml, type TemplateId } from "./templates.ts";
 
 export const env = (k: string) => {
@@ -11,10 +11,25 @@ export const env = (k: string) => {
 // Service role: bypasses RLS. Only ever used server-side, never for Coffre content (it is ciphertext anyway).
 export const admin = () => createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false } });
 
-// Internal endpoints (cron, database webhooks) must carry the service role key.
+// The signed-in user behind a request (functions called from the app with the user's token).
+export async function caller(req: Request) {
+  const token = req.headers.get("authorization")?.replace(/^Bearer /, "");
+  if (!token) return null;
+  const { data } = await admin().auth.getUser(token);
+  return data.user ?? null;
+}
+
+// Internal endpoints (cron) must carry the service role key.
 export const internalOnly = (req: Request) => req.headers.get("authorization") === `Bearer ${env("SUPABASE_SERVICE_ROLE_KEY")}`;
 
-export async function sendEmail(to: { email: string; name?: string }, template: TemplateId, data: Record<string, string> = {}) {
+// Every e-mail goes through the outbox: the "mailer" function sends it (Brevo) and retries on failure.
+export async function enqueue(db: SupabaseClient, to: { email?: string | null; name?: string | null }, template: TemplateId, data: Record<string, string> = {}) {
+  if (!to.email) return;
+  const { error } = await db.from("outbox").insert({ to_email: to.email, to_name: to.name ?? null, template, data });
+  if (error) throw new Error(`outbox: ${error.message}`);
+}
+
+export async function sendBrevo(to: { email: string; name?: string }, template: TemplateId, data: Record<string, string> = {}) {
   const e = render(template, data);
   const r = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
@@ -24,28 +39,52 @@ export async function sendEmail(to: { email: string; name?: string }, template: 
       to: [to],
       subject: e.subject,
       htmlContent: toHtml(e, env("APP_URL")),
-      textContent: [e.title, ...e.body].join("\n\n"),
+      textContent: [e.title, ...e.body, ...(e.cta ? [`${e.cta.label} : ${env("APP_URL")}${e.cta.path}`] : [])].join("\n\n"),
     }),
   });
   if (!r.ok) throw new Error(`Brevo ${r.status}: ${await r.text()}`);
   const { messageId } = await r.json();
-  await admin().from("email_log").insert({ to_address: to.email, template, provider_id: messageId });
   return messageId as string;
 }
 
 // The end of a Coffre (after the post-death access period, or an unpaid subscription): ciphertext, files, keys, envelopes.
-export async function eraseCoffre(db: ReturnType<typeof admin>, ownerId: string) {
-  const bucket = db.storage.from("coffre");
-  const { data: folders } = await bucket.list(ownerId, { limit: 1000 });
-  for (const f of folders ?? []) {
-    const { data: files } = await bucket.list(`${ownerId}/${f.name}`, { limit: 1000 });
-    const paths = (files ?? []).map((x) => `${ownerId}/${f.name}/${x.name}`);
-    if (paths.length) await bucket.remove(paths);
-  }
+export async function eraseCoffre(db: SupabaseClient, ownerId: string) {
+  await removeFolder(db, "coffre", ownerId);
   await db.from("vault_items").delete().eq("owner_id", ownerId);
   await db.from("envelopes").delete().eq("owner_id", ownerId);
-  await db.from("rights").delete().in("person_id", ((await db.from("people").select("id").eq("owner_id", ownerId)).data ?? []).map((p) => p.id));
+  await db.from("rights").delete().eq("owner_id", ownerId);
   await db.from("vaults").delete().eq("owner_id", ownerId);
 }
 
-export const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+// Storage has no recursive delete: list each sub-folder (one level deep, as our paths are) and remove by batches.
+export async function removeFolder(db: SupabaseClient, bucket: string, prefix: string) {
+  const b = db.storage.from(bucket);
+  const { data: entries } = await b.list(prefix, { limit: 1000 });
+  for (const f of entries ?? []) {
+    if (f.id) {
+      await b.remove([`${prefix}/${f.name}`]);
+      continue;
+    }
+    for (;;) {
+      const { data: files } = await b.list(`${prefix}/${f.name}`, { limit: 1000 });
+      const paths = (files ?? []).map((x) => `${prefix}/${f.name}/${x.name}`);
+      if (!paths.length) break;
+      await b.remove(paths);
+    }
+  }
+}
+
+const ALLOWED = (Deno.env.get("APP_ORIGINS") ?? Deno.env.get("APP_URL") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+// Browser calls (app → function): only from our own origins (website and the native app's local origins).
+export function cors(req: Request) {
+  const origin = req.headers.get("origin") ?? "";
+  const ok = ALLOWED.includes(origin) || ["capacitor://localhost", "https://localhost"].includes(origin);
+  return {
+    "access-control-allow-origin": ok ? origin : ALLOWED[0] ?? "null",
+    "access-control-allow-headers": "authorization, content-type, apikey, x-client-info",
+    "access-control-allow-methods": "POST, OPTIONS",
+    vary: "origin",
+  };
+}
+
+export const json = (body: unknown, status = 200, headers: Record<string, string> = {}) => new Response(JSON.stringify(body), { status, headers: { ...headers, "content-type": "application/json" } });

@@ -1,21 +1,26 @@
 "use client";
 import { motion } from "motion/react";
-import { BadgeCheck, Bell, CalendarClock, ChevronRight, CreditCard, FlaskConical, Info, LogOut, Mail, Users } from "lucide-react";
+import { BadgeCheck, Bell, CalendarClock, ChevronRight, CreditCard, FileUp, FlaskConical, Info, LogOut, Mail, ShieldCheck, Trash, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
+import { deleteAccount, openBillingPortal, openCheckout, saveAccount, setAssistantVoice, signOut, submitKyc } from "@/lib/api";
 import { LAUNCH, OFFER, SUPPORT_EMAIL } from "@/lib/config";
+import { PROD } from "@/lib/env";
 import { graceEnd } from "@/lib/rules";
 import { useApp, type Account } from "@/lib/store";
 import { lock } from "@/lib/vault";
 
 export default function Compte() {
-  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, assistantVoice: x.assistantVoice, billing: x.billing, phase: x.phase, set: x.set, reset: x.reset })));
+  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, assistantVoice: x.assistantVoice, billing: x.billing, phase: x.phase, staffRole: x.staffRole, set: x.set })));
   const router = useRouter();
   const [edit, setEdit] = useState(false);
+  const [erase, setErase] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [busy, setBusy] = useState(false);
   const [mail, setMail] = useState<string | null>(null);
   const a = s.account;
   const packs = new Set(s.cards.filter((c) => c.holderId !== "owner").map((c) => c.holderId)).size;
@@ -58,6 +63,25 @@ export default function Compte() {
               <div className="text-[0.88rem] text-mist">Pour que personne ne puisse se faire passer pour vous</div>
             </div>
           </div>
+          {PROD && a.kyc === "a_faire" && (
+            <label className="mt-4 flex cursor-pointer items-center gap-3 rounded-2xl bg-gold-soft/50 p-4 ring-1 ring-gold/30">
+              <FileUp className="h-6 w-6 shrink-0 text-gold-deep" />
+              <span className="flex-1 font-semibold">{busy ? "Envoi…" : "Déposer ma pièce d'identité"}</span>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                className="hidden"
+                disabled={busy}
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  setBusy(true);
+                  await submitKyc(f);
+                  setBusy(false);
+                }}
+              />
+            </label>
+          )}
           <div className="mt-4 rounded-2xl bg-ink/[0.04] p-4 text-[0.92rem] text-ink-soft">
             <div className="mb-1 flex items-center gap-2 font-semibold text-ink">
               <Info className="h-4 w-4" /> Qui peut lire quoi ?
@@ -95,18 +119,28 @@ export default function Compte() {
             <div className="mt-4">
               <Notice tone="coral">
                 <p>Paiement non reçu. Sans régularisation avant le {new Date(graceEnd(s.billing.since)).toLocaleDateString("fr-FR", { dateStyle: "long" })}, votre Coffre sera effacé définitivement.</p>
-                <Button className="mt-3" variant="danger" onClick={() => s.set({ billing: { status: "a_jour" } })}>
-                  Régulariser (démo)
+                <Button className="mt-3" variant="danger" onClick={() => (PROD ? openBillingPortal() : s.set({ billing: { status: "a_jour" } }))}>
+                  {PROD ? "Régulariser maintenant" : "Régulariser (démo)"}
                 </Button>
               </Notice>
             </div>
           )}
           {s.billing.status === "efface" && <p className="mt-3 text-[0.88rem] font-semibold text-coral">Le délai de grâce est dépassé : le contenu du Coffre a été effacé.</p>}
+          {PROD && OFFER.price && (
+            <div className="mt-4 grid gap-2">
+              <Button full variant="gold" icon={<CreditCard className="h-5 w-5" />} onClick={() => openCheckout()}>
+                Souscrire ou renouveler
+              </Button>
+              <Button full variant="ghost" onClick={() => openBillingPortal()}>
+                Factures et moyen de paiement
+              </Button>
+            </div>
+          )}
         </Card>
       </motion.div>
 
       <motion.div variants={rise} className="space-y-2.5">
-        <Toggle checked={s.assistantVoice} onChange={(assistantVoice) => s.set({ assistantVoice })} label="L'assistante parle à voix haute" hint="Les réponses sont lues automatiquement" />
+        <Toggle checked={s.assistantVoice} onChange={(v) => void setAssistantVoice(v)} label="L'assistante parle à voix haute" hint="Les réponses sont lues automatiquement" />
         <Link href="/espace/cartes" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
           <CreditCard className="h-6 w-6 text-gold-deep" />
           <span className="flex-1 font-semibold">Mes cartes</span>
@@ -122,16 +156,26 @@ export default function Compte() {
           <span className="flex-1 font-semibold">Coup dur et décès : signalements</span>
           <ChevronRight className="h-5 w-5 text-mist" />
         </Link>
-        <Link href="/espace/demo" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
-          <FlaskConical className="h-6 w-6 text-gold-deep" />
-          <span className="flex-1">
-            <span className="block font-semibold">Mode démonstration</span>
-            <span className="text-[0.85rem] text-mist">Avancer le temps, simuler la veille des décès</span>
-          </span>
-          <ChevronRight className="h-5 w-5 text-mist" />
-        </Link>
+        {!PROD && (
+          <Link href="/espace/demo" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <FlaskConical className="h-6 w-6 text-gold-deep" />
+            <span className="flex-1">
+              <span className="block font-semibold">Mode démonstration</span>
+              <span className="text-[0.85rem] text-mist">Avancer le temps, simuler la veille des décès</span>
+            </span>
+            <ChevronRight className="h-5 w-5 text-mist" />
+          </Link>
+        )}
+        {PROD && s.staffRole && (
+          <Link href="/admin" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
+            <ShieldCheck className="h-6 w-6 text-gold-deep" />
+            <span className="flex-1 font-semibold">Administration</span>
+            <ChevronRight className="h-5 w-5 text-mist" />
+          </Link>
+        )}
       </motion.div>
 
+      {!PROD && (
       <motion.section variants={rise}>
         <h2 className="mb-1 text-[1.3rem] font-semibold">E-mails envoyés</h2>
         <p className="mb-3 text-[0.9rem] text-mist">
@@ -152,28 +196,44 @@ export default function Compte() {
           {s.outbox.length === 0 && <p className="text-[0.9rem] text-mist">Aucun e-mail pour l'instant.</p>}
         </div>
       </motion.section>
+      )}
 
       <motion.div variants={rise} className="space-y-3 pt-2">
         <Button
           full
           variant="outline"
           icon={<LogOut className="h-5 w-5" />}
-          onClick={() => {
-            // shortcut: demo sign-out wipes local data; with Supabase this becomes auth.signOut().
+          onClick={async () => {
+            // Demo: signing out wipes the data on this device. Production: the session ends, nothing stays on the device.
             lock();
-            s.reset();
+            await signOut();
             router.replace("/");
           }}
         >
           Se déconnecter
         </Button>
+        {PROD && (
+          <Button full variant="ghost" className="!text-coral" icon={<Trash className="h-4 w-4" />} onClick={() => setErase(true)}>
+            Supprimer mon compte
+          </Button>
+        )}
         <p className="text-center text-[0.85rem] text-mist">
           Une question ? <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold text-ink underline">{SUPPORT_EMAIL}</a>
         </p>
       </motion.div>
 
       <Sheet open={edit} onClose={() => setEdit(false)} title="Mes coordonnées">
-        <AccountForm value={a} onSave={(account) => { s.set({ account }); setEdit(false); }} />
+        <AccountForm value={a} onSave={async (account) => { if (await saveAccount(account)) setEdit(false); }} />
+      </Sheet>
+
+      <Sheet open={erase} onClose={() => setErase(false)} title="Supprimer mon compte">
+        <div className="space-y-4">
+          <p className="text-ink-soft">Votre Espace, votre Coffre, ses documents et les accès de vos proches seront effacés définitivement. Personne, pas même nous, ne pourra les récupérer.</p>
+          <Field label="Pour confirmer, tapez SUPPRIMER" value={confirmText} onChange={setConfirmText} />
+          <Button full variant="danger" disabled={busy || confirmText.trim().toUpperCase() !== "SUPPRIMER"} onClick={async () => { setBusy(true); if (await deleteAccount()) router.replace("/"); setBusy(false); }}>
+            {busy ? "Suppression…" : "Tout supprimer définitivement"}
+          </Button>
+        </div>
       </Sheet>
 
       <Sheet open={!!opened} onClose={() => setMail(null)} title={opened?.subject}>

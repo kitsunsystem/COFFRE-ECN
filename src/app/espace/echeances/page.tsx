@@ -6,14 +6,15 @@ import { useShallow } from "zustand/react/shallow";
 import { useNow } from "@/components/providers";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
-import { uid, useApp } from "@/lib/store";
+import { addReminder, removeReminder, setReminderConsent } from "@/lib/api";
+import { useApp } from "@/lib/store";
 
 const TYPES = ["Passeport", "Carte d'identité", "Permis de conduire", "Contrat d'assurance", "Bail", "Crédit", "Abonnement"];
 const DAY = 86_400_000;
 
 // Reminders are typed here, in the Espace, with consent: the service can remind without ever reading the Coffre.
 export default function Echeances() {
-  const s = useApp(useShallow((x) => ({ reminders: x.reminders, consent: x.reminderConsent, set: x.set })));
+  const s = useApp(useShallow((x) => ({ reminders: x.reminders, consent: x.reminderConsent })));
   const t = useNow(60_000);
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
@@ -21,8 +22,8 @@ export default function Echeances() {
   const [ok, setOk] = useState(false);
   const list = [...s.reminders].sort((a, b) => a.date.localeCompare(b.date));
 
-  function add() {
-    s.set((x) => ({ reminders: [...x.reminders, { id: uid(), label: label.trim(), date }] }));
+  async function add() {
+    if (!(await addReminder(label, date))) return;
     setAdding(false);
     setLabel("");
     setDate("");
@@ -41,7 +42,7 @@ export default function Echeances() {
               <span className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md ring-2 ${ok ? "bg-ink ring-ink" : "ring-line"}`}>{ok && <Check className="h-4 w-4 text-paper" strokeWidth={3} />}</span>
               <span className="text-[0.95rem] text-ink-soft">J&apos;accepte que le type de document et sa date de fin soient enregistrés dans mon Espace pour recevoir des rappels. Je peux les supprimer à tout moment.</span>
             </button>
-            <Button className="mt-4" full variant="gold" disabled={!ok} onClick={() => s.set({ reminderConsent: true })}>
+            <Button className="mt-4" full variant="gold" disabled={!ok} onClick={() => setReminderConsent()}>
               Activer les rappels
             </Button>
           </Card>
@@ -60,7 +61,7 @@ export default function Echeances() {
                       <div className="text-[0.85rem] text-mist">Fin le {new Date(r.date).toLocaleDateString("fr-FR", { dateStyle: "long" })}</div>
                     </div>
                     <Badge tone={left < 0 ? "mist" : left <= 30 ? "coral" : left <= 90 ? "gold" : "sage"}>{left < 0 ? "Expiré" : `${left} j`}</Badge>
-                    <button onClick={() => s.set((x) => ({ reminders: x.reminders.filter((y) => y.id !== r.id) }))} aria-label={`Supprimer ${r.label}`} className="rounded-full p-2 hover:bg-coral/10">
+                    <button onClick={() => removeReminder(r.id)} aria-label={`Supprimer ${r.label}`} className="rounded-full p-2 hover:bg-coral/10">
                       <Trash className="h-4 w-4 text-coral" />
                     </button>
                   </motion.div>

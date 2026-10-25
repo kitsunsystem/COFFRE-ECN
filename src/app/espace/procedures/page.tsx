@@ -3,14 +3,16 @@ import { AnimatePresence, motion } from "motion/react";
 import { HeartHandshake, Hourglass, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { PinPad } from "@/components/pinpad";
+import { CardUnlock } from "@/components/card-flow";
 import { useNow } from "@/components/providers";
 import { Badge, Button, Card, Field, Notice, PageTitle, Segmented, Sheet } from "@/components/ui";
 import { Countdown, rise, stagger } from "@/components/visuals";
 import { DELAYS } from "@/lib/config";
-import { accessEnd, declare, procedureStatus, type Procedure, type ProcedureKind, type ProcedureStatus } from "@/lib/rules";
-import { now, ownerCards, useApp } from "@/lib/store";
-import { closeCoupDur, lock, unlock } from "@/lib/vault";
+import { cancelProcedure, declareAsGuarantor } from "@/lib/api";
+import { PROD } from "@/lib/env";
+import { accessEnd, procedureStatus, type Procedure, type ProcedureKind, type ProcedureStatus } from "@/lib/rules";
+import { ownerCards, useApp } from "@/lib/store";
+import { closeCoupDur, lock } from "@/lib/vault";
 
 const LABEL: Record<ProcedureStatus, { text: string; tone: "gold" | "coral" | "sage" | "mist" | "ink" }> = {
   verification: { text: "Vérification en cours", tone: "gold" },
@@ -25,7 +27,7 @@ const fmt = (t: number) => new Date(t).toLocaleString("fr-FR", { dateStyle: "lon
 const days = (ms: number) => (ms >= 86_400_000 ? `${Math.round(ms / 86_400_000)} jours` : `${Math.round(ms / 3_600_000)} heures`);
 
 export default function Procedures() {
-  const s = useApp(useShallow((x) => ({ procedures: x.procedures, guarantors: x.guarantors, people: x.people, account: x.account!, cards: x.cards, set: x.set, email: x.email })));
+  const s = useApp(useShallow((x) => ({ procedures: x.procedures, guarantors: x.guarantors, people: x.people })));
   const t = useNow(1000);
   const [prove, setProve] = useState<{ p: Procedure; action: "cancel" | "close" } | null>(null);
   const [declaring, setDeclaring] = useState(false);
@@ -108,14 +110,20 @@ export default function Procedures() {
         <Card className="bg-gradient-to-br from-paper to-sand/50">
           <ShieldAlert className="h-8 w-8 text-coral" />
           <h2 className="mt-3 text-[1.3rem] font-semibold">Espace garant</h2>
-          <p className="mt-1 text-ink-soft">Vos garants font leur signalement depuis leur propre Espace. Pour la démonstration, vous pouvez le faire ici à leur place.</p>
-          <Button className="mt-4" full variant="outline" disabled={s.guarantors.length === 0} onClick={() => setDeclaring(true)}>
-            Signaler comme garant
-          </Button>
-          {s.guarantors.length === 0 && <p className="mt-2 text-center text-[0.85rem] text-mist">Désignez d'abord un garant dans « Famille ».</p>}
-          <Button className="mt-3" full variant="ghost" href="/beneficiaire">
-            Espace bénéficiaire : déposer un acte de décès
-          </Button>
+          {PROD ? (
+            <p className="mt-1 text-ink-soft">Vos garants font leur signalement depuis leur propre compte, en se connectant avec l&apos;adresse e-mail que vous avez indiquée dans « Famille ». Vous êtes prévenu aussitôt.</p>
+          ) : (
+            <>
+              <p className="mt-1 text-ink-soft">Vos garants font leur signalement depuis leur propre Espace. Pour la démonstration, vous pouvez le faire ici à leur place.</p>
+              <Button className="mt-4" full variant="outline" disabled={s.guarantors.length === 0} onClick={() => setDeclaring(true)}>
+                Signaler comme garant
+              </Button>
+              {s.guarantors.length === 0 && <p className="mt-2 text-center text-[0.85rem] text-mist">Désignez d&apos;abord un garant dans « Famille ».</p>}
+              <Button className="mt-3" full variant="ghost" href="/beneficiaire">
+                Espace bénéficiaire : déposer un acte de décès
+              </Button>
+            </>
+          )}
         </Card>
       </motion.section>
 
@@ -123,9 +131,8 @@ export default function Procedures() {
         {prove && (
           <Prove
             onProved={async () => {
-              if (prove.action === "cancel") s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === prove.p.id ? { ...y, cancelledAt: now() } : y)) }));
-              else await closeCoupDur(prove.p.id);
-              setProve(null);
+              const ok = prove.action === "cancel" ? await cancelProcedure(prove.p.id) : await closeCoupDur(prove.p.id).then(() => true);
+              if (ok) setProve(null);
             }}
           />
         )}
@@ -134,11 +141,8 @@ export default function Procedures() {
       <Sheet open={declaring} onClose={() => setDeclaring(false)} title="Signalement d'un garant">
         <Declare
           guarantors={s.guarantors.map((g) => ({ id: g.personId, name: (() => { const p = s.people.find((x) => x.id === g.personId); return p ? `${p.firstName} ${p.lastName}` : "—"; })() }))}
-          onDeclare={(kind, by, note) => {
-            const p = declare(kind, "garant", by, now(), { note: note || undefined });
-            s.set((x) => ({ procedures: [p, ...x.procedures] }));
-            if (p.kind === "coup_dur") s.email(s.account.email, "coup-dur-declare", { declaredBy: by, endsAt: fmt(p.endsAt!) });
-            setDeclaring(false);
+          onDeclare={async (kind, by, note) => {
+            if (await declareAsGuarantor(null, kind, by, note)) setDeclaring(false);
           }}
         />
       </Sheet>
@@ -149,26 +153,19 @@ export default function Procedures() {
 // Cancelling must prove the owner is alive and well: their card and their code, nothing less.
 function Prove({ onProved }: { onProved: () => Promise<void> }) {
   const cards = ownerCards({ cards: useApp((x) => x.cards) }).filter((c) => c.status === "active");
-  const [error, setError] = useState<string | null>(null);
   if (cards.length === 0) return <p className="text-ink-soft">Aucune carte active : contactez-nous pour annuler.</p>;
   return (
-    <div>
-      <p className="mb-6 text-center text-ink-soft">Posez votre carte et tapez votre code.</p>
-      <PinPad
-        error={error}
-        label="Votre code"
-        onComplete={async (pin) => {
-          try {
-            // shortcut: the demo uses the first active card; the app reads whichever card is tapped (Tangem SDK).
-            await unlock(cards[0].id, pin);
-            await onProved();
-            lock();
-          } catch (e) {
-            setError((e as Error).message);
-          }
-        }}
-      />
-    </div>
+    <CardUnlock
+      candidates={cards}
+      intro="Posez votre carte, puis tapez votre code."
+      onOpened={async () => {
+        try {
+          await onProved();
+        } finally {
+          lock();
+        }
+      }}
+    />
   );
 }
 

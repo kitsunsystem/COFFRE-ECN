@@ -1,12 +1,9 @@
 // The in-app assistant. It receives a question and the name of the page, nothing else: it never sees the Coffre.
 // Called from the app with NEXT_PUBLIC_ASSISTANT_URL pointing here; Supabase checks the user's JWT (verify_jwt).
 import Anthropic from "npm:@anthropic-ai/sdk";
+import { caller, cors } from "../_shared/server.ts";
 
 const PLACES = ["default", "coffre", "aide", "cartes"];
-const cors = {
-  "access-control-allow-origin": Deno.env.get("APP_URL") ?? "*",
-  "access-control-allow-headers": "authorization, content-type, apikey, x-client-info",
-};
 
 const SYSTEM = `Tu es Alma, l'assistante d'un service familial : un Espace (compte, famille, garants, cartes, aide en cas d'hospitalisation, d'accident, de perte d'autonomie ou de décès, conciergerie) et un Coffre chiffré qui s'ouvre avec une carte sans contact et un code.
 
@@ -31,8 +28,11 @@ Règles :
 - Si tu ne sais pas, dis-le et propose le conseiller ou la conciergerie.`;
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
-  const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, "content-type": "application/json" } });
+  const h = cors(req);
+  if (req.method === "OPTIONS") return new Response(null, { headers: h });
+  const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...h, "content-type": "application/json" } });
+  // Signed-in people only (the gateway already checks the token; this rejects the anonymous key).
+  if (!(await caller(req))) return reply({ error: "non connecté" }, 401);
 
   const { question, place } = await req.json().catch(() => ({}));
   if (typeof question !== "string" || !question.trim() || question.length > 600) return reply({ error: "question invalide" }, 400);

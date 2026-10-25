@@ -8,6 +8,7 @@ import { useNow } from "@/components/providers";
 import { Button, Card, Notice, PageTitle, Segmented } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
 import { GRACE_DAYS } from "@/lib/config";
+import { PROD } from "@/lib/env";
 import { DEMO_PIN, seedDemo } from "@/lib/demo";
 import { accessEnd, activeProcedure, declare, graceEnd } from "@/lib/rules";
 import { now, useApp } from "@/lib/store";
@@ -26,6 +27,7 @@ export default function Demo() {
   const afterDeath = death && accessEnd(death);
 
   const jump = (ms: number) => s.set((x) => ({ clockOffset: x.clockOffset + ms }));
+  if (PROD) return <Notice tone="ink">Le poste de pilotage n&apos;existe que dans la démonstration.</Notice>;
 
   // Same code path as the monthly "insee-watch" function: a fixed-width INSEE line, parsed and matched.
   function insee(misspelled: boolean) {

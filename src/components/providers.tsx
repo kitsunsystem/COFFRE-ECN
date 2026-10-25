@@ -1,19 +1,15 @@
 "use client";
-import { MotionConfig } from "motion/react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
+import { CircleAlert, CircleCheck } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { bootstrap } from "@/lib/api";
+import { PROD } from "@/lib/env";
 import { accessEnd, graceEnd, procedureStatus } from "@/lib/rules";
 import { now, personName, useApp } from "@/lib/store";
 import { destroyPrivate, eraseCoffre } from "@/lib/vault";
 
-export function useHydrated() {
-  // `persist` is missing during the static build (no localStorage on the server).
-  const [h, setH] = useState(() => useApp.persist?.hasHydrated() ?? false);
-  useEffect(() => {
-    if (useApp.persist.hasHydrated()) setH(true);
-    return useApp.persist.onFinishHydration(() => setH(true));
-  }, []);
-  return h;
-}
+// Demo: local data loaded. Production: session restored and data fetched from the server.
+export const useHydrated = () => useApp((s) => s.ready);
 
 export function useNow(intervalMs = 1000) {
   const offset = useApp((s) => s.clockOffset);
@@ -25,7 +21,7 @@ export function useNow(intervalMs = 1000) {
   return t + offset;
 }
 
-// Runs the end of each window (server crons "procedures-tick" and "relances" in production).
+// Demo only: runs the end of each window. In production the server does it (crons "procedures-tick" and "relances").
 function ProcedureRunner() {
   const t = useNow(2000);
   useEffect(() => {
@@ -62,13 +58,45 @@ function ProcedureRunner() {
   return null;
 }
 
+function Toast() {
+  const toast = useApp((s) => s.toast);
+  const set = useApp((s) => s.set);
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => set({ toast: undefined }), 5000);
+    return () => clearTimeout(id);
+  }, [toast, set]);
+  return (
+    <div className="pointer-events-none fixed inset-x-0 top-3 z-[90] flex justify-center px-4" aria-live="assertive">
+      <AnimatePresence>
+        {toast && (
+          <motion.button
+            key={toast.id}
+            type="button"
+            onClick={() => set({ toast: undefined })}
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            className={`pointer-events-auto flex max-w-md items-start gap-3 rounded-2xl px-4 py-3 text-left text-[0.95rem] font-semibold shadow-lift ${toast.tone === "error" ? "bg-coral text-paper" : "bg-sage text-paper"}`}
+          >
+            {toast.tone === "error" ? <CircleAlert className="mt-0.5 h-5 w-5 shrink-0" /> : <CircleCheck className="mt-0.5 h-5 w-5 shrink-0" />}
+            {toast.text}
+          </motion.button>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
-    void useApp.persist.rehydrate();
+    if (PROD) void bootstrap().finally(() => useApp.getState().set({ ready: true }));
+    else void Promise.resolve(useApp.persist.rehydrate()).finally(() => useApp.getState().set({ ready: true }));
   }, []);
   return (
     <MotionConfig reducedMotion="user">
-      <ProcedureRunner />
+      {!PROD && <ProcedureRunner />}
+      <Toast />
       {children}
     </MotionConfig>
   );

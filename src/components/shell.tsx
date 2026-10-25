@@ -4,6 +4,7 @@ import { CircleAlert, House, LifeBuoy, Lock, LockOpen, ShieldCheck, Sparkles, Us
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
+import { PROD } from "@/lib/env";
 import { activeProcedure, graceEnd, procedureStatus } from "@/lib/rules";
 import { personName, useApp, useSession } from "@/lib/store";
 import { lock } from "@/lib/vault";
@@ -75,12 +76,19 @@ export function EspaceShell({ children }: { children: ReactNode }) {
   const tourPending = useApp((s) => s.tourPending);
   const phase = useApp((s) => s.phase);
   const billing = useApp((s) => s.billing);
+  const me = useApp((s) => s.me);
+  const hasTrusts = useApp((s) => s.trusts.length > 0);
   const router = useRouter();
   const path = usePath();
   const t = useNow(5000);
   useEffect(() => {
-    if (hydrated && !account) router.replace("/connexion");
-  }, [hydrated, account, router]);
+    // Production: signed in without an Espace of one's own = a relative (guarantor, beneficiary) or a sign-up to finish.
+    if (hydrated && !account) router.replace(PROD && me ? (hasTrusts ? "/proche" : "/inscription") : "/connexion");
+  }, [hydrated, account, me, hasTrusts, router]);
+  // The Coffre and the Espace are two separate places: reaching the Espace (back button, link) always closes the Coffre.
+  useEffect(() => {
+    if (useSession.getState().session.mode !== "locked") lock();
+  }, []);
   if (!hydrated || !account) return <Loader />;
   const alert = activeProcedure(procedures, t);
   const status = alert && procedureStatus(alert, t);
@@ -146,6 +154,9 @@ export function CoffreShell({ children }: { children: ReactNode }) {
   const session = useSession((s) => s.session);
   const people = useApp((s) => s.people);
   const cards = useApp((s) => s.cards);
+  const account = useApp((s) => s.account);
+  const me = useApp((s) => s.me);
+  const holderView = useApp((s) => s.holder);
   const router = useRouter();
   useEffect(() => {
     if (hydrated && session.mode === "locked") router.replace("/coffre");
@@ -166,7 +177,8 @@ export function CoffreShell({ children }: { children: ReactNode }) {
     };
   }, []);
   if (!hydrated || session.mode === "locked") return <Loader dark />;
-  const holder = session.mode === "holder" ? personName(people, cards.find((c) => c.id === session.cardId)?.holderId ?? "") : null;
+  const holder = session.mode === "holder" ? (holderView?.holderName ?? personName(people, cards.find((c) => c.id === session.cardId)?.holderId ?? "")) : null;
+  // No way back to the Espace from here: the Coffre has to be closed first.
   const items: NavItem[] = [
     { href: "/coffre/rubriques", label: "Rubriques", icon: LockOpen },
     ...(session.mode === "owner"
@@ -175,7 +187,6 @@ export function CoffreShell({ children }: { children: ReactNode }) {
           { href: "/coffre/droits", label: "Qui voit quoi", icon: ShieldCheck },
         ]
       : []),
-    { href: "/espace", label: "Espace", icon: House },
   ];
   return (
     <div className="grain relative min-h-dvh overflow-x-clip bg-night text-paper">
@@ -190,11 +201,11 @@ export function CoffreShell({ children }: { children: ReactNode }) {
               whileTap={{ scale: 0.92 }}
               onClick={() => {
                 lock();
-                router.replace("/coffre");
+                router.replace(account ? "/espace" : PROD && me ? "/proche" : "/coffre");
               }}
-              className="flex items-center gap-2 rounded-full bg-paper/10 px-4 py-2.5 text-[0.9rem] font-semibold ring-1 ring-paper/15"
+              className="flex items-center gap-2 rounded-full bg-gold px-4 py-2.5 text-[0.9rem] font-semibold text-ink"
             >
-              <Lock className="h-4 w-4" /> Fermer
+              <Lock className="h-4 w-4" /> Fermer le Coffre
             </motion.button>
           </div>
         </div>

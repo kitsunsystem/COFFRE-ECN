@@ -1,42 +1,89 @@
-// Printable export (save as PDF) for a notary or a hospital, built only from what the person opening the Coffre may see.
-// Codes and passwords are left out: never needed by a notary or a hospital.
+// PDF file for a notary or a hospital, built on the device only from what the person opening the Coffre may see:
+// the owner sees everything, a beneficiary only the sub-sections released to their card. Codes and passwords are left out.
 import { SECTIONS } from "@/lib/sections";
+import { saveFile } from "@/lib/native";
 import { readItems, visibleSubsections } from "@/lib/vault";
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+export interface ExportSection {
+  title: string;
+  subs: { title: string; items: { title: string; rows: [string, string][] }[] }[];
+}
 
-export async function exportPdf(owner: string, reader: string) {
-  // Opened first, synchronously in the click, so the browser does not block it as a pop-up.
-  const w = window.open("", "_blank");
-  if (!w) return;
+// What goes into the PDF, kept apart from the layout so it can be tested.
+export async function exportContent(): Promise<ExportSection[]> {
   const visible = visibleSubsections();
-  const parts: string[] = [];
+  const out: ExportSection[] = [];
   for (const sec of SECTIONS) {
-    const blocks: string[] = [];
+    const subs: ExportSection["subs"] = [];
     for (const sub of sec.subsections.filter((x) => visible.includes(x.id) && x.id !== "prive")) {
       const list = await readItems(sub.id);
       if (!list.length) continue;
-      const items = list.map(({ payload }) => {
-        const rows = sub.fields
-          .filter((f) => f.kind !== "secret" && payload.fields[f.key]?.trim())
-          .map((f) => `<tr><th>${esc(f.label)}</th><td>${esc(payload.fields[f.key]).replace(/\n/g, "<br>")}</td></tr>`);
-        if (payload.files.length) rows.push(`<tr><th>Documents</th><td>${payload.files.map((f) => esc(f.name)).join(", ")}</td></tr>`);
-        return `<div class="item"><h4>${esc(payload.title)}</h4><table>${rows.join("")}</table></div>`;
+      subs.push({
+        title: sub.title,
+        items: list.map(({ payload }) => {
+          const rows: [string, string][] = sub.fields
+            .filter((f) => f.kind !== "secret" && payload.fields[f.key]?.trim())
+            .map((f) => [f.label, f.kind === "date" ? new Date(payload.fields[f.key]).toLocaleDateString("fr-FR", { dateStyle: "long" }) : payload.fields[f.key].trim()]);
+          if (payload.files.length) rows.push(["Documents", payload.files.map((f) => f.name).join(", ")]);
+          return { title: payload.title, rows };
+        }),
       });
-      blocks.push(`<h3>${esc(sub.title)}</h3>${items.join("")}`);
     }
-    if (blocks.length) parts.push(`<h2>${esc(sec.title)}</h2>${blocks.join("")}`);
+    if (subs.length) out.push({ title: sec.title, subs });
   }
+  return out;
+}
+
+export async function exportPdf(owner: string, reader: string) {
+  const [{ jsPDF }, content] = await Promise.all([import("jspdf"), exportContent()]);
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const M = 56;
+  let y = M;
+  const room = (h: number) => {
+    if (y + h > H - M) {
+      doc.addPage();
+      y = M;
+    }
+  };
+  const text = (s: string, size: number, opts: { bold?: boolean; color?: [number, number, number]; indent?: number; gap?: number } = {}) => {
+    doc.setFont("helvetica", opts.bold ? "bold" : "normal").setFontSize(size).setTextColor(...(opts.color ?? [15, 27, 45]));
+    const lines = doc.splitTextToSize(s, W - 2 * M - (opts.indent ?? 0)) as string[];
+    for (const l of lines) {
+      room(size * 1.35);
+      doc.text(l, M + (opts.indent ?? 0), y + size);
+      y += size * 1.35;
+    }
+    y += opts.gap ?? 0;
+  };
+
   const date = new Date().toLocaleDateString("fr-FR", { dateStyle: "long" });
-  w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Coffre de ${esc(owner)}</title>
-<style>body{font:15px/1.5 Georgia,serif;color:#0f1b2d;max-width:720px;margin:32px auto;padding:0 20px}h1{font-size:26px;margin:0}
-.meta{color:#6b778a;margin:4px 0 24px}h2{font-size:20px;border-bottom:2px solid #c9a55c;padding-bottom:4px;margin-top:28px}
-h3{font-size:16px;margin:18px 0 6px}.item{border:1px solid #e3d9c6;border-radius:10px;padding:10px 14px;margin:8px 0;break-inside:avoid}
-h4{margin:0 0 6px}table{border-collapse:collapse;width:100%}th{text-align:left;color:#6b778a;font-weight:normal;width:38%;vertical-align:top;padding:2px 8px 2px 0}
-td{padding:2px 0}.foot{margin-top:28px;color:#6b778a;font-size:12px}</style></head><body>
-<h1>Coffre de ${esc(owner)}</h1><p class="meta">Exporté le ${date} par ${esc(reader)}. Ne contient que ce que cette personne a le droit de voir. Codes et mots de passe exclus.</p>
-${parts.join("") || "<p>Aucun élément à exporter.</p>"}
-<p class="foot">Document confidentiel. Pour l'enregistrer en PDF : Imprimer › Enregistrer au format PDF.</p>
-<script>window.onload=()=>print()</script></body></html>`);
-  w.document.close();
+  text(`Coffre de ${owner}`, 22, { bold: true, gap: 4 });
+  text(`Exporté le ${date} par ${reader}. Ce document contient uniquement ce que ${reader} a le droit de voir. Codes et mots de passe exclus.`, 10, { color: [107, 119, 138], gap: 14 });
+  if (!content.length) text("Aucun élément à exporter.", 12);
+  for (const sec of content) {
+    room(60);
+    y += 8;
+    text(sec.title, 16, { bold: true });
+    doc.setDrawColor(201, 165, 92).setLineWidth(1.5).line(M, y, W - M, y);
+    y += 10;
+    for (const sub of sec.subs) {
+      room(40);
+      text(sub.title, 12.5, { bold: true, color: [42, 58, 82], gap: 2 });
+      for (const it of sub.items) {
+        room(30);
+        text(it.title, 11.5, { bold: true, indent: 10 });
+        for (const [k, v] of it.rows) text(`${k} : ${v}`, 10.5, { indent: 18 });
+        y += 6;
+      }
+    }
+  }
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i).setFont("helvetica", "normal").setFontSize(8.5).setTextColor(107, 119, 138);
+    doc.text(`Document confidentiel · ${owner} · page ${i} sur ${pages}`, M, H - 28);
+  }
+  const slug = owner.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-");
+  await saveFile(doc.output("blob"), `Coffre-${slug}-${new Date().toISOString().slice(0, 10)}.pdf`);
 }

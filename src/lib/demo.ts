@@ -1,4 +1,5 @@
 // Demo family, so the whole service can be shown before Supabase is connected. Code for every card: 123456.
+import { enroll } from "./cards";
 import { uid, useApp, useSession, type Card, type Person } from "./store";
 import { activateHolderCard, activateOwnerCard, lock, saveItem, setRight, setSectionRight } from "./vault";
 
@@ -29,8 +30,8 @@ export async function seedDemo() {
     reminderConsent: true,
     reminders: [{ id: uid(), label: "Passeport", date: new Date(t + 40 * 86_400_000).toISOString().slice(0, 10) }],
   });
-  for (const c of owner) await activateOwnerCard(c.id, DEMO_PIN);
-  for (const c of packs) await activateHolderCard(c.id, DEMO_PIN);
+  for (const c of owner) await activateOwnerCard(c, await enroll(c), DEMO_PIN);
+  for (const c of packs) await activateHolderCard(c, await enroll(c), DEMO_PIN);
 
   const items: [string, string, Record<string, string>][] = [
     ["a-prevenir", "Marc, mon mari", { name: "Marc Durand", phone: "06 12 34 56 78", note: "À appeler en premier, à toute heure." }],

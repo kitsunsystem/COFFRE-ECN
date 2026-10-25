@@ -1,7 +1,7 @@
 // Cron every 15 minutes: alerts during the cancellation window, release at its end, and after a death the end of
 // the beneficiaries' access (warning 30 days before, then the whole Coffre is erased for good).
 // Release itself is enforced by RLS (is_released); this function only notifies and erases.
-import { admin, eraseCoffre, internalOnly, json, sendEmail } from "../_shared/server.ts";
+import { admin, enqueue, eraseCoffre, internalOnly, json } from "../_shared/server.ts";
 
 const fmt = (t: string) => new Date(t).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris" });
 const day = (t: string) => new Date(t).toLocaleDateString("fr-FR", { dateStyle: "long", timeZone: "Europe/Paris" });
@@ -26,7 +26,7 @@ async function endOfAccess(db: ReturnType<typeof admin>) {
       await db.from("procedures").update({ erased_at: new Date().toISOString() }).eq("id", p.id);
       erased++;
     } else if (!p.end_warned_at && left < 30 * 86_400_000) {
-      for (const b of await beneficiaries(db, p.owner_id, ["now", "coup_dur", "deces"])) await sendEmail(b, "acces-fin", { ownerName, until: day(p.end) });
+      for (const b of await beneficiaries(db, p.owner_id, ["now", "coup_dur", "deces"])) await enqueue(db, b, "acces-fin", { ownerName, until: day(p.end) });
       await db.from("procedures").update({ end_warned_at: new Date().toISOString() }).eq("id", p.id);
       warned++;
     }
@@ -56,11 +56,11 @@ Deno.serve(async (req) => {
     if (now < ends) {
       // shortcut: e-mail only; add Brevo SMS and a push notification here once the sender and app ids exist.
       if (!p.alerted_at) {
-        await sendEmail({ email: o.email, name: o.first_name }, template, data);
+        await enqueue(db, { email: o.email, name: o.first_name }, template, data);
         await db.from("procedures").update({ alerted_at: new Date().toISOString() }).eq("id", p.id);
         alerts++;
       } else if (!p.last_call_at && ends - now < 24 * 3_600_000) {
-        await sendEmail({ email: o.email, name: o.first_name }, template, data);
+        await enqueue(db, { email: o.email, name: o.first_name }, template, data);
         await db.from("procedures").update({ last_call_at: new Date().toISOString() }).eq("id", p.id);
         alerts++;
       }
@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     // Window over: tell each beneficiary who now has something to open.
     const moments = p.kind === "deces" ? ["coup_dur", "deces"] : ["coup_dur"];
     for (const b of await beneficiaries(db, p.owner_id, moments))
-      await sendEmail(b, "acces-ouvert", { ownerName: `${o.first_name} ${o.last_name}`, ...(p.end ? { until: day(p.end) } : {}) });
+      await enqueue(db, b, "acces-ouvert", { ownerName: `${o.first_name} ${o.last_name}`, ...(p.end ? { until: day(p.end) } : {}) });
 
     if (p.kind === "deces") {
       // "À effacer": ciphertext and files destroyed without ever being read (nobody holds its key).

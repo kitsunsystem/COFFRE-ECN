@@ -7,17 +7,17 @@ import { NamedIcon, TONES } from "@/components/icons";
 import { Button, Card, Notice } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
 import { checklistFor, downloadLetter, rubric } from "@/lib/aide";
+import { toggleChecklist } from "@/lib/api";
 import { useApp } from "@/lib/store";
 
 export function RubriqueView({ id }: { id: string }) {
   const r = rubric(id)!;
   const checklist = useApp((s) => s.checklist);
-  const set = useApp((s) => s.set);
   const [open, setOpen] = useState<number | null>(0);
   const key = (c: string) => `${r.id}:${c}`;
   const items = checklistFor(r, checklist);
   const done = items.filter((c) => checklist[key(c.id)]).length;
-  const toggle = (c: string) => set((s) => ({ checklist: { ...s.checklist, [key(c)]: !s.checklist[key(c)] } }));
+  const toggle = (c: string) => toggleChecklist(key(c));
   // Group the check-list by "when", keeping the order of the content file.
   const groups = [...new Set(items.map((c) => c.when))].map((when) => ({ when, items: items.filter((c) => c.when === when) }));
 

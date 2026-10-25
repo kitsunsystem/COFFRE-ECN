@@ -10,7 +10,9 @@ import { Badge, Button, Card, Segmented } from "@/components/ui";
 import { Logo } from "@/components/visuals";
 import { openFrom } from "@/lib/crypto";
 import { canConfirmDeath, procedureStatus, verify } from "@/lib/rules";
+import { PROD } from "@/lib/env";
 import { now, useApp, type ConciergeCase } from "@/lib/store";
+import { ProdAdmin } from "./prod";
 import { conciergeKeys } from "@/lib/vault";
 
 type Tab = "deces" | "conciergerie" | "comptes";
@@ -18,8 +20,14 @@ const Dot = ({ ok }: { ok: boolean }) => <span className={`h-2.5 w-2.5 shrink-0 
 const fmt = (t: number) => new Date(t).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
 
 // Back-office of the publisher: it sees the Espace (identity, procedures, cases), never the Coffre.
-// shortcut: open in the demo; in production it is reserved to staff accounts (Supabase role "admin" + RLS).
+// Demo version (open to all); production: ./prod.tsx, reserved to staff accounts.
 export default function Admin() {
+  const hydrated = useHydrated();
+  if (PROD) return hydrated ? <ProdAdmin /> : <Loader />;
+  return <DemoAdmin />;
+}
+
+function DemoAdmin() {
   const hydrated = useHydrated();
   const s = useApp(useShallow((x) => ({ account: x.account, procedures: x.procedures, concierge: x.concierge, cards: x.cards, people: x.people, outbox: x.outbox, set: x.set, email: x.email })));
   const t = useNow(5000);

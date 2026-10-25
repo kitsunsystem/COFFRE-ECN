@@ -3,7 +3,7 @@
 // - "tout est-il à jour ?" every 3 months;
 // - "vos cartes sont-elles toujours là ?" to every beneficiary every 6 months;
 // - unpaid subscriptions: a reminder each week of the grace period, then the whole Coffre is erased.
-import { admin, eraseCoffre, internalOnly, json, sendEmail } from "../_shared/server.ts";
+import { admin, enqueue, eraseCoffre, internalOnly, json } from "../_shared/server.ts";
 
 const DAY = 86_400_000;
 const fmt = (d: string | Date) => new Date(d).toLocaleDateString("fr-FR", { dateStyle: "long", timeZone: "Europe/Paris" });
@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     const left = new Date(r.date).getTime() - today.getTime();
     const field = left < 7 * DAY && !r.sent_7 ? "sent_7" : left < 30 * DAY && !r.sent_30 ? "sent_30" : null;
     if (!field || left < 0) continue;
-    await sendEmail({ email: r.profiles.email, name: r.profiles.first_name }, "echeance", { label: r.label, date: fmt(r.date) });
+    await enqueue(db, { email: r.profiles.email, name: r.profiles.first_name }, "echeance", { label: r.label, date: fmt(r.date) });
     await db.from("reminders").update({ [field]: true, ...(field === "sent_7" ? { sent_30: true } : {}) }).eq("id", r.id);
     stats.echeances++;
   }
@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
   // Quarterly check-in: first Monday of January, April, July and October.
   if (firstMonday && today.getMonth() % 3 === 0) {
     const { data: profiles } = await db.from("profiles").select("first_name, email").eq("billing_status", "a_jour");
-    for (const p of profiles ?? []) await sendEmail({ email: p.email, name: p.first_name }, "a-jour");
+    for (const p of profiles ?? []) await enqueue(db, { email: p.email, name: p.first_name }, "a-jour");
     stats.aJour = profiles?.length ?? 0;
   }
 
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       const p = h.people as any, o = h.profiles as any;
       if (!p.email || seen.has(p.id)) continue;
       seen.add(p.id);
-      await sendEmail({ email: p.email, name: p.first_name }, "controle-cartes", { ownerName: `${o.first_name} ${o.last_name}` });
+      await enqueue(db, { email: p.email, name: p.first_name }, "controle-cartes", { ownerName: `${o.first_name} ${o.last_name}` });
       stats.cartes++;
     }
   }
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       await db.from("profiles").update({ billing_status: "efface" }).eq("id", u.id);
       stats.effaces++;
     } else if (Math.floor((today.getTime() - new Date(u.billing_since).getTime()) / DAY) % 7 === 0) {
-      await sendEmail({ email: u.email, name: u.first_name }, "impaye", { until: fmt(u.until) });
+      await enqueue(db, { email: u.email, name: u.first_name }, "impaye", { until: fmt(u.until) });
       stats.impayes++;
     }
   }

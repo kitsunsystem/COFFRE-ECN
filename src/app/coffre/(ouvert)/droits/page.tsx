@@ -4,7 +4,7 @@ import { ChevronDown, CreditCard, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NamedIcon } from "@/components/icons";
-import { Button, Segmented } from "@/components/ui";
+import { Segmented } from "@/components/ui";
 import { moment, MOMENTS, type Moment } from "@/lib/rules";
 import { SECTIONS } from "@/lib/sections";
 import { packOf, useApp, useSession } from "@/lib/store";
@@ -63,9 +63,7 @@ export default function Droits() {
         <div className="mt-8 rounded-[1.6rem] bg-paper/5 p-6 text-center ring-1 ring-paper/10">
           <CreditCard className="mx-auto h-8 w-8 text-gold-soft" />
           <p className="mt-3 text-paper/75">Désignez d&apos;abord un bénéficiaire : il reçoit un pack de 2 cartes à son nom.</p>
-          <Button className="mt-4" variant="light" href="/espace/cartes">
-            Gérer les cartes
-          </Button>
+          <p className="mt-2 text-[0.88rem] text-paper/55">Fermez le Coffre, puis allez dans Espace › Mes cartes.</p>
         </div>
       ) : (
         <>

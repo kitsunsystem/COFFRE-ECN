@@ -1,9 +1,11 @@
 "use client";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
 import Link from "next/link";
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+
+const noop = () => () => {};
 
 type Variant = "primary" | "gold" | "ghost" | "outline" | "danger" | "light";
 const VARIANTS: Record<Variant, string> = {
@@ -140,8 +142,8 @@ export function Badge({ children, tone = "ink" }: { children: ReactNode; tone?: 
 }
 
 export function Sheet({ open, onClose, title, children, dark }: { open: boolean; onClose: () => void; title?: string; children: ReactNode; dark?: boolean }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // The portal needs document.body: false during the static build, true in the browser.
+  const mounted = useSyncExternalStore(noop, () => true, () => false);
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();

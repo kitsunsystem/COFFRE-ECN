@@ -5,8 +5,9 @@ import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
+import { requestConcierge, signMandate } from "@/lib/api";
 import { CONCIERGE } from "@/lib/config";
-import { now, uid, useApp, type ConciergeCase } from "@/lib/store";
+import { useApp, type ConciergeCase } from "@/lib/store";
 
 const KINDS = [
   { id: "mise-en-place", title: "Mettre en place mon Coffre", sub: "Cartes, bénéficiaires, l'essentiel : on le fait avec vous" },
@@ -23,14 +24,14 @@ const STATUS: Record<ConciergeCase["status"], { label: string; tone: "gold" | "s
 };
 
 export default function Services() {
-  const s = useApp(useShallow((x) => ({ concierge: x.concierge, account: x.account!, set: x.set })));
+  const s = useApp(useShallow((x) => ({ concierge: x.concierge, account: x.account! })));
   const [kind, setKind] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [sign, setSign] = useState<ConciergeCase | null>(null);
 
-  function request() {
+  async function request() {
     const k = KINDS.find((x) => x.id === kind)!;
-    s.set((x) => ({ concierge: [{ id: uid(), kind: k.title, createdAt: now(), partner: CONCIERGE.partner, status: "demande", shared: [], message: message.trim() || undefined }, ...x.concierge] }));
+    if (!(await requestConcierge(k.title, message.trim() || undefined))) return;
     setKind(null);
     setMessage("");
   }
@@ -122,9 +123,8 @@ export default function Services() {
       </Sheet>
 
       <Sheet open={!!sign} onClose={() => setSign(null)} title="Mandat">
-        {sign && <Mandate c={sign} owner={`${s.account.firstName} ${s.account.lastName}`} onSigned={(name) => {
-          s.set((x) => ({ concierge: x.concierge.map((y) => (y.id === sign.id ? { ...y, status: "mandat_signe", mandate: { name, signedAt: now() } } : y)) }));
-          setSign(null);
+        {sign && <Mandate c={sign} owner={`${s.account.firstName} ${s.account.lastName}`} onSigned={async (name) => {
+          if (await signMandate(sign.id, name)) setSign(null);
         }} />}
       </Sheet>
     </motion.div>

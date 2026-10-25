@@ -1,25 +1,29 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, Check, ConciergeBell, FileUp, Hourglass, Lock, Nfc, SearchCheck, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, ConciergeBell, FileUp, Hourglass, Lock, LogIn, Nfc, SearchCheck, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { PinPad } from "@/components/pinpad";
+import { CardUnlock } from "@/components/card-flow";
 import { useHydrated, useNow } from "@/components/providers";
 import { Loader } from "@/components/shell";
 import { Button, Card, Notice, Sheet } from "@/components/ui";
-import { Aurora, Countdown, Logo, NfcCard } from "@/components/visuals";
+import { Aurora, Countdown, Logo } from "@/components/visuals";
+import { declareDeath } from "@/lib/api";
 import { DELAYS, POST_DEATH_ACCESS_DAYS } from "@/lib/config";
-import { declare, procedureStatus } from "@/lib/rules";
-import { holderCards, now, personName, useApp, type Card as CardT } from "@/lib/store";
-import { lock, unlock } from "@/lib/vault";
+import { PROD } from "@/lib/env";
+import { procedureStatus, type Procedure } from "@/lib/rules";
+import { holderCards, personName, useApp, useSession } from "@/lib/store";
+import { lock } from "@/lib/vault";
 
 const STEPS = [
-  { icon: Nfc, t: "Identifiez-vous avec votre carte et votre code" },
+  { icon: Nfc, t: PROD ? "Connectez-vous avec l'adresse e-mail où vous avez reçu vos cartes" : "Identifiez-vous avec votre carte et votre code" },
   { icon: FileUp, t: "Déposez l'acte de décès et votre pièce d'identité" },
   { icon: SearchCheck, t: "Notre équipe vérifie : registre INSEE, acte de décès, votre identité" },
   { icon: Hourglass, t: `Un délai de ${Math.round(DELAYS.deces / 86_400_000)} jours s'écoule, avec des alertes, pour éviter toute erreur` },
   { icon: Lock, t: `Vous ouvrez ce qui vous a été confié avec votre carte, pendant ${Math.round(POST_DEATH_ACCESS_DAYS / 30)} mois` },
 ];
+const ACCEPT = ["image/", "application/pdf"];
+const MAX = 20 * 1024 * 1024;
 
 // The beneficiary's side of a death: certificate, verification, delay, then opening with their own card.
 export default function Beneficiaire() {
@@ -27,42 +31,57 @@ export default function Beneficiaire() {
   const cards = useApp((s) => s.cards);
   const people = useApp((s) => s.people);
   const account = useApp((s) => s.account);
-  const procedures = useApp((s) => s.procedures);
-  const set = useApp((s) => s.set);
+  const me = useApp((s) => s.me);
+  const trusts = useApp((s) => s.trusts);
+  const ownProcedures = useApp((s) => s.procedures);
   const t = useNow(1000);
-  const [step, setStep] = useState<"intro" | "card" | "code" | "docs">("intro");
-  const [card, setCard] = useState<CardT | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState<"intro" | "card" | "docs">("intro");
+  const [who, setWho] = useState("");
   const [acte, setActe] = useState<File | null>(null);
   const [idDoc, setIdDoc] = useState<File | null>(null);
   const [sure, setSure] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+  // Production: the Coffres the signed-in person holds a pack for.
+  const mine = trusts.filter((x) => x.cards.some((c) => c.status !== "perdue"));
+  const [ownerId, setOwnerId] = useState<string | null>(null);
   if (!hydrated) return <Loader />;
 
-  const owner = account ? `${account.firstName} ${account.lastName}` : "votre proche";
-  const active = holderCards({ cards }).filter((c) => c.status === "active");
+  const trust = PROD ? (mine.find((x) => x.ownerId === ownerId) ?? mine[0]) : undefined;
+  const owner = PROD ? (trust?.ownerName ?? "votre proche") : account ? `${account.firstName} ${account.lastName}` : "votre proche";
+  const procedures: Procedure[] = PROD ? (trust?.procedures ?? []) : ownProcedures;
+  const active = PROD ? (trust?.cards.filter((c) => c.status === "active") ?? []) : holderCards({ cards }).filter((c) => c.status === "active");
   const current = procedures.find((p) => p.kind === "deces" && ["verification", "delai", "terminee"].includes(procedureStatus(p, t)) && !p.erasedAt);
   const status = current && procedureStatus(current, t);
-  const who = card ? personName(people, card.holderId) : "";
+  const hasActe = current && (PROD ? (current as { hasActe?: boolean }).hasActe : !!current.acte);
+  const canStart = PROD ? !!trust : active.length > 0;
 
-  function submit() {
-    // shortcut: the demo keeps only the file names; in production both files go to the verification team, not to the Coffre.
-    const info = { by: who, file: acte!.name, idChecked: false, at: now() };
-    set((s) => {
-      const open = s.procedures.find((p) => p.kind === "deces" && procedureStatus(p, now()) === "verification");
-      return open
-        ? { procedures: s.procedures.map((p) => (p.id === open.id ? { ...p, acte: info, note: `${p.note ? `${p.note} · ` : ""}Pièce d'identité : ${idDoc!.name}` } : p)) }
-        : { procedures: [declare("deces", "beneficiaire", who, now(), { acte: info, note: `Pièce d'identité : ${idDoc!.name}` }), ...s.procedures] };
-    });
-    setStep("intro");
+  async function submit() {
+    setBusy(true);
+    const name = PROD ? (trust?.cards[0]?.printedName ?? "") : who;
+    const ok = await declareDeath(trust?.ownerId ?? null, name, acte!, idDoc!);
+    setBusy(false);
+    if (ok) {
+      setStep("intro");
+      setActe(null);
+      setIdDoc(null);
+      setSure(false);
+    }
   }
+
+  const pick = (setFile: (f: File | null) => void) => (f: File | undefined) => {
+    if (f && (f.size > MAX || !ACCEPT.some((a) => f.type.startsWith(a)))) return setFileError("Photo ou PDF uniquement, 20 Mo maximum.");
+    setFileError(null);
+    setFile(f ?? null);
+  };
 
   return (
     <div className="relative min-h-dvh overflow-x-clip">
       <Aurora className="fixed opacity-60" />
       <div className="relative mx-auto max-w-lg px-5 pb-16 pt-5">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-[0.92rem] font-semibold text-ink-soft">
-            <ArrowLeft className="h-4 w-4" /> Accueil
+          <Link href={PROD && me ? (account ? "/espace" : "/proche") : "/"} className="flex items-center gap-2 text-[0.92rem] font-semibold text-ink-soft">
+            <ArrowLeft className="h-4 w-4" /> {PROD && me ? "Mon espace" : "Accueil"}
           </Link>
           <Logo />
         </div>
@@ -73,12 +92,35 @@ export default function Beneficiaire() {
           <p className="mt-3 text-[1.05rem] text-ink-soft">Toutes nos condoléances. Si {owner} vous a confié des éléments, voici comment y accéder. Nous vous accompagnons à chaque étape.</p>
         </motion.div>
 
+        {PROD && !me && (
+          <Card className="mt-6">
+            <p className="text-ink-soft">Connectez-vous avec l&apos;adresse e-mail à laquelle vous avez été prévenu de l&apos;envoi de vos cartes. Pas de mot de passe : vous recevez un code.</p>
+            <Button className="mt-4" full variant="gold" href="/connexion?suite=/beneficiaire" icon={<LogIn className="h-5 w-5" />}>
+              Me connecter
+            </Button>
+          </Card>
+        )}
+        {PROD && me && mine.length === 0 && (
+          <div className="mt-6">
+            <Notice tone="gold">Aucun pack de cartes n&apos;est associé à l&apos;adresse {me.email}. Seuls les bénéficiaires désignés, avec leurs cartes, peuvent accéder à un Coffre.</Notice>
+          </div>
+        )}
+        {PROD && mine.length > 1 && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {mine.map((x) => (
+              <button key={x.ownerId} onClick={() => setOwnerId(x.ownerId)} className={`rounded-full px-4 py-2 text-[0.92rem] font-semibold ring-1 ${trust?.ownerId === x.ownerId ? "bg-ink text-paper ring-ink" : "bg-paper ring-line"}`}>
+                {x.ownerName}
+              </button>
+            ))}
+          </div>
+        )}
+
         {current && status ? (
           <Card className="mt-6">
             <div className="font-semibold">Votre demande pour {owner}</div>
             <ol className="mt-4 space-y-3">
               {[
-                { t: "Acte de décès déposé", done: !!current.acte },
+                { t: "Acte de décès déposé", done: !!hasActe },
                 { t: "Vérification par notre équipe (INSEE, acte, identité)", done: status !== "verification" },
                 { t: "Délai d'annulation", done: status === "terminee" },
                 { t: "Accès ouvert avec votre carte", done: status === "terminee" },
@@ -89,7 +131,7 @@ export default function Beneficiaire() {
                 </li>
               ))}
             </ol>
-            {status === "verification" && !current.acte && (
+            {status === "verification" && !hasActe && (
               <div className="mt-4">
                 <Notice tone="gold">Une correspondance a été trouvée dans le registre des décès. Pour la confirmer, notre équipe a besoin de l&apos;acte de décès.</Notice>
               </div>
@@ -107,62 +149,54 @@ export default function Beneficiaire() {
                 Ouvrir avec ma carte
               </Button>
             )}
-            {status === "verification" && !current.acte && (
-              <Button className="mt-4" full onClick={() => setStep("card")} icon={<FileUp className="h-5 w-5" />}>
+            {status === "verification" && !hasActe && (
+              <Button className="mt-4" full onClick={() => setStep(PROD ? "docs" : "card")} icon={<FileUp className="h-5 w-5" />}>
                 Déposer l&apos;acte de décès
               </Button>
             )}
           </Card>
         ) : (
-          <>
-            <div className="mt-6 space-y-2.5">
-              {STEPS.map((x, i) => (
-                <motion.div key={x.t} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.07 }} className="flex items-center gap-3 rounded-2xl bg-paper p-3.5 ring-1 ring-line">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-soft/60">
-                    <x.icon className="h-5 w-5 text-gold-deep" />
-                  </span>
-                  <span className="text-[0.95rem] font-semibold leading-snug">{x.t}</span>
-                </motion.div>
-              ))}
-            </div>
-            <Button className="mt-6" full variant="gold" icon={<Nfc className="h-5 w-5" />} onClick={() => setStep("card")} disabled={active.length === 0}>
-              Commencer avec ma carte
-            </Button>
-            {active.length === 0 && <p className="mt-2 text-center text-[0.88rem] text-mist">Aucune carte de bénéficiaire active sur cet appareil.</p>}
-          </>
+          (!PROD || me) && (
+            <>
+              <div className="mt-6 space-y-2.5">
+                {STEPS.map((x, i) => (
+                  <motion.div key={x.t} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.07 }} className="flex items-center gap-3 rounded-2xl bg-paper p-3.5 ring-1 ring-line">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-soft/60">
+                      <x.icon className="h-5 w-5 text-gold-deep" />
+                    </span>
+                    <span className="text-[0.95rem] font-semibold leading-snug">{x.t}</span>
+                  </motion.div>
+                ))}
+              </div>
+              <Button className="mt-6" full variant="gold" icon={<FileUp className="h-5 w-5" />} onClick={() => setStep(PROD ? "docs" : "card")} disabled={!canStart}>
+                {PROD ? "Déposer l'acte de décès" : "Commencer avec ma carte"}
+              </Button>
+              {!PROD && active.length === 0 && <p className="mt-2 text-center text-[0.88rem] text-mist">Aucune carte de bénéficiaire active sur cet appareil.</p>}
+            </>
+          )
         )}
 
         <div className="mt-6 grid gap-2.5">
-          <Button variant="outline" full href="/espace/services" icon={<ConciergeBell className="h-5 w-5" />}>
-            Se faire aider par la conciergerie
-          </Button>
+          {(!PROD || account) && (
+            <Button variant="outline" full href="/espace/services" icon={<ConciergeBell className="h-5 w-5" />}>
+              Se faire aider par la conciergerie
+            </Button>
+          )}
           <p className="text-center text-[0.85rem] text-mist">Pas de carte ? Seuls les bénéficiaires désignés, avec leurs cartes, peuvent accéder au Coffre.</p>
         </div>
       </div>
 
-      <Sheet open={step === "card"} onClose={() => setStep("intro")} title="Démo : quelle carte posez-vous ?">
-        <div className="grid grid-cols-2 gap-3">
-          {active.map((c) => (
-            <button key={c.id} onClick={() => { setCard(c); setStep("code"); setError(null); }} className="text-left">
-              <NfcCard name={c.printedName} flipped interactive={false} />
-              <span className="mt-1.5 block text-[0.85rem] font-semibold text-ink-soft">{personName(people, c.holderId).split(" ")[0]}</span>
-            </button>
-          ))}
-        </div>
-      </Sheet>
-
-      <Sheet open={step === "code"} onClose={() => setStep("intro")} title="Votre code">
-        <p className="mb-5 text-center text-ink-soft">Le code choisi à l&apos;activation de vos cartes.</p>
-        <PinPad
-          error={error}
-          onComplete={async (pin) => {
-            try {
-              await unlock(card!.id, pin);
-              lock(); // only proves who you are; nothing opens before the verification and the delay
-              setStep("docs");
-            } catch (e) {
-              setError((e as Error).message);
-            }
+      {/* Demo: the card and its code prove who you are. Production: your account (code by e-mail) does, then the team checks your ID. */}
+      <Sheet open={step === "card"} onClose={() => setStep("intro")} title="Votre carte">
+        <CardUnlock
+          candidates={active}
+          intro="Posez votre carte, puis tapez votre code."
+          onOpened={() => {
+            const ses = useSession.getState().session;
+            const card = ses.mode === "holder" ? cards.find((c) => c.id === ses.cardId) : undefined;
+            setWho(card ? personName(people, card.holderId) : "");
+            lock(); // only proves who you are; nothing opens before the verification and the delay
+            setStep("docs");
           }}
         />
       </Sheet>
@@ -170,9 +204,11 @@ export default function Beneficiaire() {
       <Sheet open={step === "docs"} onClose={() => setStep("intro")} title="Les documents">
         <AnimatePresence>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            <p className="flex items-center gap-2 font-semibold text-sage">
-              <ShieldCheck className="h-5 w-5" /> {who}, votre carte est reconnue.
-            </p>
+            {!PROD && (
+              <p className="flex items-center gap-2 font-semibold text-sage">
+                <ShieldCheck className="h-5 w-5" /> {who}, votre carte est reconnue.
+              </p>
+            )}
             {[
               { label: "Acte de décès", file: acte, setFile: setActe },
               { label: "Votre pièce d'identité", file: idDoc, setFile: setIdDoc },
@@ -184,16 +220,17 @@ export default function Beneficiaire() {
                   <span className="block truncate text-[0.85rem] text-mist">{d.file ? d.file.name : "Photo ou PDF"}</span>
                 </span>
                 {d.file && <Check className="h-5 w-5 text-sage" />}
-                <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => d.setFile(e.target.files?.[0] ?? null)} />
+                <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => pick(d.setFile)(e.target.files?.[0])} />
               </label>
             ))}
+            {fileError && <p className="font-semibold text-coral">{fileError}</p>}
             <button type="button" onClick={() => setSure(!sure)} aria-pressed={sure} className="flex w-full items-start gap-3 text-left">
               <span className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md ring-2 ${sure ? "bg-ink ring-ink" : "ring-line"}`}>{sure && <Check className="h-4 w-4 text-paper" strokeWidth={3} />}</span>
               <span className="text-[0.92rem]">Je certifie que ces documents sont authentiques.</span>
             </button>
             <p className="text-[0.85rem] text-mist">Ils servent uniquement à la vérification par notre équipe. Le titulaire est prévenu et peut encore annuler pendant le délai.</p>
-            <Button full variant="gold" disabled={!acte || !idDoc || !sure} onClick={submit}>
-              Envoyer pour vérification
+            <Button full variant="gold" disabled={!acte || !idDoc || !sure || busy} onClick={submit}>
+              {busy ? "Envoi…" : "Envoyer pour vérification"}
             </Button>
           </motion.div>
         </AnimatePresence>
