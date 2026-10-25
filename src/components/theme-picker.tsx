@@ -2,15 +2,15 @@
 // Colour theme choice: each swatch shows the theme's own colours, whatever the current one.
 import { Check } from "lucide-react";
 import { useSyncExternalStore } from "react";
-import { currentTheme, setTheme, subscribeTheme, THEMES } from "@/lib/theme";
+import { currentTheme, DEFAULT_THEME, setTheme, subscribeTheme, THEMES } from "@/lib/theme";
 
 const SWATCH: Record<string, string[]> = {
   sillage: ["#f7f2e9", "#0f1b2d", "#c9a55c"],
-  noir: ["#07090e", "#121724", "#d4af37"],
+  noir: ["#050608", "#f6e29e", "#d4af37"],
 };
 
 export function ThemePicker({ compact }: { compact?: boolean }) {
-  const theme = useSyncExternalStore(subscribeTheme, currentTheme, () => "sillage");
+  const theme = useSyncExternalStore(subscribeTheme, currentTheme, () => DEFAULT_THEME);
   return (
     <div className={`grid gap-2.5 ${compact ? "max-w-xs grid-cols-2" : "grid-cols-1"}`} role="radiogroup" aria-label="Couleurs de l'application">
       {THEMES.map((t) => {

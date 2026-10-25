@@ -93,45 +93,125 @@ html.i18n-wait body {
   visibility: hidden;
 }
 
-/* ---------- Thème « Noir et or » (data-theme="noir", see src/lib/theme.ts) ----------
-   Deep black, night-blue surfaces, metallic gold, Cinzel titles. Every colour of the app is a variable, so redefining
-   them restyles everything. Light screens become dark; the screens that were already dark (the Coffre, dark cards and
-   sheets) keep light text: their own block below. */
+/* Ambient glows behind the screens (Aurora): their colours belong to the theme. */
+.aura-l1 { background: rgb(234 215 168 / 0.7); }
+.aura-l2 { background: rgb(217 234 220 / 0.8); }
+.aura-l3 { background: rgb(247 220 211 / 0.6); }
+.aura-d1 { background: rgb(201 165 92 / 0.25); }
+.aura-d2 { background: rgb(44 76 122 / 0.5); }
+.aura-d3 { background: rgb(79 138 98 / 0.25); }
+
+/* Scroll bars in the colours of the app, never the browser's grey ones. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(156 122 52 / 0.45) transparent;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgb(156 122 52 / 0.45); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: rgb(156 122 52 / 0.7); }
+/* Swipeable rows: no bar at all; the next card peeking out, and the faded edge, say there is more. */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.fade-x {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 1.25rem, #000 calc(100% - 2.5rem), transparent);
+  mask-image: linear-gradient(90deg, transparent 0, #000 1.25rem, #000 calc(100% - 2.5rem), transparent);
+}
+
+/* A light sweep across the main buttons, every few seconds. */
+.btn-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.38) 50%, transparent 70%);
+  animation: var(--animate-shine);
+}
+
+/* ---------- Thème « Noir et or » : les couleurs du site du réseau (data-theme="noir", src/lib/theme.ts) ----------
+   Noir profond, surfaces en verre presque noires, or métallique, titres Cinzel, texte Outfit — les variables
+   exactes de sa feuille de style, sans aucun aplat bleu. Every colour of the app is a variable, so redefining them
+   restyles everything; cards and panels become glass. */
 html[data-theme="noir"] {
   color-scheme: dark;
   --color-cream: #07090e;
-  --color-sand: #181f30;
-  --color-paper: #0f131d;
-  --color-ink: #f4f0e6;
-  --color-ink-soft: #c5c9d3;
-  --color-mist: #9ca2b3;
-  --color-line: rgb(212 175 55 / 0.2);
   --color-night: #050608;
-  --color-night-2: #121724;
+  /* Surfaces: the network's near-black, without its faint blue cast (it showed on large panels such as the safes). */
+  --color-night-2: #0c0d10;
+  --color-paper: #0c0d10;
+  --color-sand: rgb(212 175 55 / 0.1);
+  --color-line: rgb(212 175 55 / 0.22);
+  --color-ink: #f8f9fc;
+  --color-ink-soft: #9da4b6;
+  --color-mist: #7d8497;
   --color-gold: #d4af37;
   --color-gold-soft: #f6e29e;
   --color-gold-deep: #e5bf4e;
-  --color-sage: #5fae7a;
-  --color-sage-soft: rgb(95 174 122 / 0.16);
-  --color-coral: #e8735a;
-  --color-coral-soft: rgb(232 115 90 / 0.16);
-  --color-aura: #1b2440;
+  --color-sage: #10b981;
+  --color-sage-soft: rgb(16 185 129 / 0.16);
+  --color-coral: #ef4444;
+  --color-coral-soft: rgb(239 68 68 / 0.16);
+  --color-aura: #d4af37;
+  --glass: rgb(14 15 19 / 0.72);
   --font-display: var(--font-cinzel), "Playfair Display", Georgia, serif;
   --font-sans: var(--font-outfit), system-ui, sans-serif;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(0 0 0 / 0.7);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.5), 0 24px 60px -16px rgb(0 0 0 / 0.8);
-  --shadow-glow: 0 0 0 1px rgb(212 175 55 / 0.35), 0 18px 50px -12px rgb(212 175 55 / 0.45);
+  --shadow-soft: 0 14px 40px rgb(0 0 0 / 0.55);
+  --shadow-lift: 0 24px 60px rgb(0 0 0 / 0.75);
+  --shadow-glow: 0 0 0 1px rgb(212 175 55 / 0.35), 0 4px 22px rgb(212 175 55 / 0.35);
+  scrollbar-color: rgb(212 175 55 / 0.4) transparent;
 }
+html[data-theme="noir"] body {
+  /* The network's own backdrop: golden halos and a faint golden grid on black. */
+  background-color: #07090e;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgb(212 175 55 / 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 85% 60%, rgb(212 175 55 / 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 100%, rgb(212 175 55 / 0.07) 0%, transparent 40%),
+    linear-gradient(rgb(212 175 55 / 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(212 175 55 / 0.02) 1px, transparent 1px);
+  background-size: auto, auto, auto, 48px 48px, 48px 48px;
+  background-attachment: fixed;
+}
+html[data-theme="noir"] ::-webkit-scrollbar-thumb { background-color: rgb(212 175 55 / 0.4); }
+html[data-theme="noir"] ::-webkit-scrollbar-thumb:hover { background-color: rgb(212 175 55 / 0.7); }
+html[data-theme="noir"] .aura-l1, html[data-theme="noir"] .aura-d1 { background: rgb(212 175 55 / 0.12); }
+html[data-theme="noir"] .aura-l2, html[data-theme="noir"] .aura-d2 { background: rgb(212 175 55 / 0.06); }
+html[data-theme="noir"] .aura-l3, html[data-theme="noir"] .aura-d3 { background: rgb(246 226 158 / 0.04); }
+/* The screens that were already dark (the Coffre, dark cards) write their text with "paper": it stays light there. */
 html[data-theme="noir"] :is(.bg-night, .\!bg-night, .bg-night-2) {
-  --color-cream: #f4efe2;
-  --color-sand: #e7dcc4;
   --color-paper: #f8f9fc;
-  --color-ink: #0b0e15;
-  --color-ink-soft: #2a3040;
-  --color-line: #e3d9c6;
-  --color-gold-deep: #8c6a1e;
-  --color-sage-soft: #d9eadc;
-  --color-coral-soft: #f7dcd3;
+}
+/* Glass: cards, fields, panels and sheets. */
+html[data-theme="noir"] :is(.bg-paper, .tile, .bg-night-2.ring-1) {
+  background-color: var(--glass);
+  background-image: linear-gradient(180deg, rgb(255 255 255 / 0.035), transparent 40%);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+html[data-theme="noir"] .tile {
+  box-shadow: 0 0 0 1px rgb(212 175 55 / 0.22), var(--shadow-soft);
+}
+html[data-theme="noir"] .bg-cream {
+  background-color: rgb(7 9 14 / 0.88);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+}
+/* Anything you can press glows gold under the pointer, as on the network's site. */
+html[data-theme="noir"] :is(a.bg-paper, button.bg-paper, a > .bg-paper, a > .tile, a.tile) {
+  transition: box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html[data-theme="noir"] :is(a.bg-paper:hover, button.bg-paper:hover, a:hover > .bg-paper, a:hover > .tile, a.tile:hover) {
+  box-shadow: 0 0 0 1px rgb(212 175 55 / 0.5), 0 0 30px rgb(212 175 55 / 0.16), var(--shadow-soft);
+}
+/* The soft green and red are tints for backgrounds; as text they take the network's light green and light red. */
+html[data-theme="noir"] .text-sage-soft { color: #34d399; }
+html[data-theme="noir"] .text-coral-soft { color: #fca5a5; }
+/* Choices of a segmented control: the chosen one is gold. */
+html[data-theme="noir"] .seg-on.bg-paper {
+  /* as specific as the glass rule above (which it follows), so the gold wins */
+  background: linear-gradient(135deg, #fbe8aa 0%, #d4af37 45%, #b38825 80%, #fbe8aa 100%);
+}
+html[data-theme="noir"] .seg-on + span {
+  color: #050608;
 }
 /* Wide engraved capitals: a little air instead of the tight tracking of the default serif, and titles scaled down so
    they take the same width as with the default font (zoom also scales their margins, keeping the rhythm). */
@@ -148,20 +228,18 @@ html[data-theme="noir"] ::selection {
   background: var(--color-gold);
   color: #050608;
 }
-/* Main buttons, selected choices and ticked boxes are gold, as on the network's own site. */
+/* Main buttons, selected choices and ticked boxes are gold, with dark text, as on the network's own site. */
 html[data-theme="noir"] .bg-ink {
   background-color: var(--color-gold);
+  background-image: linear-gradient(135deg, #fbe8aa 0%, #d4af37 45%, #b38825 80%, #fbe8aa 100%);
+  color: #06070a;
 }
 html[data-theme="noir"] .hover\:bg-ink-soft:hover {
-  background-color: var(--color-gold-soft);
+  background-image: linear-gradient(135deg, #fff0c2 0%, #e0b842 50%, #c4962c 100%);
 }
 /* Light gold washes would glare on black: a soft golden tint instead (dark screens keep the light version). */
 html[data-theme="noir"] :is(.bg-gold-soft, .bg-gold-soft\/40, .bg-gold-soft\/50, .bg-gold-soft\/60, .bg-gold-soft\/70):not(:is(.bg-night, .\!bg-night, .bg-night-2) *) {
   background-color: rgb(212 175 55 / 0.14);
-}
-/* Ambient glows: gold and night blue only. */
-html[data-theme="noir"] :is(.bg-sage-soft\/80, .bg-coral-soft\/60) {
-  background-color: rgb(27 36 64 / 0.7);
 }
 
 @media (prefers-reduced-motion: reduce) {

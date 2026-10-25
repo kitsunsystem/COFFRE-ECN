@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useApp } from "@/lib/store";
 import { NamedIcon, TONES } from "@/components/icons";
 import { PageTitle } from "@/components/ui";
-import { rise, stagger } from "@/components/visuals";
+import { rise, stagger, Tilt } from "@/components/visuals";
 import { checklistFor, RUBRICS } from "@/lib/aide";
 
 export default function Aide() {
@@ -20,7 +20,8 @@ export default function Aide() {
           return (
             <motion.div key={r.id} variants={rise}>
               <Link href={`/espace/aide/${r.id}`}>
-                <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.99 }} className={`relative overflow-hidden rounded-[1.75rem] p-6 ring-1 ${TONES[r.tone].bg} ${TONES[r.tone].ring}`}>
+                <Tilt className="rounded-[1.75rem]" max={4}>
+                <div className={`tile relative overflow-hidden rounded-[1.75rem] p-6 ring-1 ${TONES[r.tone].bg} ${TONES[r.tone].ring}`}>
                   <div className="flex items-start gap-4">
                     <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-paper/80 shadow-soft">
                       <NamedIcon name={r.icon} className={`h-7 w-7 ${TONES[r.tone].fg}`} />
@@ -42,7 +43,8 @@ export default function Aide() {
                   <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-paper/70">
                     <motion.div className="h-full rounded-full bg-ink" initial={{ width: 0 }} animate={{ width: `${(done / items.length) * 100}%` }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} />
                   </div>
-                </motion.div>
+                </div>
+                </Tilt>
               </Link>
             </motion.div>
           );

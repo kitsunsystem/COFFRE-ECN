@@ -32,9 +32,8 @@ export function Logo({ light, className = "" }: { light?: boolean; className?: s
 /* ---------- Ambient motion ---------- */
 
 export function Aurora({ dark, className = "" }: { dark?: boolean; className?: string }) {
-  const blobs = dark
-    ? ["bg-gold/25", "bg-aura/50", "bg-sage/25"]
-    : ["bg-gold-soft/70", "bg-sage-soft/80", "bg-coral-soft/60"];
+  // Colours in globals.css (.aura-*): they depend on the theme (gold only in "Noir et or").
+  const blobs = dark ? ["aura-d1", "aura-d2", "aura-d3"] : ["aura-l1", "aura-l2", "aura-l3"];
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
       <div className={`absolute -left-[20%] -top-[25%] h-[70%] w-[70%] rounded-full blur-3xl will-change-transform animate-aurora ${blobs[0]}`} />
@@ -44,17 +43,63 @@ export function Aurora({ dark, className = "" }: { dark?: boolean; className?: s
   );
 }
 
-export const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } } };
-// Opacity + transform only: blur filters stutter on mid-range phones.
+export const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } } };
+// Each block rises and tips forward into place, a light 3D entrance. Opacity + transform only: blur filters stutter
+// on mid-range phones.
 export const rise: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 140, damping: 20 } },
+  hidden: { opacity: 0, y: 22, rotateX: -7, scale: 0.985, transformPerspective: 900 },
+  show: { opacity: 1, y: 0, rotateX: 0, scale: 1, transformPerspective: 900, transition: { type: "spring", stiffness: 110, damping: 19, mass: 0.9 } },
 };
 
 export function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   return (
-    <motion.div className={className} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ type: "spring", stiffness: 90, damping: 18, delay }}>
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 32, rotateX: -8, transformPerspective: 900 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ type: "spring", stiffness: 80, damping: 18, delay }}
+    >
       {children}
+    </motion.div>
+  );
+}
+
+// A card you can press: under a mouse it tilts towards the pointer with a soft glare, lifts a little, and sinks when
+// pressed; on a phone it only sinks under the finger (no tilt that would fight the scroll). Give it the card's
+// rounded-* class: the glare follows that radius.
+export function Tilt({ children, className = "", max = 7 }: { children: ReactNode; className?: string; max?: number }) {
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const rotateX = useSpring(useTransform(my, [0, 1], [max, -max]), { stiffness: 220, damping: 20 });
+  const rotateY = useSpring(useTransform(mx, [0, 1], [-max, max]), { stiffness: 220, damping: 20 });
+  const gx = useTransform(mx, (v) => `${v * 100}%`);
+  const gy = useTransform(my, (v) => `${v * 100}%`);
+  const glare = useMotionTemplate`radial-gradient(circle at ${gx} ${gy}, rgba(255,255,255,0.12), transparent 60%)`;
+  const glow = useSpring(0, { stiffness: 160, damping: 22 });
+  const fine = () => typeof window !== "undefined" && window.matchMedia("(pointer: fine)").matches;
+  return (
+    <motion.div
+      className={`relative h-full ${className}`}
+      style={{ rotateX, rotateY, transformPerspective: 800 }}
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      onPointerMove={(e) => {
+        if (!fine()) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        mx.set((e.clientX - r.left) / r.width);
+        my.set((e.clientY - r.top) / r.height);
+        glow.set(1);
+      }}
+      onPointerLeave={() => {
+        mx.set(0.5);
+        my.set(0.5);
+        glow.set(0);
+      }}
+    >
+      {children}
+      <motion.span aria-hidden className="pointer-events-none absolute inset-0 rounded-[inherit]" style={{ background: glare, opacity: glow }} />
     </motion.div>
   );
 }

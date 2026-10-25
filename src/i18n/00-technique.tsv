@@ -6,6 +6,7 @@ id,printed_name,status,ordered_at,holder_person_id,profiles!inner(first_name,las
 launched, concierge_public_key
 SIGNED_OUT
 NFD
+(pointer: fine)
 {0}.rtf
 firstName
 lastName

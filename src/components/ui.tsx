@@ -25,26 +25,27 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
   children: ReactNode;
 }
 
-const base = "inline-flex items-center justify-center gap-2.5 rounded-full px-6 min-h-[3.25rem] font-semibold text-[1rem] transition-colors disabled:opacity-40 disabled:pointer-events-none select-none";
+const base = "relative isolate overflow-hidden inline-flex items-center justify-center gap-2.5 rounded-full px-6 min-h-[3.25rem] font-semibold text-[1rem] transition-[color,background-color,box-shadow,filter] duration-300 disabled:opacity-40 disabled:pointer-events-none select-none";
 
 export function Button({ variant = "primary", href, icon, full, className = "", children, ...rest }: ButtonProps) {
   const cls = `${base} ${VARIANTS[variant]} ${full ? "w-full" : ""} ${className}`;
   const inner = (
     <>
+      {(variant === "primary" || variant === "gold") && <span aria-hidden className="btn-shine" />}
       {icon}
       <span>{children}</span>
     </>
   );
   if (href)
     return (
-      <motion.div whileTap={{ scale: 0.97 }} className={full ? "w-full" : "inline-flex"}>
+      <motion.div whileTap={{ scale: 0.97 }} whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 400, damping: 25 }} className={full ? "w-full" : "inline-flex"}>
         <Link href={href} className={cls}>
           {inner}
         </Link>
       </motion.div>
     );
   return (
-    <motion.button whileTap={{ scale: 0.97 }} whileHover={{ y: -1 }} className={cls} {...rest}>
+    <motion.button whileTap={{ scale: 0.97 }} whileHover={{ y: -2 }} transition={{ type: "spring", stiffness: 400, damping: 25 }} className={cls} {...rest}>
       {inner}
     </motion.button>
   );
@@ -117,7 +118,7 @@ export function Toggle({ checked, onChange, label, hint }: { checked: boolean; o
         {hint && <span className="block text-[0.88rem] text-mist">{hint}</span>}
       </span>
       <span className={`relative h-8 w-14 shrink-0 rounded-full transition-colors ${checked ? "bg-sage" : "bg-line"}`}>
-        <motion.span layout transition={{ type: "spring", stiffness: 500, damping: 30 }} className={`absolute top-1 h-6 w-6 rounded-full bg-paper shadow ${checked ? "right-1" : "left-1"}`} />
+        <motion.span layout transition={{ type: "spring", stiffness: 500, damping: 30 }} className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow ${checked ? "right-1" : "left-1"}`} />
       </span>
     </button>
   );
@@ -128,7 +129,7 @@ export function Segmented<T extends string>({ options, value, onChange, layoutKe
     <div className="flex rounded-full bg-ink/[0.06] p-1">
       {options.map((o) => (
         <button key={o.id} type="button" onClick={() => onChange(o.id)} className="relative flex-1 whitespace-nowrap rounded-full px-1.5 py-2 text-[0.78rem] font-semibold">
-          {value === o.id && <motion.span layoutId={layoutKey} className="absolute inset-0 rounded-full bg-paper shadow-soft" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+          {value === o.id && <motion.span layoutId={layoutKey} className="seg-on absolute inset-0 rounded-full bg-paper shadow-soft" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
           <span className={`relative ${value === o.id ? "text-ink" : "text-mist"}`}>{o.label}</span>
         </button>
       ))}

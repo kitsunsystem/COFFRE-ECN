@@ -6,7 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 import { NamedIcon, TONES } from "@/components/icons";
 import { useNow } from "@/components/providers";
 import { Card, Eyebrow, Notice } from "@/components/ui";
-import { rise, ScoreRing, stagger } from "@/components/visuals";
+import { rise, ScoreRing, stagger, Tilt } from "@/components/visuals";
 import { RUBRICS } from "@/lib/aide";
 import { PROD } from "@/lib/env";
 import { progress } from "@/lib/score";
@@ -122,11 +122,13 @@ export default function Accueil() {
           { href: "/espace/aide", icon: LifeBuoy, title: "Démarches", sub: "Listes et courriers" },
         ].map((x) => (
           <Link key={x.href + x.title} href={x.href}>
-            <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} className="h-full rounded-[1.5rem] bg-paper p-4 shadow-soft ring-1 ring-line/70">
-              <x.icon className="h-7 w-7 text-gold-deep" />
-              <div className="mt-3 font-semibold">{x.title}</div>
-              <div className="text-[0.85rem] text-mist">{x.sub}</div>
-            </motion.div>
+            <Tilt className="rounded-[1.5rem]">
+              <div className="h-full rounded-[1.5rem] bg-paper p-4 shadow-soft ring-1 ring-line/70">
+                <x.icon className="h-7 w-7 text-gold-deep" />
+                <div className="mt-3 font-semibold">{x.title}</div>
+                <div className="text-[0.85rem] text-mist">{x.sub}</div>
+              </div>
+            </Tilt>
           </Link>
         ))}
       </motion.div>
@@ -149,20 +151,24 @@ export default function Accueil() {
       <motion.div variants={rise}>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-[1.4rem] font-semibold">Si quelque chose arrive</h2>
-          <Link href="/espace/aide" className="text-[0.9rem] font-semibold text-gold-deep">
+          <Link href="/espace/aide" className="shrink-0 whitespace-nowrap text-[0.9rem] font-semibold text-gold-deep">
             Tout voir
           </Link>
         </div>
-        <div className="-mx-5 flex snap-x gap-3 overflow-x-auto px-5 pb-2">
+        {/* Swiped with a finger or a trackpad: no scroll bar, the next card peeks out at the faded edge. */}
+        <div className="no-scrollbar fade-x -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-3 pt-1">
           {RUBRICS.map((r) => (
             <Link key={r.id} href={`/espace/aide/${r.id}`} className="w-60 shrink-0 snap-start">
-              <motion.div whileHover={{ y: -3 }} className={`h-full rounded-[1.5rem] p-5 ring-1 ${TONES[r.tone].bg} ${TONES[r.tone].ring}`}>
-                <NamedIcon name={r.icon} className={`h-7 w-7 ${TONES[r.tone].fg}`} />
-                <div className="mt-4 text-[1.1rem] font-semibold">{r.title}</div>
-                <div className="text-[0.88rem] text-ink-soft">{r.tagline}</div>
-              </motion.div>
+              <Tilt className="rounded-[1.5rem]">
+                <div className={`tile h-full rounded-[1.5rem] p-5 ring-1 ${TONES[r.tone].bg} ${TONES[r.tone].ring}`}>
+                  <NamedIcon name={r.icon} className={`h-7 w-7 ${TONES[r.tone].fg}`} />
+                  <div className="mt-4 text-[1.1rem] font-semibold">{r.title}</div>
+                  <div className="text-[0.88rem] text-ink-soft">{r.tagline}</div>
+                </div>
+              </Tilt>
             </Link>
           ))}
+          <span aria-hidden className="w-2 shrink-0" />
         </div>
       </motion.div>
     </motion.div>

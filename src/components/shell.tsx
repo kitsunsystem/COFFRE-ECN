@@ -49,11 +49,18 @@ function BottomNav({ items, dark }: { items: NavItem[]; dark?: boolean }) {
   );
 }
 
-// Enter-only: waiting for an exit animation made every tap feel slow.
+// Enter-only: waiting for an exit animation made every tap feel slow. The new page glides up and settles, with a
+// light depth; its blocks then rise one after the other (rise/stagger).
 function Transition({ children }: { children: ReactNode }) {
   const path = usePath();
   return (
-    <motion.div key={path} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}>
+    <motion.div
+      key={path}
+      initial={{ opacity: 0, y: 18, scale: 0.985, rotateX: -4, transformPerspective: 1200 }}
+      animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      style={{ transformOrigin: "50% 0%" }}
+    >
       {children}
     </motion.div>
   );
@@ -161,19 +168,19 @@ export function CoffreShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (hydrated && session.mode === "locked" && !closing.current) router.replace("/coffre");
   }, [hydrated, session.mode, router]);
-  // Auto-lock after 5 minutes without activity: keys must not stay in memory.
+  // Auto-lock after 5 minutes without activity: keys must not stay in memory. Reading counts as activity too
+  // (scrolling with a finger, a wheel or a trackpad), or the Coffre closed under someone reading "Qui voit quoi".
   useEffect(() => {
     let timer = setTimeout(lock, 5 * 60_000);
     const reset = () => {
       clearTimeout(timer);
       timer = setTimeout(lock, 5 * 60_000);
     };
-    window.addEventListener("pointerdown", reset);
-    window.addEventListener("keydown", reset);
+    const events = ["pointerdown", "pointermove", "keydown", "wheel", "touchmove", "scroll"] as const;
+    events.forEach((e) => window.addEventListener(e, reset, { passive: true, capture: true }));
     return () => {
       clearTimeout(timer);
-      window.removeEventListener("pointerdown", reset);
-      window.removeEventListener("keydown", reset);
+      events.forEach((e) => window.removeEventListener(e, reset, { capture: true }));
     };
   }, []);
   if (!hydrated || session.mode === "locked") return <Loader dark />;
