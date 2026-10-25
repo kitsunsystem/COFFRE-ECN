@@ -114,7 +114,8 @@ export default function Connexion() {
             <Button
               variant="gold"
               full
-              disabled={busy}
+              // Not before the saved state is loaded: it would overwrite the freshly seeded family.
+              disabled={busy || !hydrated}
               icon={<Sparkles className="h-5 w-5" />}
               onClick={async () => {
                 setBusy(true);
