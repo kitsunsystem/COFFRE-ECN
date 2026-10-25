@@ -8,7 +8,7 @@ import { AlmaFace } from "@/components/alma";
 import { useHydrated } from "@/components/providers";
 import { Button, Eyebrow, Field, Notice } from "@/components/ui";
 import { Aurora, Logo } from "@/components/visuals";
-import { createProfile, sendCode, submitKyc, verifyCode } from "@/lib/api";
+import { createProfile, PASSWORD_RULE, signUp, submitKyc, verifyCode } from "@/lib/api";
 import { ASSISTANT_NAME } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { uid, useApp, type Account, type Person } from "@/lib/store";
@@ -38,8 +38,8 @@ export default function Inscription() {
   const [people, setPeople] = useState<Person[]>([]);
   const [p, setP] = useState({ firstName: "", lastName: "", relation: "Conjoint", email: "" });
   const [kyc, setKyc] = useState<"idle" | "checking" | "done">("idle");
-  // Production: the e-mail address is verified with a one-time code before anything is created.
-  const [otp, setOtp] = useState<{ sent: boolean; code: string; busy: boolean; error: string | null }>({ sent: false, code: "", busy: false, error: null });
+  // Production: the access (e-mail + password) is created first, its address confirmed with a one-time code.
+  const [otp, setOtp] = useState<{ sent: boolean; password: string; code: string; busy: boolean; error: string | null }>({ sent: false, password: "", code: "", busy: false, error: null });
   const [kycFile, setKycFile] = useState<File | null>(null);
   const [later, setLater] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -131,7 +131,7 @@ export default function Inscription() {
                   <h1 className="mt-6 text-[2.2rem] font-semibold leading-tight">Bonjour, je suis {ASSISTANT_NAME}.</h1>
                   <p className="mt-3 text-[1.1rem] text-ink-soft">Je vais vous aider à créer votre Espace, vérification d&apos;identité comprise. Vous pourrez tout modifier ensuite.</p>
                   <Notice tone="ink">
-                    <span className="font-semibold">Rien à retenir.</span> Vous ouvrirez votre Coffre avec une carte et un code, sans mot de passe compliqué.
+                    <span className="font-semibold">Votre Coffre ne dépend d&apos;aucun mot de passe.</span> Il s&apos;ouvre avec votre carte et Face ID. Le mot de passe ne sert qu&apos;à l&apos;Espace.
                   </Notice>
                 </div>
               )}
@@ -156,9 +156,12 @@ export default function Inscription() {
                   {PROD && !me && (
                     <div className="space-y-3 rounded-2xl bg-paper/70 p-4 ring-1 ring-line">
                       {!otp.sent ? (
-                        <Button full variant="outline" disabled={otp.busy || !/.+@.+\..+/.test(d.email)} onClick={() => otpStep(async () => { await sendCode(d.email); setOtp((o) => ({ ...o, sent: true })); })}>
-                          {otp.busy ? "Envoi…" : "Vérifier mon adresse (code par e-mail)"}
-                        </Button>
+                        <>
+                          <Field label="Mot de passe de l'Espace" type="password" autoComplete="new-password" value={otp.password} onChange={(v) => setOtp((o) => ({ ...o, password: v }))} hint="10 caractères au moins, avec une majuscule, une minuscule et un chiffre." />
+                          <Button full variant="outline" disabled={otp.busy || !/.+@.+\..+/.test(d.email) || !PASSWORD_RULE.test(otp.password)} onClick={() => otpStep(async () => { await signUp(d.email, otp.password); setOtp((o) => ({ ...o, sent: true })); })}>
+                            {otp.busy ? "Envoi…" : "Créer mon accès (code par e-mail)"}
+                          </Button>
+                        </>
                       ) : (
                         <>
                           <Field label="Code reçu par e-mail" inputMode="numeric" value={otp.code} onChange={(v) => setOtp((o) => ({ ...o, code: v.replace(/\D/g, "").slice(0, 6) }))} />

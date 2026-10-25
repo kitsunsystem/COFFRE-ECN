@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   output: "export",
   // GitHub Pages serves the demo under /<repo>; set only by `npm run deploy`, so local dev stays at /.
   basePath: process.env.PAGES_BASE_PATH ?? "",
+  // Full links built in the browser (the QR code shown to the phone) need it too.
+  env: { NEXT_PUBLIC_BASE_PATH: process.env.PAGES_BASE_PATH ?? "" },
   // Emits espace/index.html instead of espace.html: static hosts (GitHub Pages) pick the espace/ folder otherwise, and reloads 404.
   trailingSlash: true,
   images: { unoptimized: true },

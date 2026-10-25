@@ -4,6 +4,10 @@
 <dict>
 	<key>NFCReaderUsageDescription</key>
 	<string>Lire votre carte pour ouvrir votre Coffre.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Confirmer que c'est bien vous avant d'ouvrir le Coffre.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Scanner le code QR d'un ordinateur pour y ouvrir votre Coffre.</string>
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>

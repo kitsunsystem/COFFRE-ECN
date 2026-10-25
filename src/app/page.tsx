@@ -348,7 +348,8 @@ function Offer() {
 }
 
 const FAQ = [
-  ["Dois-je retenir un mot de passe ou une phrase secrète ?", "Non. Vous ouvrez votre Coffre avec votre carte, plus votre code ou Face ID. La carte est toujours nécessaire."],
+  ["Dois-je retenir un mot de passe ou une phrase secrète ?", "Pas pour le Coffre : il s'ouvre avec votre carte et Face ID, la carte est toujours nécessaire. Un mot de passe protège seulement l'Espace (vos rappels, votre famille)."],
+  ["Puis-je ouvrir mon Coffre sur un ordinateur ?", "Oui. La première fois, votre téléphone scanne le code QR affiché sur l'ordinateur ; ensuite, une notification suffit. Chaque ouverture se confirme sur le téléphone, carte posée et Face ID."],
   ["Que se passe-t-il si je perds une carte ?", "Vos deux autres cartes ouvrent toujours votre Coffre. La carte perdue est désactivée en un geste, et une nouvelle peut être appairée."],
   ["Et mes bénéficiaires ?", "Chacun reçoit un pack de 2 cartes à son nom, à ranger dans deux endroits différents. Après votre décès, un bénéficiaire qui aurait perdu ses deux cartes perdrait son accès : nous le lui expliquons à la réception, et nous lui demandons régulièrement si ses cartes sont toujours là."],
   ["Est-ce un testament ?", "Non. Le Coffre ne remplace ni un notaire ni un testament : il indique où se trouve l'original et aide vos proches à tout retrouver."],

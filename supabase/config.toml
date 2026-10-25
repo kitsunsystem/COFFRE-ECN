@@ -36,6 +36,9 @@ enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
 enable_signup = true
 enable_anonymous_sign_ins = false
+# The Espace opens with e-mail + password (the Coffre never does: card + code, or the phone for a computer).
+minimum_password_length = 10
+password_requirements = "lower_upper_letters_digits"
 
 [auth.rate_limit]
 email_sent = 30
@@ -48,17 +51,17 @@ double_confirm_changes = true
 enable_confirmations = true
 secure_password_change = true
 max_frequency = "60s"
-# Sign-in with a 6-digit code: no password, works the same on the website and in the app.
+# 6-digit codes (no links, the same on the website and in the app): confirm a new address, reset a forgotten password.
 otp_length = 6
 otp_expiry = 3600
 
-[auth.email.template.magic_link]
-subject = "Votre code de connexion"
+[auth.email.template.confirmation]
+subject = "Confirmez votre adresse"
 content_path = "./supabase/templates/code.html"
 
-[auth.email.template.confirmation]
-subject = "Votre code de connexion"
-content_path = "./supabase/templates/code.html"
+[auth.email.template.recovery]
+subject = "Votre code pour changer de mot de passe"
+content_path = "./supabase/templates/recovery.html"
 
 [auth.email.template.email_change]
 subject = "Confirmez votre nouvelle adresse"
@@ -95,4 +98,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.account-delete]
+verify_jwt = true
+
+[functions.push]
 verify_jwt = true

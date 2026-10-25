@@ -94,7 +94,7 @@ export default function Beneficiaire() {
 
         {PROD && !me && (
           <Card className="mt-6">
-            <p className="text-ink-soft">Connectez-vous avec l&apos;adresse e-mail à laquelle vous avez été prévenu de l&apos;envoi de vos cartes. Pas de mot de passe : vous recevez un code.</p>
+            <p className="text-ink-soft">Connectez-vous avec l&apos;adresse e-mail à laquelle vous avez été prévenu de l&apos;envoi de vos cartes. Première fois ? Créez votre accès : un code de confirmation vous est envoyé.</p>
             <Button className="mt-4" full variant="gold" href="/connexion?suite=/beneficiaire" icon={<LogIn className="h-5 w-5" />}>
               Me connecter
             </Button>

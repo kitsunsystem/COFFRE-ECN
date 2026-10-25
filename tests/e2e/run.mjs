@@ -25,13 +25,12 @@ const refused = async (p, label) => {
   assert.ok(error || (Array.isArray(data) && data.length === 0), `${label} aurait dû être refusé`);
 };
 
-// A person signs in with the 6-digit code (taken from the admin API instead of the mailbox).
+// A person signs in with e-mail + password (the address confirmed through the admin API instead of the 6-digit code).
 async function signIn(email) {
   const c = createClient(URL_, ANON, { auth: { persistSession: false } });
-  // Same as signInWithOtp({ shouldCreateUser: true }) followed by the code from the e-mail.
-  await admin.auth.admin.createUser({ email, email_confirm: true });
-  const link = await must(admin.auth.admin.generateLink({ type: "magiclink", email }), "generateLink");
-  const session = await must(c.auth.verifyOtp({ email, token: link.properties.email_otp, type: "email" }), "verifyOtp");
+  const password = `Essai-${randomUUID()}`;
+  await must(admin.auth.admin.createUser({ email, password, email_confirm: true }), "createUser");
+  const session = await must(c.auth.signInWithPassword({ email, password }), "signInWithPassword");
   assert.ok(session.session, "session");
   return { c, id: session.user.id };
 }
@@ -45,7 +44,9 @@ await admin.from("app_settings").update({ launched: false }).eq("id", true);
 const claire = await signIn(mail("claire"));
 const marc = await signIn(mail("marc"));
 const eve = await signIn(mail("eve"));
-ok("connexion par code à usage unique (3 comptes)");
+const weak = await createClient(URL_, ANON, { auth: { persistSession: false } }).auth.signUp({ email: mail("faible"), password: "court" });
+assert.ok(weak.error, "mot de passe trop faible accepté");
+ok("connexion par e-mail et mot de passe (3 comptes) ; mot de passe faible refusé");
 
 await must(claire.c.from("profiles").insert({ id: claire.id, first_name: "Claire", last_name: "Durand", birth_date: "1972-03-14", birth_city: "Lyon" }), "profil");
 const [profile] = await must(claire.c.from("profiles").select("kyc, email"), "lecture profil");
@@ -110,17 +111,36 @@ await refused(eve.c.rpc("declare_procedure", { owner: claire.id, proc_kind: "cou
 await must(claire.c.rpc("cancel_procedure", { proc: procId }), "annulation");
 ok("coup dur déclaré par le garant, refusé à un inconnu, annulé par la titulaire");
 
-const queued = await must(admin.from("outbox").select("template, to_email").in("to_email", [mail("claire"), mail("marc")]), "outbox");
-for (const t of ["bienvenue", "invitation-garant", "cartes-commandees", "invitation-porteur", "coup-dur-declare"]) assert.ok(queued.some((m) => m.template === t), `e-mail ${t} en file`);
-await refused(claire.c.from("outbox").select("*"), "lecture de la file d'e-mails");
 const fn = (name, key, body = {}) => fetch(`${URL_}/functions/v1/${name}`, { method: "POST", headers: { authorization: `Bearer ${key}`, "content-type": "application/json" }, body: JSON.stringify(body) });
+const claireToken = (await claire.c.auth.getSession()).data.session.access_token;
+
+// Trusted computer: the computer asks, the phone answers with the right number and deposits sealed keys,
+// the computer takes them back once. The server only ever holds ciphertext.
+const pairing = await must(claire.c.rpc("request_device", { req_kind: "pairing", device_pk: Buffer.alloc(32, 7).toString("base64"), device_name: "Chrome · Windows" }), "appairage");
+const seen = await must(claire.c.rpc("device_request", { req: pairing.id }), "demande vue par le téléphone");
+assert.equal(seen.choices.length, 3);
+assert.equal(seen.code, undefined, "le bon nombre ne doit pas être montré au téléphone");
+assert.equal(await must(eve.c.rpc("device_request", { req: pairing.id }), "demande vue par une inconnue"), null);
+const device = await must(claire.c.rpc("approve_device_request", { req: pairing.id, choice: pairing.code, payload: "c2NlbGzDqQ==" }), "approbation");
+assert.equal((await must(claire.c.rpc("take_device_request", { req: pairing.id }), "reprise")).sealed, "c2NlbGzDqQ==");
+assert.equal((await must(claire.c.rpc("take_device_request", { req: pairing.id }), "seconde reprise")).sealed, null);
+await refused(claire.c.from("device_requests").select("*"), "lecture directe des demandes");
+const opening = await must(claire.c.rpc("request_device", { req_kind: "open", device }), "ouverture depuis l'ordinateur");
+const pushed = await fn("push", claireToken, { request: opening.id });
+assert.equal(pushed.status, 200, `push: ${await pushed.clone().text()}`);
+assert.equal((await fn("push", ANON, { request: opening.id })).status, 401);
+ok("ordinateur de confiance : nombre de contrôle, clés scellées reprises une seule fois, notification");
+
+const queued = await must(admin.from("outbox").select("template, to_email").in("to_email", [mail("claire"), mail("marc")]), "outbox");
+for (const t of ["bienvenue", "invitation-garant", "cartes-commandees", "invitation-porteur", "coup-dur-declare", "nouvel-appareil"]) assert.ok(queued.some((m) => m.template === t), `e-mail ${t} en file`);
+await refused(claire.c.from("outbox").select("*"), "lecture de la file d'e-mails");
 const r = await fn("mailer", SERVICE);
 assert.equal(r.status, 200, `mailer: ${await r.clone().text()}`);
-assert.ok((await r.json()).sent >= 5);
+assert.ok((await r.json()).sent >= 6);
 assert.equal((await fn("mailer", ANON)).status, 403);
 ok("e-mails mis en file par la base, envoyés par « mailer » (refusé sans la clé de service)");
 
-const del = await fn("account-delete", (await claire.c.auth.getSession()).data.session.access_token);
+const del = await fn("account-delete", claireToken);
 assert.equal(del.status, 200, `account-delete: ${await del.clone().text()}`);
 assert.equal((await must(admin.from("profiles").select("id").eq("id", claire.id), "après suppression")).length, 0);
 const gone = await admin.storage.from("coffre").list(`${claire.id}/a-prevenir`);

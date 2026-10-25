@@ -2,7 +2,7 @@
 // auth.users / auth.uid(), and storage.objects / storage.foldername(). Lets the access rules (RLS, grants,
 // functions) be tested anywhere, without Docker. The CI also runs the full Supabase stack (see .github/workflows/ci.yml).
 import { PGlite } from "@electric-sql/pglite";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 const SHIM = `
 create role anon nologin;
@@ -26,8 +26,10 @@ grant execute on function storage.foldername(text) to anon, authenticated;
 export async function freshDb() {
   const db = new PGlite();
   await db.exec(SHIM);
-  const sql = readFileSync(new URL("../migrations/0001_init.sql", import.meta.url), "utf8").replace(/^create extension.*$/gm, "");
-  await db.exec(sql);
+  // Every migration except the scheduling one (pg_cron and pg_net do not exist in PGlite).
+  const dir = new URL("../migrations/", import.meta.url);
+  for (const f of readdirSync(dir).filter((f) => f.endsWith(".sql") && !f.includes("cron")).sort())
+    await db.exec(readFileSync(new URL(f, dir), "utf8").replace(/^create extension.*$/gm, ""));
   return db;
 }
 

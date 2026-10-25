@@ -4,10 +4,12 @@
 import { Nfc } from "lucide-react";
 import { useState } from "react";
 import { activeTrustCards } from "@/lib/api";
+import { faceIdThenCode, forgetCode, rememberCode } from "@/lib/biometric";
 import { driver, needsPin, read, type Tap } from "@/lib/cards";
 import { PROD } from "@/lib/env";
-import { useApp, type Card } from "@/lib/store";
-import { unlock } from "@/lib/vault";
+import { isNative } from "@/lib/native";
+import { useApp, type Card, type OpenSession } from "@/lib/store";
+import { cardKeys, openSession } from "@/lib/vault";
 import { PinPad } from "./pinpad";
 import { Button } from "./ui";
 import { NfcCard, TapReader, type TapState } from "./visuals";
@@ -21,9 +23,10 @@ export function openableCards(): Card[] {
   return PROD ? [...own, ...activeTrustCards()] : own;
 }
 
-type Opened = (mode: "owner" | "holder", pin?: string) => void | Promise<void>;
+type Opened = (mode: "owner" | "holder", pin?: string, keys?: OpenSession) => void | Promise<void>;
 
-export function useCardOpen(candidates: Card[], onOpened: Opened) {
+// keysOnly: the keys are handed to onOpened without opening the Coffre here (the phone approving a computer).
+export function useCardOpen(candidates: Card[], onOpened: Opened, keysOnly = false) {
   const demo = driver() === "demo";
   const [tap, setTap] = useState<Tap | null>(null);
   const [reading, setReading] = useState<TapState>("idle");
@@ -31,15 +34,23 @@ export function useCardOpen(candidates: Card[], onOpened: Opened) {
   const [picking, setPicking] = useState(false);
   const [opening, setOpening] = useState(false);
 
-  async function finish(t: Tap, pin?: string) {
+  async function finish(t: Tap, pin?: string, saved = false) {
     setError(null);
     setOpening(true);
     try {
-      await onOpened(await unlock(t, pin), pin);
+      const keys = await cardKeys(t, pin);
+      // In the app, a code typed right is kept behind Face ID for the next time.
+      if (pin && !saved && isNative()) await rememberCode(t.card.id, pin);
+      if (!keysOnly) await openSession(keys);
+      await onOpened(keys.mode, pin, keys);
     } catch (e) {
       setOpening(false);
       setError((e as Error).message);
-      if (!pin) {
+      if (saved) {
+        // The kept code no longer works: forget it and ask for it.
+        await forgetCode(t.card.id);
+        setTap(t);
+      } else if (!pin) {
         setTap(null);
         setReading("error");
         setTimeout(() => setReading("idle"), 900);
@@ -56,8 +67,11 @@ export function useCardOpen(candidates: Card[], onOpened: Opened) {
       // The demo waits a moment so the reading animation is visible; a real card takes that long anyway.
       const [t] = await Promise.all([read(candidates, picked), demo ? sleep(1000) : null]);
       setReading("done");
-      if (needsPin(t.card.kind)) setTap(t);
-      else await finish(t);
+      if (!needsPin(t.card.kind)) return await finish(t);
+      // App: Face ID (or the phone's code) is mandatory, and gives back the card's code once it has been typed here.
+      const saved = isNative() ? await faceIdThenCode(t.card.id) : null;
+      if (saved) await finish(t, saved, true);
+      else setTap(t);
     } catch (e) {
       setReading("error");
       setError((e as Error).message);
@@ -74,8 +88,8 @@ export function useCardOpen(candidates: Card[], onOpened: Opened) {
 }
 
 // Ready-made block (light or dark): used to prove who you are (cancel a procedure) or to open before adding a card.
-export function CardUnlock({ candidates, onOpened, dark, intro }: { candidates: Card[]; onOpened: Opened; dark?: boolean; intro?: string }) {
-  const f = useCardOpen(candidates, onOpened);
+export function CardUnlock({ candidates, onOpened, dark, intro, keysOnly }: { candidates: Card[]; onOpened: Opened; dark?: boolean; intro?: string; keysOnly?: boolean }) {
+  const f = useCardOpen(candidates, onOpened, keysOnly);
   if (!candidates.length) return <p className={dark ? "text-paper/70" : "text-ink-soft"}>Aucune carte active.</p>;
   if (f.tap)
     return (

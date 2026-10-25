@@ -83,6 +83,7 @@ export function Field({
   placeholder,
   autoFocus,
   inputMode,
+  autoComplete,
 }: {
   label: string;
   hint?: string;
@@ -93,6 +94,7 @@ export function Field({
   placeholder?: string;
   autoFocus?: boolean;
   inputMode?: "text" | "numeric" | "tel" | "email";
+  autoComplete?: string;
 }) {
   const id = useId();
   const cls =
@@ -103,7 +105,7 @@ export function Field({
       {multiline ? (
         <textarea id={id} rows={4} className={cls} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
       ) : (
-        <input id={id} type={type} inputMode={inputMode} autoFocus={autoFocus} className={cls} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+        <input id={id} type={type} inputMode={inputMode} autoFocus={autoFocus} autoComplete={autoComplete} className={cls} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
       )}
       {hint && <span className="mt-1.5 block text-[0.85rem] text-mist">{hint}</span>}
     </label>

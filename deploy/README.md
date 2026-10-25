@@ -43,10 +43,11 @@ Dans les deux cas, ensuite :
 - **Secrets des fonctions** : `supabase secrets set NOM=valeur` (liste dans `.env.example`).
 - **Authentification** (Authentication › Settings) :
   - Site URL : `https://app.<domaine>` ; Redirect URLs : `https://app.<domaine>`, `capacitor://localhost`, `https://localhost` ;
-  - fournisseur e-mail activé, inscriptions activées, confirmation obligatoire ;
+  - fournisseur e-mail activé, inscriptions activées, confirmation obligatoire ; mot de passe : 10 caractères au
+    moins, minuscules, majuscules et chiffres (déjà dans `supabase/config.toml`) ;
   - SMTP personnalisé : celui de Brevo (étape 4) ;
-  - modèles d'e-mail : copier `supabase/templates/code.html` pour « Magic Link » et « Confirm signup »
-    (ils affichent le code à 6 chiffres), et `email-change.html` pour « Change Email Address ».
+  - modèles d'e-mail (ils affichent le code à 6 chiffres) : `supabase/templates/code.html` pour « Confirm signup »,
+    `recovery.html` pour « Reset Password », et `email-change.html` pour « Change Email Address ».
 - **Comptes de l'équipe** : chaque membre crée son compte normalement, puis :
   ```sql
   insert into public.staff (user_id, role) select id, 'admin' from auth.users where email = 'prenom@<domaine>';
@@ -115,10 +116,23 @@ Pour les stores :
 - **Google** : compte Google Play Console (25 $), clé de signature (keystore), `./gradlew bundleRelease`.
 - Icônes et écrans de lancement : `npx @capacitor/assets generate` à partir d'un logo 1024×1024.
 - Cartes : FIDO2 (fonctionnent sur le site) ou Tangem (plugin natif à ajouter : `native/tangem/README.md`).
+- Une fois publiées : variables `NEXT_PUBLIC_STORE_IOS` et `NEXT_PUBLIC_STORE_ANDROID` (liens des fiches) ; sur le
+  navigateur d'un téléphone, le Coffre renvoie vers l'application.
+
+**Ordinateurs de confiance (notifications).** Sur ordinateur, le Coffre s'ouvre avec l'accord du téléphone (code QR la
+première fois, puis notification). Sans les clés ci-dessous tout fonctionne, la demande attend simplement dans
+l'application ; avec elles, le téléphone sonne :
+- **Android** : projet Firebase (gratuit), application `app.sillage.famille`, télécharger `google-services.json` dans
+  `android/app/` ; compte de service Firebase (JSON) → `supabase secrets set FCM_SERVICE_ACCOUNT='<json sur une ligne>'`.
+- **iOS** : Apple Developer › Keys › clé APNs (.p8) → secrets `APNS_KEY` (contenu du .p8), `APNS_KEY_ID`, `APNS_TEAM_ID`,
+  `APNS_TOPIC` (identifiant de l'app) ; Xcode › Signing & Capabilities › **+ Push Notifications**.
+- Puis `NEXT_PUBLIC_PUSH=1` dans les variables de build de l'application.
+- Face ID (ou l'empreinte, ou le code du téléphone) est exigé à chaque ouverture dans l'application ; rien à configurer.
 
 ## 9. Avant l'audit d'intrusion
 
-- `npm test` : tests unitaires + règles d'accès de la base (32 scénarios, dont les tentatives d'un inconnu).
+- `npm test` : tests unitaires + règles d'accès de la base (46 scénarios, dont les tentatives d'un inconnu et les
+  ordinateurs de confiance).
 - CI : le parcours complet sur un vrai Supabase à chaque push.
 - Actions › **Security scan** : OWASP ZAP (analyse passive) sur l'adresse de pré-production.
 - Dependabot ouvre une demande à chaque dépendance à mettre à jour.

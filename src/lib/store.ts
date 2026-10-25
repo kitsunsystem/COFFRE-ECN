@@ -126,6 +126,28 @@ export interface HolderView {
   procedures: Procedure[];
 }
 
+// A computer allowed to ask for the Coffre (the phone approves each opening, card tapped), for 90 days.
+export interface TrustedDevice {
+  id: string;
+  name: string;
+  createdAt: number;
+  expiresAt: number;
+  lastUsedAt?: number;
+}
+
+// A computer's request, as the phone sees it: three numbers to choose from, never the right one alone.
+export interface DeviceRequest {
+  id: string;
+  kind: "pairing" | "open";
+  deviceId?: string;
+  name: string;
+  pk: string; // the computer's public key: the opened keys are sealed to it
+  choices: number[];
+  status: "pending" | "approved" | "refused" | "used";
+  createdAt: number;
+  expiresAt: number;
+}
+
 interface State {
   ready: boolean; // demo: local data loaded; production: session restored and data fetched
   me?: { userId: string; email: string }; // production only
@@ -221,10 +243,8 @@ export const personName = (people: Person[], id: string) => {
 };
 
 // Coffre session: keys in memory only, gone on reload or lock.
-type Session =
-  | { mode: "locked" }
-  | { mode: "owner"; cardId: string; vmk: Uint8Array }
-  | { mode: "holder"; cardId: string; publicKey: Uint8Array; privateKey: Uint8Array };
+export type OpenSession = { mode: "owner"; cardId: string; vmk: Uint8Array } | { mode: "holder"; cardId: string; publicKey: Uint8Array; privateKey: Uint8Array };
+type Session = { mode: "locked" } | OpenSession;
 
 export const useSession = create<{ session: Session; setSession: (s: Session) => void }>()((set) => ({
   session: { mode: "locked" },

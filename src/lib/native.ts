@@ -1,7 +1,22 @@
-// What differs between the website and the iOS/Android app (Capacitor): saving a file and copying text.
+// What differs between the website and the iOS/Android app (Capacitor): saving a file, copying text, reading a QR code.
 import { Capacitor } from "@capacitor/core";
 
 export const isNative = () => Capacitor.isNativePlatform();
+// A phone or tablet's browser (not the app): the cards cannot be read there, the Coffre opens in the app.
+export const isPhoneBrowser = () => !isNative() && (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)));
+
+// App: a computer's QR code, read with the camera. Returns the page where the phone answers, or null if it is not ours.
+export async function scanComputer(instructions: string): Promise<string | null> {
+  const { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } = await import("@capacitor/barcode-scanner");
+  const { ScanResult } = await CapacitorBarcodeScanner.scanBarcode({ hint: CapacitorBarcodeScannerTypeHint.QR_CODE, scanInstructions: instructions });
+  try {
+    const u = new URL(ScanResult);
+    const [r, k] = [u.searchParams.get("r"), u.searchParams.get("k")];
+    return u.pathname.endsWith("/appareil/") && r && k ? `/appareil/?r=${encodeURIComponent(r)}&k=${encodeURIComponent(k)}` : null;
+  } catch {
+    return null;
+  }
+}
 
 const toBase64 = (blob: Blob) =>
   new Promise<string>((ok, ko) => {

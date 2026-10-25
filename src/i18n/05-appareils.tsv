@@ -1,0 +1,121 @@
+# Appareils de confiance (ordinateur ↔ téléphone), mot de passe de l'Espace, Face ID obligatoire dans l'application.
+Téléphone (démo)	Phone (demo)	Teléfono (demo)	Telèfon (demo)
+Ouvrez l'application sur votre téléphone, puis touchez « Scanner un ordinateur » dans le Coffre.	Open the app on your phone, then tap "Scan a computer" in the Vault.	Abra la aplicación en su teléfono y toque «Escanear un ordenador» en el Cofre.	Obriu l'aplicació al vostre telèfon i toqueu «Escanejar un ordinador» al Cofre.
+Répondez depuis l'application	Answer from the app	Responda desde la aplicación	Responeu des de l'aplicació
+Connectez-vous d'abord	Sign in first	Inicie sesión primero	Inicieu la sessió primer
+Vos ordinateurs	Your computers	Sus ordenadores	Els vostres ordinadors
+Les demandes d'ouverture de vos ordinateurs de confiance s'affichent ici.	Opening requests from your trusted computers appear here.	Aquí aparecen las solicitudes de apertura de sus ordenadores de confianza.	Aquí apareixen les sol·licituds d'obertura dels vostres ordinadors de confiança.
+Un instant…	One moment…	Un momento…	Un moment…
+Demande introuvable	Request not found	Solicitud no encontrada	Sol·licitud no trobada
+Elle a peut-être été faite depuis un autre compte.	It may have been made from another account.	Puede que se haya hecho desde otra cuenta.	Potser s'ha fet des d'un altre compte.
+{0} Rien n'est resté ouvert sur ce téléphone.	{0} Nothing was left open on this phone.	{0} No ha quedado nada abierto en este teléfono.	{0} No ha quedat res obert en aquest telèfon.
+C'est fait	Done	Hecho	Fet
+Cet ordinateur est maintenant un appareil de confiance, et le Coffre s'y ouvre.	This computer is now a trusted device, and the Vault is opening on it.	Este ordenador es ahora un dispositivo de confianza y el Cofre se abre en él.	Aquest ordinador ja és un dispositiu de confiança i el Cofre s'hi obre.
+Le Coffre s'ouvre sur l'ordinateur.	The Vault is opening on the computer.	El Cofre se abre en el ordenador.	El Cofre s'obre a l'ordinador.
+Par sécurité, la demande est annulée. Si elle ne venait pas de vous, changez votre mot de passe dans Compte.	For your security, the request has been cancelled. If it did not come from you, change your password in Account.	Por seguridad, la solicitud se ha cancelado. Si no la hizo usted, cambie su contraseña en Cuenta.	Per seguretat, la sol·licitud s'ha cancel·lat. Si no la vau fer vós, canvieu la contrasenya a Compte.
+Ce n'est pas le bon nombre	That is not the right number	No es el número correcto	No és el número correcte
+Rien ne s'est ouvert. Si elle ne venait pas de vous, changez votre mot de passe dans Compte.	Nothing was opened. If it did not come from you, change your password in Account.	No se ha abierto nada. Si no la hizo usted, cambie su contraseña en Cuenta.	No s'ha obert res. Si no la vau fer vós, canvieu la contrasenya a Compte.
+Demande refusée	Request declined	Solicitud rechazada	Sol·licitud rebutjada
+Recommencez depuis l'ordinateur.	Start again from the computer.	Vuelva a empezar desde el ordenador.	Torneu a començar des de l'ordinador.
+Demande expirée	Request expired	Solicitud caducada	Sol·licitud caducada
+Faire confiance à cet ordinateur ?	Trust this computer?	¿Confiar en este ordenador?	Confiar en aquest ordinador?
+Ouvrir le Coffre sur l'ordinateur ?	Open the Vault on the computer?	¿Abrir el Cofre en el ordenador?	Obrir el Cofre a l'ordinador?
+Demandé à {0}	Requested at {0}	Solicitado a las {0}	Sol·licitat a les {0}
+N'acceptez que si cet ordinateur est devant vous. Il pourra ensuite demander l'ouverture du Coffre, toujours avec votre accord ici.	Only accept if this computer is in front of you. It will then be able to ask to open the Vault, always with your approval here.	Acepte solo si este ordenador está delante de usted. Después podrá pedir la apertura del Cofre, siempre con su aprobación aquí.	Accepteu només si aquest ordinador és davant vostre. Després podrà demanar l'obertura del Cofre, sempre amb la vostra aprovació aquí.
+Quel nombre s'affiche sur l'ordinateur ?	Which number is shown on the computer?	¿Qué número aparece en el ordenador?	Quin número apareix a l'ordinador?
+Ce n'est pas moi : refuser	It was not me: decline	No he sido yo: rechazar	No he estat jo: rebutjar
+Posez votre carte	Tap your card	Acerque su tarjeta	Acosteu la targeta
+Pour confirmer, avec Face ID. Le Coffre s'ouvrira sur l'ordinateur, pas ici.	To confirm, with Face ID. The Vault will open on the computer, not here.	Para confirmar, con Face ID. El Cofre se abrirá en el ordenador, no aquí.	Per confirmar, amb Face ID. El Cofre s'obrirà a l'ordinador, no aquí.
+Revenir au choix du nombre	Back to choosing the number	Volver a elegir el número	Tornar a triar el número
+Retour au Coffre	Back to the Vault	Volver al Cofre	Tornar al Cofre
+Fermer le téléphone simulé	Close the simulated phone	Cerrar el teléfono simulado	Tancar el telèfon simulat
+Connectez-vous avec l'adresse e-mail à laquelle vous avez été prévenu de l'envoi de vos cartes. Première fois ? Créez votre accès : un code de confirmation vous est envoyé.	Sign in with the e-mail address at which you were told your cards were on their way. First time? Create your access: a confirmation code will be sent to you.	Inicie sesión con el correo electrónico en el que se le avisó del envío de sus tarjetas. ¿Primera vez? Cree su acceso: le enviaremos un código de confirmación.	Inicieu la sessió amb el correu electrònic on se us va avisar de l'enviament de les targetes. Primera vegada? Creeu el vostre accés: us enviarem un codi de confirmació.
+Sur un ordinateur ? Ouvrir avec mon téléphone	On a computer? Open with my phone	¿En un ordenador? Abrir con mi teléfono	En un ordinador? Obrir amb el meu telèfon
+Dans l'application iPhone et Android, Face ID (ou l'empreinte) est demandé à chaque ouverture : le code n'est tapé qu'une fois par téléphone, toujours avec la carte.	In the iPhone and Android app, Face ID (or your fingerprint) is required at every opening: the code is typed only once per phone, always with the card.	En la aplicación para iPhone y Android, se pide Face ID (o la huella) en cada apertura: el código se escribe solo una vez por teléfono, siempre con la tarjeta.	A l'aplicació per a iPhone i Android, es demana Face ID (o l'empremta) a cada obertura: el codi s'escriu només un cop per telèfon, sempre amb la targeta.
+Votre adresse e-mail et votre mot de passe ouvrent l'Espace. Le Coffre, lui, s'ouvre avec votre carte.	Your e-mail address and password open the Space. The Vault opens with your card.	Su correo electrónico y su contraseña abren el Espacio. El Cofre se abre con su tarjeta.	El vostre correu electrònic i la contrasenya obren l'Espai. El Cofre s'obre amb la vostra targeta.
+Aucun compte avec cette adresse dans la démonstration : découvrez-la ci-dessous.	No account with this address in the demo: try the demo below.	No hay ninguna cuenta con esta dirección en la demostración: descúbrala más abajo.	No hi ha cap compte amb aquesta adreça a la demostració: descobriu-la a continuació.
+Choisissez un mot de passe	Choose a password	Elija una contraseña	Trieu una contrasenya
+10 caractères au moins, avec une majuscule, une minuscule et un chiffre.	At least 10 characters, with an upper-case letter, a lower-case letter and a digit.	Al menos 10 caracteres, con una mayúscula, una minúscula y una cifra.	Almenys 10 caràcters, amb una majúscula, una minúscula i una xifra.
+Créer mon accès	Create my access	Crear mi acceso	Crear el meu accés
+Mot de passe oublié ?	Forgot your password?	¿Ha olvidado su contraseña?	Heu oblidat la contrasenya?
+Invité par un proche ? Créez votre accès	Invited by a relative? Create your access	¿Le ha invitado un familiar? Cree su acceso	Us ha convidat un familiar? Creeu el vostre accés
+J'ai déjà un accès : me connecter	I already have access: sign in	Ya tengo acceso: iniciar sesión	Ja tinc accés: iniciar la sessió
+Pour confirmer votre adresse, un code à 6 chiffres vient d'être envoyé à {0}.	To confirm your address, a 6-digit code has just been sent to {0}.	Para confirmar su dirección, acabamos de enviar un código de 6 cifras a {0}.	Per confirmar la vostra adreça, acabem d'enviar un codi de 6 xifres a {0}.
+Confirmer et me connecter	Confirm and sign in	Confirmar e iniciar sesión	Confirmar i iniciar la sessió
+Revenir à la connexion	Back to sign-in	Volver al inicio de sesión	Tornar a l'inici de sessió
+Appareils de confiance	Trusted devices	Dispositivos de confianza	Dispositius de confiança
+Mot de passe changé.	Password changed.	Contraseña cambiada.	Contrasenya canviada.
+Changer mon mot de passe	Change my password	Cambiar mi contraseña	Canviar la meva contrasenya
+Il s'ouvre avec votre carte et Face ID. Le mot de passe ne sert qu'à l'Espace.	It opens with your card and Face ID. The password is only for the Space.	Se abre con su tarjeta y Face ID. La contraseña solo sirve para el Espacio.	S'obre amb la vostra targeta i Face ID. La contrasenya només serveix per a l'Espai.
+Votre Coffre ne dépend d'aucun mot de passe.	Your Vault does not depend on any password.	Su Cofre no depende de ninguna contraseña.	El vostre Cofre no depèn de cap contrasenya.
+Mot de passe de l'Espace	Space password	Contraseña del Espacio	Contrasenya de l'Espai
+Créer mon accès (code par e-mail)	Create my access (code by e-mail)	Crear mi acceso (código por correo)	Crear el meu accés (codi per correu)
+Pas pour le Coffre : il s'ouvre avec votre carte et Face ID, la carte est toujours nécessaire. Un mot de passe protège seulement l'Espace (vos rappels, votre famille).	Not for the Vault: it opens with your card and Face ID, and the card is always needed. A password only protects the Space (your reminders, your family).	No para el Cofre: se abre con su tarjeta y Face ID, y la tarjeta siempre es necesaria. Una contraseña solo protege el Espacio (sus recordatorios, su familia).	No per al Cofre: s'obre amb la vostra targeta i Face ID, i la targeta sempre és necessària. Una contrasenya només protegeix l'Espai (els vostres recordatoris, la vostra família).
+Puis-je ouvrir mon Coffre sur un ordinateur ?	Can I open my Vault on a computer?	¿Puedo abrir mi Cofre en un ordenador?	Puc obrir el meu Cofre en un ordinador?
+Oui. La première fois, votre téléphone scanne le code QR affiché sur l'ordinateur ; ensuite, une notification suffit. Chaque ouverture se confirme sur le téléphone, carte posée et Face ID.	Yes. The first time, your phone scans the QR code shown on the computer; after that, a notification is enough. Every opening is confirmed on the phone, with your card and Face ID.	Sí. La primera vez, su teléfono escanea el código QR que aparece en el ordenador; después, basta con una notificación. Cada apertura se confirma en el teléfono, con la tarjeta y Face ID.	Sí. La primera vegada, el vostre telèfon escaneja el codi QR que apareix a l'ordinador; després, n'hi ha prou amb una notificació. Cada obertura es confirma al telèfon, amb la targeta i Face ID.
+Recevoir un code par e-mail	Get a code by e-mail	Recibir un código por correo	Rebre un codi per correu
+Un code à 6 chiffres vient d'être envoyé à {0}.	A 6-digit code has just been sent to {0}.	Acabamos de enviar un código de 6 cifras a {0}.	Acabem d'enviar un codi de 6 xifres a {0}.
+Nouveau mot de passe	New password	Nueva contraseña	Nova contrasenya
+Changer le mot de passe	Change the password	Cambiar la contraseña	Canviar la contrasenya
+Demande refusée sur le téléphone.	Request declined on the phone.	Solicitud rechazada en el teléfono.	Sol·licitud rebutjada al telèfon.
+Délai dépassé. Recommencez.	Time is up. Please start again.	Se ha agotado el tiempo. Vuelva a empezar.	S'ha esgotat el temps. Torneu a començar.
+Scannez avec votre téléphone	Scan with your phone	Escanee con su teléfono	Escanegeu amb el vostre telèfon
+Dans l'application, touchez « Scanner un ordinateur », puis choisissez ce nombre et posez votre carte.	In the app, tap "Scan a computer", then choose this number and tap your card.	En la aplicación, toque «Escanear un ordenador», elija este número y acerque su tarjeta.	A l'aplicació, toqueu «Escanejar un ordinador», trieu aquest número i acosteu la targeta.
+Code QR à scanner avec l'application	QR code to scan with the app	Código QR para escanear con la aplicación	Codi QR per escanejar amb l'aplicació
+Expire dans {0}	Expires in {0}	Caduca en {0}	Caduca d'aquí a {0}
+Démo : ouvrir le téléphone simulé	Demo: open the simulated phone	Demo: abrir el teléfono simulado	Demo: obrir el telèfon simulat
+Regardez votre téléphone	Check your phone	Mire su teléfono	Mireu el vostre telèfon
+Touchez la notification, choisissez ce nombre, puis posez votre carte.	Tap the notification, choose this number, then tap your card.	Toque la notificación, elija este número y acerque su tarjeta.	Toqueu la notificació, trieu aquest número i acosteu la targeta.
+Pas de notification ? Ouvrez l'application : la demande vous attend dans le Coffre.	No notification? Open the app: the request is waiting for you in the Vault.	¿No hay notificación? Abra la aplicación: la solicitud le espera en el Cofre.	No hi ha notificació? Obriu l'aplicació: la sol·licitud us espera al Cofre.
+Démo : ouvrir la notification	Demo: open the notification	Demo: abrir la notificación	Demo: obrir la notificació
+Ouvrir le Coffre sur cet ordinateur	Open the Vault on this computer	Abrir el Cofre en este ordenador	Obrir el Cofre en aquest ordinador
+Un ordinateur ne lit pas les cartes : c'est votre téléphone qui donne l'accord, carte posée.	A computer cannot read the cards: your phone gives the approval, with your card.	Un ordenador no lee las tarjetas: es su teléfono el que da la aprobación, con la tarjeta.	Un ordinador no llegeix les targetes: és el vostre telèfon qui dona l'aprovació, amb la targeta.
+Ouvrez l'application sur votre téléphone	Open the app on your phone	Abra la aplicación en su teléfono	Obriu l'aplicació al vostre telèfon
+Scannez le code QR de cet ordinateur	Scan this computer's QR code	Escanee el código QR de este ordenador	Escanegeu el codi QR d'aquest ordinador
+Choisissez le même nombre, posez votre carte : Face ID confirme	Choose the same number and tap your card: Face ID confirms	Elija el mismo número y acerque su tarjeta: Face ID lo confirma	Trieu el mateix número i acosteu la targeta: Face ID ho confirma
+Cet ordinateur devient un appareil de confiance pendant 90 jours : les fois suivantes, une notification suffit.	This computer becomes a trusted device for 90 days: next time, a notification is enough.	Este ordenador se convierte en un dispositivo de confianza durante 90 días: las próximas veces, basta con una notificación.	Aquest ordinador esdevé un dispositiu de confiança durant 90 dies: les properes vegades, n'hi ha prou amb una notificació.
+Afficher le code QR	Show the QR code	Mostrar el código QR	Mostrar el codi QR
+Appareil de confiance	Trusted device	Dispositivo de confianza	Dispositiu de confiança
+Votre téléphone va recevoir la demande. Posez votre carte dessus : le Coffre s'ouvre ici.	Your phone will receive the request. Tap your card on it: the Vault opens here.	Su teléfono recibirá la solicitud. Acerque su tarjeta: el Cofre se abre aquí.	El vostre telèfon rebrà la sol·licitud. Acosteu-hi la targeta: el Cofre s'obre aquí.
+Ouvrir avec mon téléphone	Open with my phone	Abrir con mi teléfono	Obrir amb el meu telèfon
+Associer avec le code QR	Pair with the QR code	Vincular con el código QR	Vincular amb el codi QR
+Démo : revenir à la carte posée sur le téléphone	Demo: back to tapping the card on the phone	Demo: volver a acercar la tarjeta al teléfono	Demo: tornar a acostar la targeta al telèfon
+Nombre à choisir	Number to choose	Número que debe elegir	Número que cal triar
+Le Coffre s'ouvre dans l'application	The Vault opens in the app	El Cofre se abre en la aplicación	El Cofre s'obre a l'aplicació
+Sur un téléphone, la carte se lit avec l'application, avec Face ID. Installez-la et connectez-vous avec la même adresse : votre Espace et votre Coffre vous y attendent.	On a phone, the card is read by the app, with Face ID. Install it and sign in with the same address: your Space and your Vault are waiting for you there.	En un teléfono, la tarjeta se lee con la aplicación, con Face ID. Instálela e inicie sesión con la misma dirección: su Espacio y su Cofre le esperan allí.	En un telèfon, la targeta es llegeix amb l'aplicació, amb Face ID. Instal·leu-la i inicieu la sessió amb la mateixa adreça: el vostre Espai i el vostre Cofre us hi esperen.
+Télécharger sur l'App Store	Download on the App Store	Descargar en el App Store	Baixar a l'App Store
+Télécharger sur Google Play	Get it on Google Play	Descargar en Google Play	Baixar a Google Play
+Bientôt sur l'App Store et Google Play.	Coming soon to the App Store and Google Play.	Próximamente en el App Store y Google Play.	Aviat a l'App Store i Google Play.
+Sur un ordinateur, le Coffre s'ouvre aussi, avec l'accord de votre téléphone.	On a computer, the Vault opens too, with your phone's approval.	En un ordenador, el Cofre también se abre, con la aprobación de su teléfono.	En un ordinador, el Cofre també s'obre, amb l'aprovació del vostre telèfon.
+Les ordinateurs qui peuvent demander l'ouverture du Coffre. Chaque ouverture se confirme sur votre téléphone, carte posée.	The computers that can ask to open the Vault. Every opening is confirmed on your phone, with your card.	Los ordenadores que pueden pedir la apertura del Cofre. Cada apertura se confirma en su teléfono, con la tarjeta.	Els ordinadors que poden demanar l'obertura del Cofre. Cada obertura es confirma al vostre telèfon, amb la targeta.
+Aucun ordinateur pour l'instant. Sur un ordinateur, ouvrez le Coffre : un code QR vous guidera.	No computer yet. On a computer, open the Vault: a QR code will guide you.	Ningún ordenador por ahora. En un ordenador, abra el Cofre: un código QR le guiará.	Cap ordinador de moment. En un ordinador, obriu el Cofre: un codi QR us guiarà.
+cet ordinateur	this computer	este ordenador	aquest ordinador
+Approuvé le {0} · à revalider le {1}	Approved on {0} · to be renewed on {1}	Aprobado el {0} · por revalidar el {1}	Aprovat el {0} · per revalidar el {1}
+À revalider avec le code QR	To be renewed with the QR code	Por revalidar con el código QR	Per revalidar amb el codi QR
+Dernière ouverture le {0}	Last opened on {0}	Última apertura el {0}	Darrera obertura el {0}
+Visez le code QR affiché sur l'ordinateur	Point at the QR code shown on the computer	Apunte al código QR que aparece en el ordenador	Apunteu al codi QR que apareix a l'ordinador
+Ce code QR ne vient pas de notre site.	This QR code does not come from our website.	Este código QR no procede de nuestro sitio.	Aquest codi QR no prové del nostre lloc.
+Lecture annulée.	Scan cancelled.	Lectura cancelada.	Lectura cancel·lada.
+Ouverture demandée	Opening requested	Apertura solicitada	Obertura sol·licitada
+Répondre	Answer	Responder	Respondre
+Scanner un ordinateur	Scan a computer	Escanear un ordenador	Escanejar un ordinador
+Adresse ou mot de passe incorrect.	Incorrect address or password.	Dirección o contraseña incorrecta.	Adreça o contrasenya incorrecta.
+Patientez une minute avant de réessayer.	Please wait a minute before trying again.	Espere un minuto antes de volver a intentarlo.	Espereu un minut abans de tornar-ho a provar.
+Mot de passe trop faible : 10 caractères au moins, avec une majuscule, une minuscule et un chiffre.	Password too weak: at least 10 characters, with an upper-case letter, a lower-case letter and a digit.	Contraseña demasiado débil: al menos 10 caracteres, con una mayúscula, una minúscula y una cifra.	Contrasenya massa feble: almenys 10 caràcters, amb una majúscula, una minúscula i una xifra.
+Un compte existe déjà avec cette adresse : connectez-vous.	An account already exists with this address: please sign in.	Ya existe una cuenta con esta dirección: inicie sesión.	Ja existeix un compte amb aquesta adreça: inicieu la sessió.
+Appareil inconnu ou à revalider.	Unknown device, or one to be renewed.	Dispositivo desconocido o por revalidar.	Dispositiu desconegut o per revalidar.
+Demande expirée.	Request expired.	Solicitud caducada.	Sol·licitud caducada.
+Appareil à revalider.	Device to be renewed.	Dispositivo por revalidar.	Dispositiu per revalidar.
+Demande inconnue.	Unknown request.	Solicitud desconocida.	Sol·licitud desconeguda.
+Activez Face ID, l'empreinte ou un code de verrouillage sur ce téléphone : c'est obligatoire pour ouvrir le Coffre.	Turn on Face ID, fingerprint or a screen lock code on this phone: it is required to open the Vault.	Active Face ID, la huella o un código de bloqueo en este teléfono: es obligatorio para abrir el Cofre.	Activeu Face ID, l'empremta o un codi de bloqueig en aquest telèfon: és obligatori per obrir el Cofre.
+Confirmez que c'est bien vous	Confirm it is really you	Confirme que es usted	Confirmeu que sou vós
+Identité non confirmée sur ce téléphone. Réessayez.	Identity not confirmed on this phone. Please try again.	Identidad no confirmada en este teléfono. Vuelva a intentarlo.	Identitat no confirmada en aquest telèfon. Torneu-ho a provar.
+Retenir le code avec Face ID	Remember the code with Face ID	Recordar el código con Face ID	Recordar el codi amb Face ID
+Réponse inattendue du téléphone. Recommencez.	Unexpected answer from the phone. Please start again.	Respuesta inesperada del teléfono. Vuelva a empezar.	Resposta inesperada del telèfon. Torneu a començar.
+Ce code QR ne correspond pas à la demande. Scannez-le de nouveau.	This QR code does not match the request. Scan it again.	Este código QR no corresponde a la solicitud. Vuelva a escanearlo.	Aquest codi QR no correspon a la sol·licitud. Torneu-lo a escanejar.
+Cet ordinateur n'a pas été approuvé depuis ce téléphone : sur l'ordinateur, choisissez « Associer avec le code QR ».	This computer was not approved from this phone: on the computer, choose "Pair with the QR code".	Este ordenador no se aprobó desde este teléfono: en el ordenador, elija «Vincular con el código QR».	Aquest ordinador no es va aprovar des d'aquest telèfon: a l'ordinador, trieu «Vincular amb el codi QR».
+Nouvel appareil de confiance	New trusted device	Nuevo dispositivo de confianza	Nou dispositiu de confiança
+Un ordinateur peut ouvrir votre Coffre	A computer can open your Vault	Un ordenador puede abrir su Cofre	Un ordinador pot obrir el vostre Cofre
+« {0} » a été approuvé depuis votre téléphone le {1}. Il pourra demander l'ouverture du Coffre, toujours avec votre carte et votre accord sur le téléphone.	"{0}" was approved from your phone on {1}. It will be able to ask to open the Vault, always with your card and your approval on the phone.	«{0}» se aprobó desde su teléfono el {1}. Podrá pedir la apertura del Cofre, siempre con su tarjeta y su aprobación en el teléfono.	«{0}» es va aprovar des del vostre telèfon el {1}. Podrà demanar l'obertura del Cofre, sempre amb la vostra targeta i la vostra aprovació al telèfon.
+Ce n'est pas vous ? Retirez-le tout de suite dans Compte › Appareils de confiance, puis changez votre mot de passe.	Wasn't you? Remove it at once in Account › Trusted devices, then change your password.	¿No ha sido usted? Retírelo enseguida en Cuenta › Dispositivos de confianza y cambie su contraseña.	No heu estat vós? Retireu-lo de seguida a Compte › Dispositius de confiança i canvieu la contrasenya.
+Mes appareils	My devices	Mis dispositivos	Els meus dispositius

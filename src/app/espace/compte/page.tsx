@@ -1,11 +1,13 @@
 "use client";
 import { motion } from "motion/react";
-import { BadgeCheck, Bell, CalendarClock, ChevronRight, CreditCard, FileUp, FlaskConical, Info, LogOut, Mail, ShieldCheck, Trash, Users } from "lucide-react";
+import { BadgeCheck, Bell, CalendarClock, ChevronRight, CreditCard, FileUp, FlaskConical, Info, KeyRound, LogOut, Mail, ShieldCheck, Trash, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { LangPicker } from "@/components/lang-picker";
+import { PasswordReset } from "@/components/password-reset";
+import { TrustedDevices } from "@/components/phone-open";
 import { tr } from "@/lib/i18n";
 import { ThemePicker } from "@/components/theme-picker";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
@@ -14,7 +16,7 @@ import { deleteAccount, openBillingPortal, openCheckout, saveAccount, setAssista
 import { LAUNCH, OFFER, SUPPORT_EMAIL } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { graceEnd } from "@/lib/rules";
-import { useApp, type Account } from "@/lib/store";
+import { toast, useApp, type Account } from "@/lib/store";
 import { lock } from "@/lib/vault";
 
 export default function Compte() {
@@ -25,6 +27,7 @@ export default function Compte() {
   const [confirmText, setConfirmText] = useState("");
   const [busy, setBusy] = useState(false);
   const [mail, setMail] = useState<string | null>(null);
+  const [password, setPassword] = useState(false);
   const a = s.account;
   const packs = new Set(s.cards.filter((c) => c.holderId !== "owner").map((c) => c.holderId)).size;
   const opened = s.outbox.find((m) => m.id === mail);
@@ -151,6 +154,24 @@ export default function Compte() {
         <h2 className="mb-3 text-[1.3rem] font-semibold">Langue</h2>
         <LangPicker />
       </motion.section>
+
+      <motion.section variants={rise}>
+        <h2 className="mb-1 text-[1.3rem] font-semibold">Appareils de confiance</h2>
+        <TrustedDevices />
+      </motion.section>
+
+      {PROD && (
+        <motion.section variants={rise}>
+          <h2 className="mb-3 text-[1.3rem] font-semibold">Mot de passe</h2>
+          {password ? (
+            <PasswordReset email={a.email} onDone={() => (setPassword(false), toast("Mot de passe changé.", "ok"))} />
+          ) : (
+            <Button full variant="outline" icon={<KeyRound className="h-5 w-5" />} onClick={() => setPassword(true)}>
+              Changer mon mot de passe
+            </Button>
+          )}
+        </motion.section>
+      )}
 
       <motion.div variants={rise} className="space-y-2.5">
         <Toggle checked={s.assistantVoice} onChange={(v) => void setAssistantVoice(v)} label="L'assistante parle à voix haute" hint="Les réponses sont lues automatiquement" />

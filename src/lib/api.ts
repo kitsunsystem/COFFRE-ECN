@@ -3,9 +3,9 @@
 import { CONCIERGE, OFFER } from "./config";
 import { PROD } from "./env";
 import { declare, type Moment, type ProcedureKind } from "./rules";
-import { envelopeRow, itemRow, personRow, profileRow, toAccount, toCard, toCase, toEnvelope, toItem, toPerson, toProcedure, toReminder, toRights, toTrust } from "./rows";
+import { envelopeRow, itemRow, personRow, profileRow, toAccount, toCard, toCase, toDevice, toDeviceRequest, toEnvelope, toItem, toPerson, toProcedure, toReminder, toRights, toTrust } from "./rows";
 import { sb, q, friendly } from "./supabase";
-import { now, personName, toast, uid, useApp, type Account, type Card, type ConciergeCase, type Envelope, type Guarantor, type Person, type Trust, type VaultItem } from "./store";
+import { now, personName, toast, uid, useApp, type Account, type Card, type ConciergeCase, type DeviceRequest, type Envelope, type Guarantor, type Person, type Trust, type TrustedDevice, type VaultItem } from "./store";
 import type { Sealed } from "./crypto";
 
 const st = () => useApp.getState();
@@ -28,19 +28,62 @@ async function attempt(fn: () => Promise<unknown>): Promise<boolean> {
 
 /* ---------- Session (production) ---------- */
 
-export async function sendCode(email: string) {
-  const { error } = await sb().auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: true } });
-  if (error) throw new Error(/rate|seconds/i.test(error.message) ? "Patientez une minute avant de demander un nouveau code." : friendly(error));
+// The Espace opens with an e-mail address and a password; the Coffre never does (card + code, or the phone).
+export const PASSWORD_RULE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{10,}$/;
+const clean = (email: string) => email.trim().toLowerCase();
+
+function authError(e: { message: string }) {
+  if (/invalid login/i.test(e.message)) return "Adresse ou mot de passe incorrect.";
+  if (/rate|seconds/i.test(e.message)) return "Patientez une minute avant de réessayer.";
+  if (/password/i.test(e.message)) return "Mot de passe trop faible : 10 caractères au moins, avec une majuscule, une minuscule et un chiffre.";
+  if (/expired|invalid/i.test(e.message)) return "Code incorrect ou expiré.";
+  return friendly(e);
+}
+
+// New account: the address is confirmed with the 6-digit code it receives (verifyCode).
+export async function signUp(email: string, password: string) {
+  const { data, error } = await sb().auth.signUp({ email: clean(email), password });
+  if (error) throw new Error(authError(error));
+  // An address that already has an account receives nothing (Supabase hides it on purpose).
+  if (data.user && !data.user.identities?.length) throw new Error("Un compte existe déjà avec cette adresse : connectez-vous.");
+}
+
+// "unconfirmed": the account was never confirmed; a new code has just been sent.
+export async function signIn(email: string, password: string): Promise<"ok" | "unconfirmed"> {
+  const { error } = await sb().auth.signInWithPassword({ email: clean(email), password });
+  if (error && /not confirmed/i.test(error.message)) {
+    await sb().auth.resend({ type: "signup", email: clean(email) });
+    return "unconfirmed";
+  }
+  if (error) throw new Error(authError(error));
+  await loadAll();
+  return "ok";
 }
 
 export async function verifyCode(email: string, code: string) {
-  const { error } = await sb().auth.verifyOtp({ email: email.trim().toLowerCase(), token: code.trim(), type: "email" });
-  if (error) throw new Error(/expired|invalid/i.test(error.message) ? "Code incorrect ou expiré." : friendly(error));
+  const { error } = await sb().auth.verifyOtp({ email: clean(email), token: code.trim(), type: "email" });
+  if (error) throw new Error(authError(error));
+  await loadAll();
+}
+
+export async function forgotPassword(email: string) {
+  const { error } = await sb().auth.resetPasswordForEmail(clean(email));
+  if (error) throw new Error(authError(error));
+}
+
+export async function resetPassword(email: string, code: string, password: string) {
+  const { error } = await sb().auth.verifyOtp({ email: clean(email), token: code.trim(), type: "recovery" });
+  if (error) throw new Error(authError(error));
+  const { error: e2 } = await sb().auth.updateUser({ password });
+  if (e2) throw new Error(authError(e2));
   await loadAll();
 }
 
 export async function signOut() {
-  if (PROD) await sb().auth.signOut().catch(() => {});
+  if (PROD) {
+    await forgetPushToken();
+    await sb().auth.signOut().catch(() => {});
+  }
   st().reset();
 }
 
@@ -384,6 +427,129 @@ export const reloadTrusts = () =>
     const rows = await q<unknown[]>(sb().rpc("my_trusts") as never);
     st().set({ trusts: rows.map((t) => toTrust(t as Record<string, unknown>)) });
   });
+
+/* ---------- Appareils de confiance (utilisés par devices.ts) ---------- */
+
+export type Taken = { status: DeviceRequest["status"] | "expired"; sealed?: string; deviceId?: string };
+
+// Demo: requests and computers in this browser's storage, shared by the computer window and the simulated phone window.
+type DemoDevice = TrustedDevice & { pk: string };
+type DemoRequest = DeviceRequest & { code: number; sealed?: string };
+const DEMO_DEVICES = "sillage-appareils";
+function demoDevices(): { devices: DemoDevice[]; requests: DemoRequest[] } {
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_DEVICES) ?? "") as never;
+  } catch {
+    return { devices: [], requests: [] };
+  }
+}
+const saveDemoDevices = (d: ReturnType<typeof demoDevices>) => localStorage.setItem(DEMO_DEVICES, JSON.stringify(d));
+const publicPart = ({ code: _c, sealed: _s, ...r }: DemoRequest): DeviceRequest => r;
+// The right number and two decoys, shuffled (same rule as number_choices in the database).
+function numberChoices(code: number) {
+  const pool = Array.from({ length: 90 }, (_, i) => i + 10).filter((n) => n !== code);
+  const all = [code, pool.splice(Math.floor(Math.random() * pool.length), 1)[0], pool[Math.floor(Math.random() * pool.length)]];
+  return all.sort(() => Math.random() - 0.5);
+}
+
+export const devices = {
+  async request(kind: DeviceRequest["kind"], o: { pk?: string; name?: string; device?: string }): Promise<{ id: string; code: number; expiresAt: number }> {
+    if (PROD) {
+      const r = await q<{ id: string; code: number; expires_at: string }>(sb().rpc("request_device", { req_kind: kind, device_pk: o.pk ?? null, device_name: o.name ?? null, device: o.device ?? null }) as never);
+      return { id: r.id, code: r.code, expiresAt: Date.parse(r.expires_at) };
+    }
+    const d = demoDevices();
+    const dev = kind === "open" ? d.devices.find((x) => x.id === o.device && x.expiresAt > Date.now()) : undefined;
+    if (kind === "open" && !dev) throw new Error("Appareil inconnu ou à revalider.");
+    const code = 10 + Math.floor(Math.random() * 90);
+    const r: DemoRequest = { id: uid(), kind, deviceId: dev?.id, name: dev?.name ?? o.name!, pk: dev?.pk ?? o.pk!, code, choices: numberChoices(code), status: "pending", createdAt: Date.now(), expiresAt: Date.now() + (kind === "open" ? 3 : 5) * 60_000 };
+    saveDemoDevices({ ...d, requests: [...d.requests.filter((x) => x.createdAt > Date.now() - 86_400_000), r] });
+    return { id: r.id, code, expiresAt: r.expiresAt };
+  },
+  async get(id: string): Promise<DeviceRequest | null> {
+    if (PROD) {
+      const r = await q<Record<string, unknown> | null>(sb().rpc("device_request", { req: id }) as never);
+      return r ? toDeviceRequest(r) : null;
+    }
+    const r = demoDevices().requests.find((x) => x.id === id);
+    return r ? publicPart(r) : null;
+  },
+  async pending(): Promise<DeviceRequest[]> {
+    if (PROD) return (await q<Record<string, unknown>[]>(sb().rpc("pending_device_requests") as never)).map(toDeviceRequest);
+    return demoDevices()
+      .requests.filter((r) => r.status === "pending" && r.expiresAt > Date.now())
+      .map(publicPart)
+      .reverse();
+  },
+  // The phone's answer: the sealed keys, or null when the number was wrong (the request is then refused for good).
+  async approve(id: string, choice: number, sealed: string): Promise<string | null> {
+    if (PROD) return q<string | null>(sb().rpc("approve_device_request", { req: id, choice, payload: sealed }) as never);
+    const d = demoDevices();
+    const r = d.requests.find((x) => x.id === id);
+    if (!r || r.status !== "pending" || r.expiresAt < Date.now()) throw new Error("Demande expirée.");
+    if (choice !== r.code) {
+      r.status = "refused";
+      saveDemoDevices(d);
+      return null;
+    }
+    if (r.kind === "pairing") {
+      const dev: DemoDevice = { id: uid(), name: r.name, pk: r.pk, createdAt: Date.now(), expiresAt: Date.now() + 90 * 86_400_000 };
+      d.devices = [...d.devices.filter((x) => x.pk !== r.pk), dev];
+      r.deviceId = dev.id;
+      st().email(st().account?.email ?? st().me?.email ?? "", "nouvel-appareil", { name: r.name, date: new Date().toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) });
+    } else if (!d.devices.some((x) => x.id === r.deviceId && x.expiresAt > Date.now())) throw new Error("Appareil à revalider.");
+    Object.assign(r, { status: "approved", sealed });
+    saveDemoDevices(d);
+    return r.deviceId!;
+  },
+  async refuse(id: string) {
+    if (PROD) return void (await q(sb().rpc("refuse_device_request", { req: id })));
+    const d = demoDevices();
+    d.requests = d.requests.map((r) => (r.id === id && r.status === "pending" ? { ...r, status: "refused" } : r));
+    saveDemoDevices(d);
+  },
+  // The computer takes the sealed keys back, once: they are erased right away.
+  async take(id: string): Promise<Taken> {
+    if (PROD) {
+      const r = await q<{ status: Taken["status"]; sealed: string | null; device_id: string | null }>(sb().rpc("take_device_request", { req: id }) as never);
+      return { status: r.status, sealed: r.sealed ?? undefined, deviceId: r.device_id ?? undefined };
+    }
+    const d = demoDevices();
+    const r = d.requests.find((x) => x.id === id);
+    if (!r) throw new Error("Demande inconnue.");
+    const taken: Taken = { status: r.status === "pending" && r.expiresAt < Date.now() ? "expired" : r.status, sealed: r.sealed, deviceId: r.deviceId };
+    if (r.status === "approved") {
+      Object.assign(r, { status: "used", sealed: undefined });
+      d.devices = d.devices.map((x) => (x.id === r.deviceId ? { ...x, lastUsedAt: Date.now() } : x));
+      saveDemoDevices(d);
+    }
+    return taken;
+  },
+  async list(): Promise<TrustedDevice[]> {
+    if (PROD) return (await q<Record<string, unknown>[]>(sb().from("trusted_devices").select("id, name, created_at, expires_at, last_used_at").order("created_at") as never)).map(toDevice);
+    return demoDevices().devices.map(({ pk: _pk, ...x }) => x);
+  },
+  async remove(id: string) {
+    if (PROD) return void (await q(sb().from("trusted_devices").delete().eq("id", id)));
+    const d = demoDevices();
+    saveDemoDevices({ devices: d.devices.filter((x) => x.id !== id), requests: d.requests.filter((r) => r.deviceId !== id) });
+  },
+  // Wakes the phone up (notification). Never blocking: the request also shows when the app is opened.
+  async notify(id: string) {
+    if (PROD) await invoke("push", { request: id }).catch(console.error);
+  },
+};
+
+// Phones (production app): the token that lets the server wake them up for a computer's request.
+let pushToken: string | undefined;
+export async function savePushToken(token: string, platform: "ios" | "android") {
+  pushToken = token;
+  await q(sb().rpc("register_push", { push_token: token, push_platform: platform }));
+}
+async function forgetPushToken() {
+  if (pushToken) await sb().rpc("unregister_push", { push_token: pushToken });
+  pushToken = undefined;
+}
 
 /* ---------- Coffre : persistance (utilisée par vault.ts) ---------- */
 

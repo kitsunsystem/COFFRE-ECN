@@ -1,12 +1,25 @@
 // Database rows (snake_case, ISO dates) <-> app state (camelCase, timestamps). Production only.
 import type { Sealed } from "./crypto";
 import type { Moment, Procedure } from "./rules";
-import type { Account, Card, CardKind, CardStatus, ConciergeCase, Envelope, Person, Reminder, Trust, VaultItem } from "./store";
+import type { Account, Card, CardKind, CardStatus, ConciergeCase, DeviceRequest, Envelope, Person, Reminder, TrustedDevice, Trust, VaultItem } from "./store";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows come untyped from supabase-js */
 type Row = Record<string, any>;
 
 const ms = (t?: string | null) => (t ? new Date(t).getTime() : undefined);
+
+export const toDevice = (r: Row): TrustedDevice => ({ id: r.id, name: r.name, createdAt: ms(r.created_at)!, expiresAt: ms(r.expires_at)!, lastUsedAt: ms(r.last_used_at) });
+export const toDeviceRequest = (r: Row): DeviceRequest => ({
+  id: r.id,
+  kind: r.kind,
+  deviceId: r.device_id ?? undefined,
+  name: r.name,
+  pk: r.pk,
+  choices: r.choices,
+  status: r.status,
+  createdAt: ms(r.created_at)!,
+  expiresAt: ms(r.expires_at)!,
+});
 
 export const toAccount = (r: Row): Account => ({
   firstName: r.first_name,

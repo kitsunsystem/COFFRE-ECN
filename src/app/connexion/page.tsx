@@ -1,14 +1,15 @@
 "use client";
 import { motion } from "motion/react";
-import { ArrowRight, KeyRound, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, KeyRound, LogIn, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PasswordReset } from "@/components/password-reset";
 import { useHydrated } from "@/components/providers";
 import { Button, Field, Notice } from "@/components/ui";
 import { LangPicker } from "@/components/lang-picker";
 import { Aurora, Logo } from "@/components/visuals";
-import { sendCode, verifyCode } from "@/lib/api";
+import { PASSWORD_RULE, signIn, signUp, verifyCode } from "@/lib/api";
 import { DEMO_PIN, seedDemo } from "@/lib/demo";
 import { PROD } from "@/lib/env";
 import { useApp } from "@/lib/store";
@@ -27,8 +28,11 @@ export default function Connexion() {
   const account = useApp((s) => s.account);
   const me = useApp((s) => s.me);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-  const [sent, setSent] = useState(false);
+  // "create": a relative invited by e-mail creates their access (the Espace sign-up is /inscription);
+  // "confirm": a code has just been sent to confirm the address; "forgot": new password with a code.
+  const [step, setStep] = useState<"login" | "create" | "confirm" | "forgot">("login");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,30 +64,50 @@ export default function Connexion() {
         <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-[2.2rem] font-semibold leading-tight">
           Bon retour parmi nous
         </motion.h1>
-        <p className="mt-3 text-[1.08rem] text-ink-soft">{PROD ? "Recevez un code de connexion par e-mail. Pas de mot de passe à retenir." : "Recevez un lien de connexion par e-mail. Pas de mot de passe à retenir."}</p>
+        <p className="mt-3 text-[1.08rem] text-ink-soft">Votre adresse e-mail et votre mot de passe ouvrent l&apos;Espace. Le Coffre, lui, s&apos;ouvre avec votre carte.</p>
 
-        {!sent ? (
+        {step === "login" || step === "create" ? (
           <form
             className="mt-8 space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
               if (!PROD) {
-                if (account && account.email.toLowerCase() === email.toLowerCase()) router.push("/espace");
-                else setSent(true);
+                if (account && account.email.toLowerCase() === email.trim().toLowerCase()) router.push("/espace");
+                else setError("Aucun compte avec cette adresse dans la démonstration : découvrez-la ci-dessous.");
                 return;
               }
               void run(async () => {
-                await sendCode(email);
-                setSent(true);
+                if (step === "create") {
+                  await signUp(email, password);
+                  setStep("confirm");
+                } else if ((await signIn(email, password)) === "unconfirmed") setStep("confirm");
+                else router.replace(landing());
               });
             }}
           >
-            <Field label="Adresse e-mail" type="email" inputMode="email" value={email} onChange={setEmail} />
-            <Button full icon={<Mail className="h-5 w-5" />} disabled={busy || !/.+@.+\..+/.test(email)}>
-              {busy ? "Envoi…" : PROD ? "Recevoir mon code" : "Recevoir mon lien"}
+            <Field label="Adresse e-mail" type="email" inputMode="email" autoComplete="email" value={email} onChange={setEmail} />
+            {step === "create" ? (
+              <Field label="Choisissez un mot de passe" type="password" autoComplete="new-password" value={password} onChange={setPassword} hint="10 caractères au moins, avec une majuscule, une minuscule et un chiffre." />
+            ) : (
+              <Field label="Mot de passe" type="password" autoComplete="current-password" value={password} onChange={setPassword} />
+            )}
+            <Button full icon={<LogIn className="h-5 w-5" />} disabled={busy || !/.+@.+\..+/.test(email) || (step === "create" ? !PASSWORD_RULE.test(password) : !password)}>
+              {busy ? "Un instant…" : step === "create" ? "Créer mon accès" : "Me connecter"}
             </Button>
+            {PROD && (
+              <div className="flex flex-col items-center gap-2 text-[0.92rem] font-semibold text-ink-soft">
+                {step === "login" && (
+                  <button type="button" onClick={() => (setError(null), setStep("forgot"))}>
+                    Mot de passe oublié ?
+                  </button>
+                )}
+                <button type="button" onClick={() => (setError(null), setStep(step === "login" ? "create" : "login"))}>
+                  {step === "login" ? "Invité par un proche ? Créez votre accès" : "J'ai déjà un accès : me connecter"}
+                </button>
+              </div>
+            )}
           </form>
-        ) : PROD ? (
+        ) : step === "confirm" ? (
           <form
             className="mt-8 space-y-4"
             onSubmit={(e) => {
@@ -94,19 +118,20 @@ export default function Connexion() {
               });
             }}
           >
-            <Notice tone="sage">Un code à 6 chiffres vient d&apos;être envoyé à {email}. Il est valable une heure.</Notice>
-            <Field label="Code reçu par e-mail" inputMode="numeric" value={code} onChange={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))} autoFocus />
+            <Notice tone="sage">Pour confirmer votre adresse, un code à 6 chiffres vient d&apos;être envoyé à {email}.</Notice>
+            <Field label="Code reçu par e-mail" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(v) => setCode(v.replace(/\D/g, "").slice(0, 6))} autoFocus />
             <Button full icon={<KeyRound className="h-5 w-5" />} disabled={busy || code.length !== 6}>
-              {busy ? "Vérification…" : "Me connecter"}
+              {busy ? "Vérification…" : "Confirmer et me connecter"}
             </Button>
-            <button type="button" className="w-full text-center text-[0.92rem] font-semibold text-ink-soft" onClick={() => { setSent(false); setCode(""); }}>
-              Changer d&apos;adresse ou renvoyer un code
-            </button>
           </form>
         ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4">
-            <Notice tone="sage">Si un compte existe pour cette adresse, un lien vient de vous être envoyé.</Notice>
-          </motion.div>
+          <div className="mt-8 space-y-4">
+            <Field label="Adresse e-mail" type="email" inputMode="email" autoComplete="email" value={email} onChange={setEmail} />
+            <PasswordReset email={email} onDone={() => router.replace(landing())} />
+            <button type="button" className="w-full text-center text-[0.92rem] font-semibold text-ink-soft" onClick={() => setStep("login")}>
+              Revenir à la connexion
+            </button>
+          </div>
         )}
         {error && <p className="mt-3 font-semibold text-coral">{error}</p>}
 

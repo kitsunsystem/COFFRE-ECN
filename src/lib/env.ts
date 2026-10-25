@@ -10,3 +10,8 @@ export const CARD_DRIVER = (process.env.NEXT_PUBLIC_CARD_DRIVER ?? "auto") as "a
 export const FIDO_RP_ID = process.env.NEXT_PUBLIC_FIDO_RP_ID || undefined;
 // Public web address, used in links and for the native app's redirects.
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
+// Phone notifications (a computer asks for the Coffre): on once Firebase (Android) and APNs (iOS) are set up.
+export const PUSH = process.env.NEXT_PUBLIC_PUSH === "1";
+// Store pages, shown on a phone's browser (the Coffre opens in the app). Empty until the apps are published.
+export const STORE_IOS = process.env.NEXT_PUBLIC_STORE_IOS ?? "";
+export const STORE_ANDROID = process.env.NEXT_PUBLIC_STORE_ANDROID ?? "";

@@ -1,10 +1,11 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, Nfc, ScanFace, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Monitor, Nfc, ScanFace, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { openableCards, useCardOpen } from "@/components/card-flow";
+import { InstallApp, PhoneInbox, PhoneOpen } from "@/components/phone-open";
 import { PinPad } from "@/components/pinpad";
 import { useHydrated } from "@/components/providers";
 import { Loader } from "@/components/shell";
@@ -12,7 +13,9 @@ import { Button, Sheet } from "@/components/ui";
 import { Aurora, Logo, NfcCard, TapReader, VaultReveal } from "@/components/visuals";
 import { driver } from "@/lib/cards";
 import { PROD } from "@/lib/env";
-import { personName, useApp, useSession } from "@/lib/store";
+import { isNative, isPhoneBrowser } from "@/lib/native";
+import { personName, useApp, useSession, type OpenSession } from "@/lib/store";
+import { openSession } from "@/lib/vault";
 
 export default function Verrou() {
   const hydrated = useHydrated();
@@ -24,15 +27,25 @@ export default function Verrou() {
   const session = useSession((s) => s.session);
   const router = useRouter();
   const [faceId, setFaceId] = useState(false);
+  const [viaPhone, setViaPhone] = useState(false);
+  const [revealing, setRevealing] = useState(false);
   const active = hydrated ? openableCards() : [];
   const f = useCardOpen(active, () => {});
   const home = account ? "/espace" : PROD && me ? "/proche" : "/";
+  // The website cannot read the cards: a computer asks the phone, a phone's browser sends to the app.
+  const where = !hydrated ? null : !PROD ? "demo" : isNative() ? "app" : isPhoneBrowser() ? "phone-browser" : "computer";
 
   useEffect(() => {
-    if (session.mode !== "locked" && !f.opening) router.replace("/coffre/rubriques");
-  }, [session.mode, f.opening, router]);
+    if (session.mode !== "locked" && !f.opening && !revealing) router.replace("/coffre/rubriques");
+  }, [session.mode, f.opening, revealing, router]);
 
   if (!hydrated) return <Loader dark />;
+  const fromPhone = async (keys: OpenSession) => {
+    setRevealing(true);
+    // Demo: the simulated phone window saved its changes (the "new device" e-mail); take them before writing anything.
+    if (!PROD) await useApp.persist.rehydrate();
+    await openSession(keys);
+  };
   const tapped = f.tap?.card;
   // Production: a beneficiary card belongs to someone else's Coffre.
   const ownerOf = (holderId: string) => trusts.find((t) => t.personId === holderId)?.ownerName ?? "votre proche";
@@ -49,7 +62,11 @@ export default function Verrou() {
         </div>
 
         <AnimatePresence mode="wait">
-          {!tapped ? (
+          {where === "phone-browser" ? (
+            <InstallApp />
+          ) : where === "computer" || viaPhone ? (
+            <PhoneOpen onKeys={fromPhone} onBack={where === "demo" ? () => setViaPhone(false) : undefined} />
+          ) : !tapped ? (
             <motion.div key="tap" className="flex flex-1 flex-col items-center justify-center text-center" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, filter: "blur(6px)" }}>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mb-2 flex items-center gap-2 rounded-full bg-sage/15 px-3 py-1 text-[0.78rem] font-bold text-sage-soft">
                 <ShieldCheck className="h-4 w-4" /> Chiffré sur cet appareil
@@ -72,6 +89,16 @@ export default function Verrou() {
                   {f.reading === "reading" ? "Lecture de la carte…" : "Poser ma carte"}
                 </Button>
               )}
+              {where === "app" && (
+                <div className="mt-4 w-full">
+                  <PhoneInbox />
+                </div>
+              )}
+              {where === "demo" && (
+                <button onClick={() => setViaPhone(true)} className="mt-4 flex items-center gap-2 text-[0.92rem] font-semibold text-gold-soft">
+                  <Monitor className="h-4 w-4" /> Sur un ordinateur ? Ouvrir avec mon téléphone
+                </button>
+              )}
               <Link href="/beneficiaire" className="mt-4 text-[0.9rem] font-semibold text-paper/70 underline">
                 Un proche est décédé ? Espace bénéficiaire
               </Link>
@@ -86,14 +113,16 @@ export default function Verrou() {
               </p>
               <PinPad dark error={f.error} onComplete={f.submitPin} />
               <div className="mt-4 flex justify-center gap-3">
-                <button onClick={() => setFaceId(true)} className="flex items-center gap-2 rounded-full px-4 py-2.5 text-[0.92rem] font-semibold text-paper/75 ring-1 ring-paper/15">
-                  <ScanFace className="h-5 w-5" /> Face ID
-                </button>
+                {where !== "app" && (
+                  <button onClick={() => setFaceId(true)} className="flex items-center gap-2 rounded-full px-4 py-2.5 text-[0.92rem] font-semibold text-paper/75 ring-1 ring-paper/15">
+                    <ScanFace className="h-5 w-5" /> Face ID
+                  </button>
+                )}
                 <button onClick={f.reset} className="rounded-full px-4 py-2.5 text-[0.92rem] font-semibold text-paper/75 ring-1 ring-paper/15">
                   Autre carte
                 </button>
               </div>
-              {faceId && <p className="mt-4 text-center text-[0.88rem] text-paper/60">Dans l&apos;application iPhone et Android, Face ID ou votre empreinte remplacent le code, toujours avec la carte.</p>}
+              {faceId && <p className="mt-4 text-center text-[0.88rem] text-paper/60">Dans l&apos;application iPhone et Android, Face ID (ou l&apos;empreinte) est demandé à chaque ouverture : le code n&apos;est tapé qu&apos;une fois par téléphone, toujours avec la carte.</p>}
             </motion.div>
           )}
         </AnimatePresence>
@@ -110,7 +139,7 @@ export default function Verrou() {
         </div>
       </Sheet>
 
-      {f.opening && session.mode !== "locked" && <VaultReveal onDone={() => router.replace("/coffre/rubriques")} />}
+      {(f.opening || revealing) && session.mode !== "locked" && <VaultReveal onDone={() => router.replace("/coffre/rubriques")} />}
     </div>
   );
 }

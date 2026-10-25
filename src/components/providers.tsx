@@ -1,10 +1,12 @@
 "use client";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { CircleAlert, CircleCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { bootstrap } from "@/lib/api";
 import { PROD } from "@/lib/env";
 import { startI18n } from "@/lib/i18n";
+import { startPush } from "@/lib/push";
 import { accessEnd, graceEnd, procedureStatus } from "@/lib/rules";
 import { now, personName, useApp } from "@/lib/store";
 import { destroyPrivate, eraseCoffre } from "@/lib/vault";
@@ -90,11 +92,17 @@ function Toast() {
 }
 
 export function Providers({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const signedIn = useApp((s) => s.me?.userId);
   useEffect(() => {
     void startI18n();
     if (PROD) void bootstrap().finally(() => useApp.getState().set({ ready: true }));
     else void Promise.resolve(useApp.persist.rehydrate()).finally(() => useApp.getState().set({ ready: true }));
   }, []);
+  // App: notifications from a trusted computer, once someone is signed in.
+  useEffect(() => {
+    if (signedIn) startPush((path) => router.push(path)).catch(console.error);
+  }, [signedIn, router]);
   return (
     <MotionConfig reducedMotion="user">
       {!PROD && <ProcedureRunner />}

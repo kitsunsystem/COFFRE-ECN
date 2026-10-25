@@ -80,3 +80,16 @@ M. Petit
 Assurances Avenir
 iPhone
 Maître Roux
+Edge
+Firefox
+Chrome
+Safari
+Navigateur
+Windows
+Mac
+ChromeOS
+Linux
+Ordinateur
+{0}{1}/appareil/?r={2}{3}
+pushNotificationActionPerformed
+id, name, created_at, expires_at, last_used_at

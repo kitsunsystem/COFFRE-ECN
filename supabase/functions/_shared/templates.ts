@@ -14,7 +14,8 @@ export type TemplateId =
   | "a-jour"
   | "controle-cartes"
   | "impaye"
-  | "acces-fin";
+  | "acces-fin"
+  | "nouvel-appareil";
 
 export interface Email {
   subject: string;
@@ -53,6 +54,8 @@ export function render(id: TemplateId, d: Record<string, string> = {}): Email {
       return { subject: `${d.ownerName} compte sur vous`, title: "Vous êtes garant", body: [`${d.ownerName} vous a désigné comme garant. Votre rôle : ${d.role}.`, "Si un coup dur ou un décès survient, vous pourrez le déclarer depuis votre Espace."] };
     case "cartes-commandees":
       return { subject: "Vos cartes sont en fabrication", title: "Vos cartes arrivent", body: [`${d.count} cartes sont en fabrication. Dès réception, posez-les sur votre téléphone pour les activer.`] };
+    case "nouvel-appareil":
+      return { subject: "Nouvel appareil de confiance", title: "Un ordinateur peut ouvrir votre Coffre", body: [`« ${d.name} » a été approuvé depuis votre téléphone le ${d.date}. Il pourra demander l'ouverture du Coffre, toujours avec votre carte et votre accord sur le téléphone.`, "Ce n'est pas vous ? Retirez-le tout de suite dans Compte › Appareils de confiance, puis changez votre mot de passe."], cta: { label: "Mes appareils", path: "/espace/compte" } };
   }
 }
 

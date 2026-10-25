@@ -8,7 +8,7 @@ import { fromB64, na, newKey, newSalt, open, openBytes, openFrom, openJson, seal
 import { PROD } from "./env";
 import { isReleased, type Moment } from "./rules";
 import { ALL_SUBSECTIONS, SECTIONS } from "./sections";
-import { now, ownerCards, packOf, uid, useApp, useSession, type Card, type Envelope, type VaultItem } from "./store";
+import { now, ownerCards, packOf, uid, useApp, useSession, type Card, type Envelope, type OpenSession, type VaultItem } from "./store";
 
 export interface FileMeta {
   id: string;
@@ -96,25 +96,24 @@ export async function activateHolderCard(card: Card, enrolled: Enrolled, pin?: s
   if (useSession.getState().session.mode === "owner") await syncEnvelopes();
 }
 
-export async function unlock(tap: Tap, pin?: string): Promise<"owner" | "holder"> {
+// The keys a card and its code give, without opening anything here: the phone uses them to approve a computer.
+export async function cardKeys(tap: Tap, pin?: string): Promise<OpenSession> {
   if (Date.now() < lockedUntil) throw new Error("Trop d'essais. Patientez quelques minutes.");
   const st = useApp.getState();
   const card = tap.card;
   if (card.status !== "active") throw new Error("Cette carte n'est pas encore activée.");
-  let opened: "owner" | "holder";
   try {
+    let keys: OpenSession;
     if (purposeOf(card) === "unlock") {
       const kek = await keyFrom(tap.secret, card.kind, pin, st.vault.salt!);
-      const vmk = await open(kek, card.wrappedVmk!, vmkAad(card.id));
-      useSession.getState().setSession({ mode: "owner", cardId: card.id, vmk });
-      opened = "owner";
+      keys = { mode: "owner", cardId: card.id, vmk: await open(kek, card.wrappedVmk!, vmkAad(card.id)) };
     } else {
-      const keys = await holderKeys(tap.secret, card.kind, pin, card.salt!);
-      if (keys.publicKeyB64 !== card.boxPk) throw new Error("bad code");
-      useSession.getState().setSession({ mode: "holder", cardId: card.id, publicKey: keys.publicKey, privateKey: keys.privateKey });
-      opened = "holder";
+      const k = await holderKeys(tap.secret, card.kind, pin, card.salt!);
+      if (k.publicKeyB64 !== card.boxPk) throw new Error("bad code");
+      keys = { mode: "holder", cardId: card.id, publicKey: k.publicKey, privateKey: k.privateKey };
     }
     failedAttempts = 0;
+    return keys;
   } catch {
     if (++failedAttempts >= 5) {
       lockedUntil = Date.now() + 5 * 60_000;
@@ -122,14 +121,22 @@ export async function unlock(tap: Tap, pin?: string): Promise<"owner" | "holder"
     }
     throw new Error(pin ? "Code incorrect. Réessayez." : "Cette carte n'ouvre pas ce Coffre.");
   }
-  // Never reported as a wrong code: the Coffre is open, these only bring it up to date.
-  if (opened === "owner") await ensureSubsectionKeys().then(syncEnvelopes).catch(console.error);
-  else if (PROD) {
-    const trust = trustOfCard(card.id);
-    if (trust) await loadHolderView(trust, card);
-  }
-  return opened;
 }
+
+// Opens the Coffre on this device with keys from a card, or sent by the phone to a trusted computer.
+export async function openSession(keys: OpenSession): Promise<"owner" | "holder"> {
+  useSession.getState().setSession(keys);
+  // Never reported as a wrong code: the Coffre is open, these only bring it up to date.
+  if (keys.mode === "owner") await ensureSubsectionKeys().then(syncEnvelopes).catch(console.error);
+  else if (PROD) {
+    const trust = trustOfCard(keys.cardId);
+    const card = trust?.cards.find((c) => c.id === keys.cardId);
+    if (trust && card) await loadHolderView(trust, card);
+  }
+  return keys.mode;
+}
+
+export const unlock = async (tap: Tap, pin?: string) => openSession(await cardKeys(tap, pin));
 
 export const lock = () => {
   useSession.getState().setSession({ mode: "locked" });
