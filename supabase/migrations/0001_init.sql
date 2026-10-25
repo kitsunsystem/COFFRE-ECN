@@ -552,7 +552,7 @@ create trigger guarantors_invite after insert on public.guarantors for each row 
 -- Un garant déclare ; il ne peut ni vérifier, ni raccourcir le délai.
 create or replace function public.declare_procedure(owner uuid, proc_kind text, proc_note text default null)
 returns uuid language plpgsql security definer set search_path = public as $$
-declare id uuid; g people; o profiles; s app_settings := settings();
+declare id uuid; g people; s app_settings := settings();
 begin
   select p.* into g from people p join guarantors gu on gu.person_id = p.id where p.owner_id = owner and p.user_id = auth.uid() limit 1;
   if g.id is null then raise exception 'pas garant'; end if;
@@ -674,7 +674,7 @@ create or replace function public.staff_set_launched(on_off boolean)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   if not is_staff('admin') then raise exception 'interdit'; end if;
-  update app_settings set launched = on_off;
+  update app_settings set launched = on_off where id; -- Supabase refuses an UPDATE without WHERE
   perform audit(null, 'admin.lancement', jsonb_build_object('launched', on_off));
 end $$;
 
@@ -750,11 +750,10 @@ grant update (phone, address, situation, is_business_owner, assistant_voice, rem
 grant select, delete on public.people to authenticated;
 grant insert (id, owner_id, first_name, last_name, relation, email, phone) on public.people to authenticated;
 grant update (first_name, last_name, relation, email, phone) on public.people to authenticated;
-grant select, insert, delete on public.guarantors to authenticated;
-grant update (role) on public.guarantors to authenticated;
+-- Upserts need UPDATE on every column they write: rows stay pinned to the owner by RLS and the composite foreign keys.
+grant select, insert, update, delete on public.guarantors to authenticated;
 grant select on public.cards to authenticated;
-grant select, insert, delete on public.rights to authenticated;
-grant update (moment) on public.rights to authenticated;
+grant select, insert, update, delete on public.rights to authenticated;
 grant select on public.procedures to authenticated;
 grant select, insert, delete on public.reminders to authenticated;
 grant update (label, date) on public.reminders to authenticated;
@@ -764,7 +763,7 @@ grant insert (id, owner_id, kind, partner, message) on public.concierge_cases to
 grant select on public.staff to authenticated;
 grant select on public.audit_log to authenticated;
 grant select, insert on public.vaults to authenticated;
-grant update (ssk) on public.vaults to authenticated;
+grant update (salt, ssk) on public.vaults to authenticated;
 grant select, insert, update, delete on public.vault_items to authenticated;
 grant select, insert, update, delete on public.envelopes to authenticated;
 grant select, insert, delete on public.concierge_shares to authenticated;

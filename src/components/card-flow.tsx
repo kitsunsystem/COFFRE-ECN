@@ -6,7 +6,7 @@ import { useState } from "react";
 import { activeTrustCards } from "@/lib/api";
 import { driver, needsPin, read, type Tap } from "@/lib/cards";
 import { PROD } from "@/lib/env";
-import { personName, useApp, type Card } from "@/lib/store";
+import { useApp, type Card } from "@/lib/store";
 import { unlock } from "@/lib/vault";
 import { PinPad } from "./pinpad";
 import { Button } from "./ui";
@@ -76,7 +76,6 @@ export function useCardOpen(candidates: Card[], onOpened: Opened) {
 // Ready-made block (light or dark): used to prove who you are (cancel a procedure) or to open before adding a card.
 export function CardUnlock({ candidates, onOpened, dark, intro }: { candidates: Card[]; onOpened: Opened; dark?: boolean; intro?: string }) {
   const f = useCardOpen(candidates, onOpened);
-  const people = useApp((s) => s.people);
   if (!candidates.length) return <p className={dark ? "text-paper/70" : "text-ink-soft"}>Aucune carte active.</p>;
   if (f.tap)
     return (
@@ -95,7 +94,7 @@ export function CardUnlock({ candidates, onOpened, dark, intro }: { candidates: 
           {candidates.map((c) => (
             <button key={c.id} type="button" onClick={() => f.start(c)}>
               <NfcCard name={c.printedName} flipped interactive={false} />
-              <span className={`mt-1.5 block text-[0.85rem] font-semibold ${dark ? "text-paper/75" : "text-ink-soft"}`}>{c.holderId === "owner" ? "Ma carte" : `Carte de ${personName(people, c.holderId).split(" ")[0]}`}</span>
+              <span className={`mt-1.5 block text-[0.85rem] font-semibold ${dark ? "text-paper/75" : "text-ink-soft"}`}>{c.holderId === "owner" ? "Ma carte" : `Carte de ${c.printedName.split(" ")[0]}`}</span>
             </button>
           ))}
         </div>

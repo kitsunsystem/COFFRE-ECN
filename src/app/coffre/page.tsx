@@ -104,7 +104,7 @@ export default function Verrou() {
           {active.map((c) => (
             <button key={c.id} onClick={() => f.start(c)} className="text-left">
               <NfcCard name={c.printedName} flipped interactive={false} />
-              <span className="mt-1.5 block text-[0.85rem] font-semibold text-paper/75">{c.holderId === "owner" ? "Ma carte" : `Carte de ${personName(people, c.holderId).split(" ")[0]}`}</span>
+              <span className="mt-1.5 block text-[0.85rem] font-semibold text-paper/75">{c.holderId === "owner" ? "Ma carte" : `Carte de ${c.printedName.split(" ")[0]}`}</span>
             </button>
           ))}
         </div>

@@ -275,6 +275,40 @@ describe("conciergerie, échéances, journal", () => {
   });
 });
 
+// The statements PostgREST builds for the app's upserts (insert … on conflict do update every column sent).
+describe("écritures telles que l'application les envoie", () => {
+  it("re-saving a guarantor's role and changing a right go through", async () => {
+    await claire(
+      `insert into guarantors (owner_id, person_id, role) values ($1, $2, 'Nouveau rôle')
+       on conflict (owner_id, person_id) do update set owner_id = excluded.owner_id, person_id = excluded.person_id, role = excluded.role`,
+      [ids.claire, ids.pMarc],
+    );
+    await claire(
+      `insert into rights (person_id, owner_id, subsection_id, moment) values ($1, $2, 'banques', 'deces')
+       on conflict (person_id, subsection_id) do update set person_id = excluded.person_id, owner_id = excluded.owner_id, subsection_id = excluded.subsection_id, moment = excluded.moment`,
+      [ids.pMarc, ids.claire],
+    );
+    expect((await claire<{ moment: string }>("select moment from rights where person_id = $1 and subsection_id = 'banques'", [ids.pMarc]))[0].moment).toBe("deces");
+  });
+
+  it("an upsert can never move a row to someone else", async () => {
+    await refused(
+      as(db, ids.eve, `insert into rights (person_id, owner_id, subsection_id, moment) values ($1, $2, 'banques', 'now')
+        on conflict (person_id, subsection_id) do update set moment = excluded.moment`, [ids.pMarc, ids.claire]),
+      /row-level security/,
+    );
+    await refused(claire(`update guarantors set owner_id = $1 where person_id = $2`, [ids.eve, ids.pMarc]), /row-level security|foreign key/);
+  });
+
+  it("a relative is edited field by field, never through an upsert that could touch the account link", async () => {
+    await claire(`update people set first_name = 'Marc', email = 'marc@exemple.fr' where id = $1`, [ids.pMarc]);
+    await refused(
+      claire(`insert into people (id, owner_id, first_name, last_name, relation) values ($1, $2, 'M', 'D', 'Conjoint') on conflict (id) do update set first_name = excluded.first_name, owner_id = excluded.owner_id`, [ids.pMarc, ids.claire]),
+      /permission denied/,
+    );
+  });
+});
+
 describe("clés et départs", () => {
   it("rotates a sub-section key in one transaction", async () => {
     await claire("select rotate_subsection('banques', '\"new\"'::jsonb, $1::jsonb, $2::jsonb)", [

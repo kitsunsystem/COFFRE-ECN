@@ -57,6 +57,9 @@ ok("profil créé ; KYC et facturation hors de portée de l'application");
 const pMarc = randomUUID();
 await must(claire.c.from("people").insert({ id: pMarc, owner_id: claire.id, first_name: "Marc", last_name: "Durand", relation: "Conjoint", email: mail("marc") }), "proche");
 await must(claire.c.from("guarantors").insert({ owner_id: claire.id, person_id: pMarc, role: "Prévenir les enfants" }), "garant");
+// Exactly what the app sends when the role is edited (upsert).
+await must(claire.c.from("guarantors").upsert({ owner_id: claire.id, person_id: pMarc, role: "Prévenir les enfants et le notaire" }), "garant modifié");
+await must(claire.c.from("people").update({ phone: "0612345678" }).eq("id", pMarc), "proche modifié");
 assert.equal((await must(eve.c.from("people").select("*"), "eve")).length, 0);
 ok("famille et garant ; invisibles pour un inconnu");
 
@@ -72,7 +75,10 @@ const item = randomUUID();
 await refused(claire.c.from("vault_items").insert({ id: item, owner_id: claire.id, subsection_id: "a-prevenir", data: sealed }).select(), "dépôt en phase découverte");
 const up0 = await claire.c.storage.from("coffre").upload(`${claire.id}/a-prevenir/f-${tag}`, new Blob([new Uint8Array([1, 2, 3])]));
 assert.ok(up0.error, "fichier en phase découverte");
-await admin.from("app_settings").update({ launched: true }).eq("id", true);
+// The launch switch, as the admin screen flips it (through the API, which refuses an UPDATE without WHERE).
+await refused(claire.c.rpc("staff_set_launched", { on_off: true }), "lancement par une non-admin");
+await must(admin.from("staff").insert({ user_id: claire.id, role: "admin" }), "rôle admin");
+await must(claire.c.rpc("staff_set_launched", { on_off: true }), "lancement officiel");
 await must(claire.c.from("vault_items").insert({ id: item, owner_id: claire.id, subsection_id: "a-prevenir", data: sealed, file_ids: [`f-${tag}`] }), "élément");
 await must(claire.c.storage.from("coffre").upload(`${claire.id}/a-prevenir/f-${tag}`, new Blob([new Uint8Array([1, 2, 3])]), { contentType: "application/octet-stream" }), "fichier chiffré");
 const evil = await eve.c.storage.from("coffre").upload(`${claire.id}/a-prevenir/evil-${tag}`, new Blob([new Uint8Array([9])]));
@@ -87,7 +93,9 @@ await must(marc.c.rpc("activate_holder_card", { card: mine[0].id, card_kind: "de
 ok("Marc rattaché par son adresse vérifiée ; il active lui-même son pack");
 
 assert.equal((await must(marc.c.from("vault_items").select("id"), "avant droits")).length, 0);
-await must(claire.c.from("rights").insert({ person_id: pMarc, owner_id: claire.id, subsection_id: "a-prevenir", moment: "now" }), "droit");
+// The app writes rights with an upsert: first time, then a change of level.
+await must(claire.c.from("rights").upsert({ person_id: pMarc, owner_id: claire.id, subsection_id: "a-prevenir", moment: "deces" }), "droit");
+await must(claire.c.from("rights").upsert({ person_id: pMarc, owner_id: claire.id, subsection_id: "a-prevenir", moment: "now" }), "droit modifié");
 await must(claire.c.from("envelopes").insert({ card_id: mine[0].id, owner_id: claire.id, subsection_id: "a-prevenir", moment: "now", sealed: "a2V5" }), "enveloppe");
 assert.deepEqual((await must(marc.c.from("vault_items").select("id"), "après droits")).map((x) => x.id), [item]);
 const dl = await marc.c.storage.from("coffre").download(`${claire.id}/a-prevenir/f-${tag}`);

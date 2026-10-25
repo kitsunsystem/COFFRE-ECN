@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { CircleAlert, House, LifeBuoy, Lock, LockOpen, ShieldCheck, Sparkles, UserRound, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { PROD } from "@/lib/env";
 import { activeProcedure, graceEnd, procedureStatus } from "@/lib/rules";
 import { personName, useApp, useSession } from "@/lib/store";
@@ -159,8 +159,10 @@ export function CoffreShell({ children }: { children: ReactNode }) {
   const me = useApp((s) => s.me);
   const holderView = useApp((s) => s.holder);
   const router = useRouter();
+  // Set when the person closes the Coffre: their destination wins over the "locked → lock screen" redirect.
+  const closing = useRef(false);
   useEffect(() => {
-    if (hydrated && session.mode === "locked") router.replace("/coffre");
+    if (hydrated && session.mode === "locked" && !closing.current) router.replace("/coffre");
   }, [hydrated, session.mode, router]);
   // Auto-lock after 5 minutes without activity: keys must not stay in memory.
   useEffect(() => {
@@ -201,6 +203,7 @@ export function CoffreShell({ children }: { children: ReactNode }) {
             <motion.button
               whileTap={{ scale: 0.92 }}
               onClick={() => {
+                closing.current = true;
                 lock();
                 router.replace(account ? "/espace" : PROD && me ? "/proche" : "/coffre");
               }}

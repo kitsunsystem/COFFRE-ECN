@@ -172,7 +172,12 @@ export const savePerson = (p: Person) =>
   attempt(async () => {
     const person = { ...p, id: p.id || uid() };
     const isNew = !st().people.some((x) => x.id === person.id);
-    if (PROD) await q(sb().from("people").upsert(personRow(person, me())));
+    // Not an upsert: the account link (user_id) and the owner of a relative can never be written by the app.
+    if (PROD && isNew) await q(sb().from("people").insert(personRow(person, me())));
+    if (PROD && !isNew) {
+      const { first_name, last_name, relation, email, phone } = personRow(person, me());
+      await q(sb().from("people").update({ first_name, last_name, relation, email, phone }).eq("id", person.id).eq("owner_id", me()));
+    }
     st().set((x) => ({ people: isNew ? [...x.people, person] : x.people.map((y) => (y.id === person.id ? person : y)) }));
   });
 
@@ -384,8 +389,11 @@ export const reloadTrusts = () =>
 
 // The Coffre only ever sends ciphertext. Each function is a no-op in the demo (vault.ts updates the local store itself).
 export const remote = {
+  // A new vault, or a fresh one after every card was lost (the old one could never be opened again).
   async vaultInit(salt: string, ssk: Record<string, Sealed>) {
-    if (PROD) await q(sb().from("vaults").insert({ owner_id: me(), salt, ssk }));
+    if (!PROD) return;
+    const updated = await q<unknown[]>(sb().from("vaults").update({ salt, ssk }).eq("owner_id", me()).select("owner_id") as never);
+    if (!updated.length) await q(sb().from("vaults").insert({ owner_id: me(), salt, ssk }));
   },
   async putSsk(ssk: Record<string, Sealed>) {
     if (PROD) await q(sb().from("vaults").update({ ssk }).eq("owner_id", me()));
@@ -423,7 +431,7 @@ export const remote = {
     if (PROD) await q(sb().rpc("activate_holder_card", { card: cardId, card_kind: kind, chip: chipId, pk: boxPk, card_salt: salt }));
   },
   async shareConcierge(caseId: string, itemId: string, sealed: string) {
-    if (PROD) await q(sb().from("concierge_shares").upsert({ case_id: caseId, item_id: itemId, sealed }));
+    if (PROD) await q(sb().from("concierge_shares").upsert({ case_id: caseId, item_id: itemId, sealed }, { ignoreDuplicates: true }));
   },
   // Encrypted files: bucket "coffre", <owner>/<sub-section>/<file id>, stored as nonce + ciphertext bytes.
   async putBlob(ownerId: string, subId: string, fileId: string, bytes: Uint8Array) {
