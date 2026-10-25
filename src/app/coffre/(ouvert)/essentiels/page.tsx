@@ -88,7 +88,7 @@ export default function Essentiels() {
           </motion.div>
         ) : (
           <motion.div key="end" initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} className="mt-10 text-center">
-            <motion.div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradient-to-b from-gold-soft to-gold text-ink shadow-glow" animate={{ rotate: [0, -6, 6, 0] }} transition={{ duration: 0.8, delay: 0.2 }}>
+            <motion.div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradient-to-b from-gold-soft to-gold text-night shadow-glow" animate={{ rotate: [0, -6, 6, 0] }} transition={{ duration: 0.8, delay: 0.2 }}>
               <ShieldCheck className="h-12 w-12" />
             </motion.div>
             <h2 className="mt-6 text-[1.7rem] font-semibold">{done === ESSENTIALS.length ? "L'essentiel est en place" : "Bien avancé"}</h2>

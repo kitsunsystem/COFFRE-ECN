@@ -10,7 +10,7 @@ const noop = () => () => {};
 type Variant = "primary" | "gold" | "ghost" | "outline" | "danger" | "light";
 const VARIANTS: Record<Variant, string> = {
   primary: "bg-ink text-paper hover:bg-ink-soft shadow-soft",
-  gold: "bg-gradient-to-b from-gold-soft to-gold text-ink shadow-glow hover:brightness-105",
+  gold: "bg-gradient-to-b from-gold-soft to-gold text-night shadow-glow hover:brightness-105",
   ghost: "text-ink hover:bg-ink/5",
   outline: "border-2 border-ink/15 text-ink hover:border-ink/35 bg-paper/60",
   danger: "bg-coral text-paper hover:brightness-110 shadow-soft",

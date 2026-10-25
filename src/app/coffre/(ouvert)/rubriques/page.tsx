@@ -15,7 +15,7 @@ import { useApp } from "@/lib/store";
 import { visibleSubsections } from "@/lib/vault";
 import { exportPdf } from "./export";
 
-const GLOW: Record<string, string> = { coral: "from-coral/35", gold: "from-gold/35", sage: "from-sage/35", ink: "from-[#2c4c7a]/50", mist: "from-mist/35" };
+const GLOW: Record<string, string> = { coral: "from-coral/35", gold: "from-gold/35", sage: "from-sage/35", ink: "from-aura/50", mist: "from-mist/35" };
 
 export default function Rubriques() {
   const vault = useApp((s) => s.vault);
@@ -43,11 +43,11 @@ export default function Rubriques() {
 
       {owner && done < ESSENTIALS.length && (
         <motion.div variants={rise}>
-          <Link href="/coffre/essentiels" className="mb-6 flex items-center gap-4 rounded-[1.6rem] bg-gradient-to-r from-gold-soft to-gold p-5 text-ink shadow-glow">
+          <Link href="/coffre/essentiels" className="mb-6 flex items-center gap-4 rounded-[1.6rem] bg-gradient-to-r from-gold-soft to-gold p-5 text-night shadow-glow">
             <Sparkles className="h-7 w-7 shrink-0" />
             <span className="flex-1">
               <span className="block font-semibold">Commencer par l'essentiel</span>
-              <span className="text-[0.88rem] text-ink/70">
+              <span className="text-[0.88rem] text-night/70">
                 {done} sur {ESSENTIALS.length} · à votre rythme
               </span>
             </span>

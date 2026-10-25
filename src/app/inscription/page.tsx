@@ -347,7 +347,7 @@ export default function Inscription() {
                       <motion.span key={i} className="absolute left-1/2 top-1/2 h-2.5 w-2.5 rounded-full bg-gold" initial={{ x: 0, y: 0, opacity: 1 }} animate={{ x: Math.cos((i / 14) * Math.PI * 2) * 90, y: Math.sin((i / 14) * Math.PI * 2) * 90, opacity: 0 }} transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }} />
                     ))}
                     <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 220, damping: 14 }} className="grid h-28 w-28 place-items-center rounded-full bg-gradient-to-b from-gold-soft to-gold shadow-glow">
-                      <Check className="h-14 w-14 text-ink" strokeWidth={2.5} />
+                      <Check className="h-14 w-14 text-night" strokeWidth={2.5} />
                     </motion.span>
                   </div>
                   <h1 className="mt-8 text-[2.2rem] font-semibold leading-tight">Votre Espace est prêt, {d.firstName}.</h1>

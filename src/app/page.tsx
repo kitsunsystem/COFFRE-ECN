@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTrans
 import { ArrowRight, BadgeCheck, Bell, CalendarClock, ChevronRight, ConciergeBell, EyeOff, FileText, HandHeart, HeartPulse, Lock, ShieldCheck, Siren, Sparkles, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { ThemePicker } from "@/components/theme-picker";
 import { Button, Eyebrow } from "@/components/ui";
 import { Aurora, Emblem, Logo, NfcCard, Reveal, rise, stagger, TapDemo } from "@/components/visuals";
 import { APP_NAME, LAUNCH, OFFER } from "@/lib/config";
@@ -61,7 +62,7 @@ function Hero() {
             <span className="relative whitespace-nowrap italic text-gold-deep">
               au même endroit
               <motion.svg viewBox="0 0 300 20" className="absolute -bottom-2 left-0 w-full" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}>
-                <motion.path d="M4 14 C 80 4, 200 4, 296 12" fill="none" stroke="#c9a55c" strokeWidth="4" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.9, duration: 1.1, ease: "easeInOut" }} />
+                <motion.path d="M4 14 C 80 4, 200 4, 296 12" fill="none" style={{ stroke: "var(--color-gold)" }} strokeWidth="4" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ delay: 0.9, duration: 1.1, ease: "easeInOut" }} />
               </motion.svg>
             </span>
             .
@@ -171,7 +172,7 @@ function CardSection() {
             ].map(([n, t, d], i) => (
               <Reveal key={n} delay={i * 0.1}>
                 <div className="flex gap-4 rounded-3xl bg-paper/5 p-5 ring-1 ring-paper/10">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold font-display text-[1.1rem] font-semibold text-ink">{n}</span>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold font-display text-[1.1rem] font-semibold text-night">{n}</span>
                   <div>
                     <div className="text-[1.1rem] font-semibold">{t}</div>
                     <div className="text-paper/65">{d}</div>
@@ -269,7 +270,7 @@ function Family() {
 
 function Privacy() {
   return (
-    <section className="relative overflow-hidden bg-ink px-5 py-24 text-paper">
+    <section className="relative overflow-hidden bg-night-2 px-5 py-24 text-paper">
       <Aurora dark className="opacity-60" />
       <div className="relative mx-auto max-w-4xl text-center">
         <Reveal>
@@ -404,6 +405,10 @@ export default function Landing() {
           <Link href="/beneficiaire" className="text-[0.85rem] font-semibold text-ink-soft hover:text-ink">
             Un proche est décédé ? Espace bénéficiaire
           </Link>
+        </div>
+        <div className="mx-auto mt-8 flex max-w-6xl flex-col items-center gap-2">
+          <span className="text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-mist">Couleurs</span>
+          <ThemePicker compact />
         </div>
       </footer>
     </>

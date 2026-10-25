@@ -73,7 +73,7 @@ export function SectionView({ id }: { id: string }) {
         </Link>
       </motion.div>
       <motion.header variants={rise} className="flex items-start gap-4">
-        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-[1.4rem] bg-gradient-to-br from-gold-soft to-gold text-ink shadow-glow">
+        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-[1.4rem] bg-gradient-to-br from-gold-soft to-gold text-night shadow-glow">
           <NamedIcon name={section.icon} className="h-8 w-8" />
         </span>
         <div>
@@ -123,7 +123,7 @@ export function SectionView({ id }: { id: string }) {
                 <p className="text-[0.85rem] text-paper/55">{sub.hint}</p>
               </div>
               {owner && launched && (
-                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setOpen({ subId: sub.id })} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-ink" aria-label={`Ajouter dans ${sub.title}`}>
+                <motion.button whileTap={{ scale: 0.9 }} onClick={() => setOpen({ subId: sub.id })} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-night" aria-label={`Ajouter dans ${sub.title}`}>
                   <Plus className="h-5 w-5" />
                 </motion.button>
               )}

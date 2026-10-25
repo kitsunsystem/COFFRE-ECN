@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { ThemePicker } from "@/components/theme-picker";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
 import { deleteAccount, openBillingPortal, openCheckout, saveAccount, setAssistantVoice, signOut, submitKyc } from "@/lib/api";
@@ -138,6 +139,11 @@ export default function Compte() {
           )}
         </Card>
       </motion.div>
+
+      <motion.section variants={rise}>
+        <h2 className="mb-3 text-[1.3rem] font-semibold">Couleurs de l&apos;application</h2>
+        <ThemePicker />
+      </motion.section>
 
       <motion.div variants={rise} className="space-y-2.5">
         <Toggle checked={s.assistantVoice} onChange={(v) => void setAssistantVoice(v)} label="L'assistante parle à voix haute" hint="Les réponses sont lues automatiquement" />

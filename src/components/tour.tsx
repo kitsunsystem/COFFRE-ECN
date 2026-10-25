@@ -45,7 +45,7 @@ function FamilyOrbit() {
     <div className="relative mx-auto h-[19rem] w-72">
       <div className="absolute left-1/2 top-1/2 h-[200px] w-[224px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-gold/30" />
       <div className="absolute inset-0 m-auto flex h-fit w-fit flex-col items-center">
-        <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-b from-gold-soft to-gold font-display text-[1.5rem] font-semibold text-ink shadow-glow">CD</span>
+        <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-b from-gold-soft to-gold font-display text-[1.5rem] font-semibold text-night shadow-glow">CD</span>
         <span className="mt-1 text-[0.8rem] font-bold">Claire</span>
       </div>
       {FAMILY.map((p, i) => (
@@ -242,7 +242,7 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
       <ol className="mt-4 space-y-2.5 text-left">
         {SCENARIO.map(([t, d], k) => (
           <motion.li key={t} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + k * 0.08 }} className="flex gap-3 rounded-2xl bg-paper/[0.06] p-3.5 ring-1 ring-paper/10">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gold font-display font-semibold text-ink">{k + 1}</span>
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gold font-display font-semibold text-night">{k + 1}</span>
             <span>
               <span className="block font-semibold leading-snug">{t}</span>
               <span className="text-[0.85rem] text-paper/60">{d}</span>
@@ -334,7 +334,7 @@ export function Tour() {
           )}
           {last ? (
             <div className="flex flex-1 gap-3">
-              <Link href="/coffre" onClick={close} className="flex min-h-[3.25rem] flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold px-5 font-semibold text-ink shadow-glow">
+              <Link href="/coffre" onClick={close} className="flex min-h-[3.25rem] flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold px-5 font-semibold text-night shadow-glow">
                 <Lock className="h-5 w-5" /> Ouvrir le Coffre
               </Link>
               <Button variant="light" onClick={close}>

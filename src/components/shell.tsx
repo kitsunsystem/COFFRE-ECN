@@ -30,7 +30,7 @@ function BottomNav({ items, dark }: { items: NavItem[]; dark?: boolean }) {
           if (it.center)
             return (
               <Link key={it.href} href={it.href} className="-mt-7 flex min-w-0 flex-1 flex-col items-center gap-1" aria-label={it.label}>
-                <motion.span whileTap={{ scale: 0.92 }} whileHover={{ y: -2 }} className="grid h-16 w-16 place-items-center rounded-[1.4rem] bg-gradient-to-b from-gold-soft to-gold text-ink shadow-glow">
+                <motion.span whileTap={{ scale: 0.92 }} whileHover={{ y: -2 }} className="grid h-16 w-16 place-items-center rounded-[1.4rem] bg-gradient-to-b from-gold-soft to-gold text-night shadow-glow">
                   <it.icon className="h-7 w-7" />
                 </motion.span>
                 <span className={`text-[0.7rem] font-bold ${dark ? "text-paper" : "text-ink"}`}>{it.label}</span>
@@ -207,9 +207,9 @@ export function CoffreShell({ children }: { children: ReactNode }) {
                 lock();
                 router.replace(account ? "/espace" : PROD && me ? "/proche" : "/coffre");
               }}
-              className="flex items-center gap-2 rounded-full bg-gold px-4 py-2.5 text-[0.9rem] font-semibold text-ink"
+              className="flex items-center gap-2 whitespace-nowrap rounded-full bg-gold px-4 py-2.5 text-[0.9rem] font-semibold text-night"
             >
-              <Lock className="h-4 w-4" /> Fermer le Coffre
+              <Lock className="h-4 w-4" /> Fermer<span className="hidden min-[420px]:inline"> le Coffre</span>
             </motion.button>
           </div>
         </div>

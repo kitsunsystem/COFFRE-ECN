@@ -8,7 +8,7 @@ export type ProcedureKind = "coup_dur" | "deces";
 export const MOMENTS: { id: Moment; label: string; short: string; dot: string; pill: string }[] = [
   { id: "now", label: "Urgence : tout de suite, à tout moment", short: "Urgence", dot: "bg-sage", pill: "bg-sage text-paper" },
   { id: "coup_dur", label: "En cas de coup dur", short: "Coup dur", dot: "bg-coral", pill: "bg-coral text-paper" },
-  { id: "deces", label: "Au décès", short: "Décès", dot: "bg-gold", pill: "bg-gold text-ink" },
+  { id: "deces", label: "Au décès", short: "Décès", dot: "bg-gold", pill: "bg-gold text-night" },
   { id: "jamais", label: "Jamais", short: "Jamais", dot: "bg-mist/40", pill: "bg-mist/15 text-mist" },
 ];
 export const moment = (id: Moment) => MOMENTS.find((m) => m.id === id)!;

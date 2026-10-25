@@ -8,12 +8,13 @@ import { APP_NAME } from "@/lib/config";
 
 export function Emblem({ className = "h-8 w-8", light }: { className?: string; light?: boolean }) {
   // Three widening arcs: the wake ("sillage") a life leaves behind, and the contactless gesture of the card.
-  const c = light ? "#ead7a8" : "#c9a55c";
+  // Colours come from the theme (CSS variables), so the emblem follows the chosen palette.
+  const c = light ? "var(--color-gold-soft)" : "var(--color-gold)";
   return (
     <svg viewBox="0 0 40 40" className={className} aria-hidden>
-      <circle cx="12" cy="20" r="4.2" fill={c} />
+      <circle cx="12" cy="20" r="4.2" style={{ fill: c }} />
       {[9, 15, 21].map((r, i) => (
-        <path key={r} d={`M ${12 + r * Math.cos(-0.9)} ${20 + r * Math.sin(-0.9)} A ${r} ${r} 0 0 1 ${12 + r * Math.cos(0.9)} ${20 + r * Math.sin(0.9)}`} fill="none" stroke={c} strokeWidth="2.6" strokeLinecap="round" opacity={1 - i * 0.25} />
+        <path key={r} d={`M ${12 + r * Math.cos(-0.9)} ${20 + r * Math.sin(-0.9)} A ${r} ${r} 0 0 1 ${12 + r * Math.cos(0.9)} ${20 + r * Math.sin(0.9)}`} fill="none" style={{ stroke: c }} strokeWidth="2.6" strokeLinecap="round" opacity={1 - i * 0.25} />
       ))}
     </svg>
   );
@@ -32,7 +33,7 @@ export function Logo({ light, className = "" }: { light?: boolean; className?: s
 
 export function Aurora({ dark, className = "" }: { dark?: boolean; className?: string }) {
   const blobs = dark
-    ? ["bg-gold/25", "bg-[#2c4c7a]/50", "bg-sage/25"]
+    ? ["bg-gold/25", "bg-aura/50", "bg-sage/25"]
     : ["bg-gold-soft/70", "bg-sage-soft/80", "bg-coral-soft/60"];
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
@@ -178,7 +179,7 @@ export function NfcCard({
 export type TapState = "idle" | "reading" | "done" | "error";
 
 export function TapReader({ state, light }: { state: TapState; light?: boolean }) {
-  const stroke = light ? "rgba(247,242,233,0.9)" : "#0f1b2d";
+  const stroke = light ? "rgba(247,242,233,0.9)" : "var(--color-ink)";
   return (
     <div className="relative mx-auto flex h-72 w-60 items-center justify-center [perspective:900px]">
       {(state === "reading" || state === "idle") &&
@@ -194,9 +195,9 @@ export function TapReader({ state, light }: { state: TapState; light?: boolean }
       {/* Phone and card share one tilted 3D plane, so the card really lands on the back of the phone. */}
       <motion.div className="relative [transform-style:preserve-3d]" initial={false} animate={{ rotateX: 18, rotateY: state === "done" ? -4 : -16, rotateZ: -3 }} transition={{ type: "spring", stiffness: 60, damping: 14 }}>
         <svg viewBox="0 0 120 220" className="relative h-60 w-auto drop-shadow-2xl" aria-hidden>
-          <rect x="6" y="4" width="108" height="212" rx="22" fill={light ? "rgba(255,255,255,0.08)" : "#fffdf9"} stroke={stroke} strokeWidth="3" />
-          <rect x="44" y="12" width="32" height="8" rx="4" fill={stroke} opacity="0.5" />
-          <motion.rect x="12" y="26" width="96" height="176" rx="14" fill="#4f8a62" initial={false} animate={{ opacity: state === "done" ? 0.35 : 0 }} />
+          <rect x="6" y="4" width="108" height="212" rx="22" style={{ fill: light ? "rgba(255,255,255,0.08)" : "var(--color-paper)", stroke }} strokeWidth="3" />
+          <rect x="44" y="12" width="32" height="8" rx="4" style={{ fill: stroke }} opacity="0.5" />
+          <motion.rect x="12" y="26" width="96" height="176" rx="14" style={{ fill: "var(--color-sage)" }} initial={false} animate={{ opacity: state === "done" ? 0.35 : 0 }} />
         </svg>
         <motion.div
           className="absolute inset-0 m-auto h-fit w-40"
@@ -251,11 +252,11 @@ export function ScoreRing({ value, size = 172, label = "préparé", dark }: { va
       <svg width={size} height={size} className="-rotate-90">
         <defs>
           <linearGradient id="ring" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0%" stopColor="#ead7a8" />
-            <stop offset="100%" stopColor="#c9a55c" />
+            <stop offset="0%" style={{ stopColor: "var(--color-gold-soft)" }} />
+            <stop offset="100%" style={{ stopColor: "var(--color-gold)" }} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke={dark ? "rgba(255,255,255,0.1)" : "#ede3d1"} strokeWidth="12" fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} style={{ stroke: dark ? "rgba(255,255,255,0.1)" : "var(--color-sand)" }} strokeWidth="12" fill="none" />
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -290,10 +291,10 @@ export function VaultReveal({ onDone }: { onDone: () => void }) {
     <motion.div className="fixed inset-0 z-[60] grid place-items-center bg-night" initial={{ opacity: 1 }} animate={{ opacity: [1, 1, 0] }} transition={{ duration: 1.9, times: [0, 0.75, 1] }} onAnimationComplete={onDone}>
       <motion.div className="relative h-64 w-64" initial={{ scale: 0.9 }} animate={{ scale: [0.9, 1, 3.2] }} transition={{ duration: 1.9, times: [0, 0.45, 1], ease: [0.7, 0, 0.3, 1] }}>
         <motion.svg viewBox="0 0 200 200" className="absolute inset-0" animate={{ rotate: 200 }} transition={{ duration: 1.2, ease: [0.65, 0, 0.35, 1] }}>
-          <circle cx="100" cy="100" r="92" fill="none" stroke="#c9a55c" strokeWidth="3" />
-          <circle cx="100" cy="100" r="72" fill="none" stroke="#c9a55c" strokeWidth="1.5" opacity="0.6" />
+          <circle cx="100" cy="100" r="92" fill="none" style={{ stroke: "var(--color-gold)" }} strokeWidth="3" />
+          <circle cx="100" cy="100" r="72" fill="none" style={{ stroke: "var(--color-gold)" }} strokeWidth="1.5" opacity="0.6" />
           {Array.from({ length: 24 }).map((_, i) => (
-            <line key={i} x1="100" y1="12" x2="100" y2={i % 3 ? "20" : "28"} stroke="#ead7a8" strokeWidth="2" transform={`rotate(${i * 15} 100 100)`} />
+            <line key={i} x1="100" y1="12" x2="100" y2={i % 3 ? "20" : "28"} style={{ stroke: "var(--color-gold-soft)" }} strokeWidth="2" transform={`rotate(${i * 15} 100 100)`} />
           ))}
         </motion.svg>
         <div className="absolute inset-0 grid place-items-center">

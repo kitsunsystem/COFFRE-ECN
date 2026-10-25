@@ -17,6 +17,7 @@
   --color-coral-soft: #f7dcd3;
   --color-mist: #6b778a;
   --color-line: #e3d9c6;
+  --color-aura: #2c4c7a;
 
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-manrope), system-ui, sans-serif;
@@ -85,6 +86,77 @@ h1, h2, h3, .font-display {
 
 .safe-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+/* ---------- Thème « Noir et or » (data-theme="noir", see src/lib/theme.ts) ----------
+   Deep black, night-blue surfaces, metallic gold, Cinzel titles. Every colour of the app is a variable, so redefining
+   them restyles everything. Light screens become dark; the screens that were already dark (the Coffre, dark cards and
+   sheets) keep light text: their own block below. */
+html[data-theme="noir"] {
+  color-scheme: dark;
+  --color-cream: #07090e;
+  --color-sand: #181f30;
+  --color-paper: #0f131d;
+  --color-ink: #f4f0e6;
+  --color-ink-soft: #c5c9d3;
+  --color-mist: #9ca2b3;
+  --color-line: rgb(212 175 55 / 0.2);
+  --color-night: #050608;
+  --color-night-2: #121724;
+  --color-gold: #d4af37;
+  --color-gold-soft: #f6e29e;
+  --color-gold-deep: #e5bf4e;
+  --color-sage: #5fae7a;
+  --color-sage-soft: rgb(95 174 122 / 0.16);
+  --color-coral: #e8735a;
+  --color-coral-soft: rgb(232 115 90 / 0.16);
+  --color-aura: #1b2440;
+  --font-display: var(--font-cinzel), "Playfair Display", Georgia, serif;
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -12px rgb(0 0 0 / 0.7);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.5), 0 24px 60px -16px rgb(0 0 0 / 0.8);
+  --shadow-glow: 0 0 0 1px rgb(212 175 55 / 0.35), 0 18px 50px -12px rgb(212 175 55 / 0.45);
+}
+html[data-theme="noir"] :is(.bg-night, .\!bg-night, .bg-night-2) {
+  --color-cream: #f4efe2;
+  --color-sand: #e7dcc4;
+  --color-paper: #f8f9fc;
+  --color-ink: #0b0e15;
+  --color-ink-soft: #2a3040;
+  --color-line: #e3d9c6;
+  --color-gold-deep: #8c6a1e;
+  --color-sage-soft: #d9eadc;
+  --color-coral-soft: #f7dcd3;
+}
+/* Wide engraved capitals: a little air instead of the tight tracking of the default serif, and titles scaled down so
+   they take the same width as with the default font (zoom also scales their margins, keeping the rhythm). */
+html[data-theme="noir"] :is(h1, h2, h3, .font-display) {
+  letter-spacing: 0.01em;
+}
+html[data-theme="noir"] h1 {
+  zoom: 0.82;
+}
+html[data-theme="noir"] :is(h2, h3) {
+  zoom: 0.9;
+}
+html[data-theme="noir"] ::selection {
+  background: var(--color-gold);
+  color: #050608;
+}
+/* Main buttons, selected choices and ticked boxes are gold, as on the network's own site. */
+html[data-theme="noir"] .bg-ink {
+  background-color: var(--color-gold);
+}
+html[data-theme="noir"] .hover\:bg-ink-soft:hover {
+  background-color: var(--color-gold-soft);
+}
+/* Light gold washes would glare on black: a soft golden tint instead (dark screens keep the light version). */
+html[data-theme="noir"] :is(.bg-gold-soft, .bg-gold-soft\/40, .bg-gold-soft\/50, .bg-gold-soft\/60, .bg-gold-soft\/70):not(:is(.bg-night, .\!bg-night, .bg-night-2) *) {
+  background-color: rgb(212 175 55 / 0.14);
+}
+/* Ambient glows: gold and night blue only. */
+html[data-theme="noir"] :is(.bg-sage-soft\/80, .bg-coral-soft\/60) {
+  background-color: rgb(27 36 64 / 0.7);
 }
 
 @media (prefers-reduced-motion: reduce) {

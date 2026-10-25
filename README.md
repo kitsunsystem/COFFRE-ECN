@@ -2,7 +2,9 @@
 
 Application complète conforme au *Brief développeurs — coffre familial* et au *Suivi du projet* (formule simple) : un **Espace** (compte, famille, garants, cartes, échéances, aide, services, assistante) et un **Coffre** chiffré qui s'ouvre avec une **carte, plus le code**. Le même code donne le site web, l'application iPhone et l'application Android.
 
-**Démo en ligne : https://kitsunsystem.github.io/COFFRE-ECN/**
+**Démo en ligne : https://kitsunsystem.github.io/COFFRE-ECN/** · en noir et or : https://kitsunsystem.github.io/COFFRE-ECN/?theme=noir
+
+Deux thèmes de couleurs, au choix dans Compte › Couleurs de l'application (ou en bas de la page d'accueil) : **Sillage** (crème, encre et or) et **Noir et or** (noir profond, bleu nuit, or métallique, titres en Cinzel). Toutes les couleurs sont des variables de `src/app/globals.css` ; `?theme=noir` ou `?theme=sillage` dans un lien choisit le thème (mémorisé sur l'appareil).
 
 ## Deux modes, un seul code
 

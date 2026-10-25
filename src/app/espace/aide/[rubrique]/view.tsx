@@ -70,7 +70,7 @@ export function RubriqueView({ id }: { id: string }) {
                   const on = !!checklist[key(c.id)];
                   return (
                     <motion.button key={c.id} type="button" whileTap={{ scale: 0.98 }} onClick={() => toggle(c.id)} aria-pressed={on} className="flex w-full items-center gap-4 rounded-2xl bg-paper p-4 text-left ring-1 ring-line">
-                      <motion.span animate={{ backgroundColor: on ? "#4f8a62" : "rgba(15,27,45,0.06)", scale: on ? [1, 1.2, 1] : 1 }} className="grid h-8 w-8 shrink-0 place-items-center rounded-full">
+                      <motion.span animate={{ scale: on ? [1, 1.2, 1] : 1 }} className={`grid h-8 w-8 shrink-0 place-items-center rounded-full transition-colors ${on ? "bg-sage" : "bg-ink/[0.06]"}`}>
                         <AnimatePresence>{on && <motion.span initial={{ scale: 0, rotate: -40 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }}><Check className="h-4 w-4 text-paper" strokeWidth={3} /></motion.span>}</AnimatePresence>
                       </motion.span>
                       <span className={`flex-1 transition-colors ${on ? "text-mist line-through decoration-mist/40" : "font-semibold"}`}>{c.label}</span>
