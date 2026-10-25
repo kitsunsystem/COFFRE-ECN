@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 import { PROD } from "@/lib/env";
 import { activeProcedure, graceEnd, procedureStatus } from "@/lib/rules";
-import { personName, useApp, useSession } from "@/lib/store";
+import { useApp, useSession } from "@/lib/store";
 import { lock } from "@/lib/vault";
 import { Alma } from "./alma";
 import { Tour } from "./tour";
@@ -153,11 +153,8 @@ export function EspaceShell({ children }: { children: ReactNode }) {
 export function CoffreShell({ children }: { children: ReactNode }) {
   const hydrated = useHydrated();
   const session = useSession((s) => s.session);
-  const people = useApp((s) => s.people);
-  const cards = useApp((s) => s.cards);
   const account = useApp((s) => s.account);
   const me = useApp((s) => s.me);
-  const holderView = useApp((s) => s.holder);
   const router = useRouter();
   // Set when the person closes the Coffre: their destination wins over the "locked → lock screen" redirect.
   const closing = useRef(false);
@@ -180,7 +177,6 @@ export function CoffreShell({ children }: { children: ReactNode }) {
     };
   }, []);
   if (!hydrated || session.mode === "locked") return <Loader dark />;
-  const holder = session.mode === "holder" ? (holderView?.holderName ?? personName(people, cards.find((c) => c.id === session.cardId)?.holderId ?? "")) : null;
   // No way back to the Espace from here: the Coffre has to be closed first.
   const items: NavItem[] = [
     { href: "/coffre/rubriques", label: "Rubriques", icon: LockOpen },
@@ -198,7 +194,6 @@ export function CoffreShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-3">
           <Logo light />
           <div className="flex items-center gap-2">
-            <span className="hidden rounded-full bg-sage/20 px-3 py-1 text-[0.75rem] font-bold text-sage-soft sm:inline">{holder ? `Carte de ${holder}` : "Coffre ouvert"}</span>
             <Alma dark />
             <motion.button
               whileTap={{ scale: 0.92 }}
@@ -209,7 +204,11 @@ export function CoffreShell({ children }: { children: ReactNode }) {
               }}
               className="flex items-center gap-2 whitespace-nowrap rounded-full bg-gold px-4 py-2.5 text-[0.9rem] font-semibold text-night"
             >
-              <Lock className="h-4 w-4" /> Fermer<span className="hidden min-[420px]:inline"> le Coffre</span>
+              <Lock className="h-4 w-4" />
+              {/* One flex item: the gap must not split "Fermer le Coffre" into a double space. */}
+              <span>
+                Fermer<span className="hidden min-[420px]:inline"> le Coffre</span>
+              </span>
             </motion.button>
           </div>
         </div>
