@@ -5,9 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:prod": "next build && node scripts/headers.mjs",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:db": "vitest run supabase/tests",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "cap:sync": "cap sync",
     "deploy": "node scripts/deploy-pages.mjs"
   },
   "dependencies": {

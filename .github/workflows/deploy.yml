@@ -1,0 +1,68 @@
+# Production deployment, started by hand (Actions › Deploy › Run workflow) once the accounts exist.
+# Needs, in Settings › Secrets and variables › Actions:
+#   variables: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_PROJECT_REF, CF_PAGES_PROJECT, FIDO_RP_ID
+#   secrets:   SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
+# Self-hosted Supabase (OVHcloud HDS): skip the "backend" job and apply migrations with psql (deploy/README.md).
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: "Database migrations and server functions"
+        type: boolean
+        default: true
+      web:
+        description: "Website (Cloudflare Pages)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  backend:
+    if: inputs.backend && vars.SUPABASE_PROJECT_REF != ''
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+      - run: supabase link --project-ref "${{ vars.SUPABASE_PROJECT_REF }}"
+      - run: supabase db push
+      - run: supabase functions deploy
+
+  web:
+    needs: [backend]
+    # Runs even when the backend job was skipped (self-hosted backend).
+    if: always() && inputs.web && vars.SUPABASE_URL != '' && needs.backend.result != 'failure'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:prod
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_FIDO_RP_ID: ${{ vars.FIDO_RP_ID }}
+          NEXT_PUBLIC_APP_URL: https://${{ vars.FIDO_RP_ID }}
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main

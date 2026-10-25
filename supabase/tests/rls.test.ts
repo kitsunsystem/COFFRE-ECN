@@ -13,7 +13,7 @@ beforeAll(async () => {
   await db.exec(`insert into public.staff values ('${ids.verif}', 'verification'), ('${ids.logistique}', 'logistique'), ('${ids.concierge}', 'conciergerie'), ('${ids.admin}', 'admin');`);
 }, 60_000);
 
-const claire = (q: string, p: unknown[] = []) => as(db, ids.claire, q, p);
+const claire = <T = Record<string, unknown>>(q: string, p: unknown[] = []) => as<T>(db, ids.claire, q, p);
 const outbox = async (template: string) => (await db.query<{ to_email: string }>("select to_email from outbox where template = $1", [template])).rows.map((r) => r.to_email);
 
 describe("profil", () => {

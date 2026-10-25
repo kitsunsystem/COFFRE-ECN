@@ -14,7 +14,8 @@ const email = read("git config user.email");
 const env = { ...process.env, GIT_AUTHOR_NAME: name, GIT_AUTHOR_EMAIL: email, GIT_COMMITTER_NAME: name, GIT_COMMITTER_EMAIL: email };
 
 rmSync("out", { recursive: true, force: true });
-sh("npm run build", { env: { ...process.env, PAGES_BASE_PATH: BASE } });
+// Always the demo: a local .env.local with production keys must never end up on the public demo.
+sh("npm run build", { env: { ...process.env, PAGES_BASE_PATH: BASE, NEXT_PUBLIC_SUPABASE_URL: "", NEXT_PUBLIC_SUPABASE_ANON_KEY: "", NEXT_PUBLIC_CARD_DRIVER: "" } });
 writeFileSync("out/.nojekyll", ""); // otherwise Pages hides the _next/ folder
 
 // out/ becomes a throwaway one-commit repo: gh-pages only ever holds the latest build.

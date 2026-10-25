@@ -34,7 +34,8 @@ export default function Verrou() {
 
   if (!hydrated) return <Loader dark />;
   const tapped = f.tap?.card;
-  const holderLabel = (holderId: string) => (PROD ? (trusts.find((t) => t.personId === holderId)?.ownerName ?? "") : personName(people, holderId));
+  // Production: a beneficiary card belongs to someone else's Coffre.
+  const ownerOf = (holderId: string) => trusts.find((t) => t.personId === holderId)?.ownerName ?? "votre proche";
 
   return (
     <div className="grain relative grid min-h-dvh overflow-hidden bg-night text-paper">
@@ -80,7 +81,9 @@ export default function Verrou() {
               <div className="mx-auto mb-6 w-56">
                 <NfcCard name={tapped.printedName} flipped interactive={false} />
               </div>
-              <p className="mb-5 text-center text-paper/70">{tapped.holderId === "owner" ? "Carte reconnue. Tapez votre code." : `Carte reconnue${holderLabel(tapped.holderId) ? ` (Coffre de ${holderLabel(tapped.holderId)})` : ""}. Tapez votre code.`}</p>
+              <p className="mb-5 text-center text-paper/70">
+                {tapped.holderId === "owner" ? "Carte reconnue. Tapez votre code." : PROD ? `Carte reconnue : Coffre de ${ownerOf(tapped.holderId)}. Tapez votre code.` : `Carte de ${personName(people, tapped.holderId)}. Tapez votre code.`}
+              </p>
               <PinPad dark error={f.error} onComplete={f.submitPin} />
               <div className="mt-4 flex justify-center gap-3">
                 <button onClick={() => setFaceId(true)} className="flex items-center gap-2 rounded-full px-4 py-2.5 text-[0.92rem] font-semibold text-paper/75 ring-1 ring-paper/15">

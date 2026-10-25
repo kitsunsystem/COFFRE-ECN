@@ -1,0 +1,65 @@
+# Every push: code checks, unit tests, database access rules (PGlite), both builds,
+# then the full production path on a real Supabase stack (Docker on the runner).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Code, tests, builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Unit tests and database access rules
+        run: npm test
+      - name: Demo build
+        run: npm run build
+      - name: Production build (with security headers)
+        run: npm run build:prod
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      - run: npm audit --omit=dev --audit-level=high
+
+  supabase:
+    name: Production path on a real Supabase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+      - name: Start Supabase (migrations applied, functions served)
+        run: supabase start
+      - name: Database lint (functions and policies)
+        run: supabase db lint --level error
+      - name: Export the local keys
+        run: supabase status -o env | sed 's/"//g' >> "$GITHUB_ENV"
+      - name: End-to-end
+        run: npm run test:e2e
+      - name: Function logs on failure
+        if: failure()
+        run: docker logs $(docker ps -q --filter name=supabase_edge_runtime) 2>&1 | tail -n 200

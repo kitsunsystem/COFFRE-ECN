@@ -1,0 +1,26 @@
+# OWASP ZAP baseline scan (passive, safe) of a deployed version — staging first, never someone else's site.
+# Actions › Security scan › Run workflow, with the address to scan. The report is attached to the run.
+name: Security scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Address to scan (e.g. https://staging.votre-domaine.fr)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  zap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ inputs.target }}
+          rules_file_name: .zap/rules.tsv
+          allow_issue_writing: false
+          fail_action: false
+          artifact_name: zap-report
