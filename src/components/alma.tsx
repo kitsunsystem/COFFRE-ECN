@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ask, DISCLAIMER, SUGGESTIONS } from "@/lib/assistant";
 import { ASSISTANT_NAME } from "@/lib/config";
+import { locale, tr } from "@/lib/i18n";
 import { useApp } from "@/lib/store";
 import { Sheet } from "./ui";
 
@@ -65,8 +66,8 @@ export function Alma({ dark }: { dark?: boolean }) {
   function speak(t: string) {
     if (!voice || typeof speechSynthesis === "undefined") return;
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(t);
-    u.lang = "fr-FR";
+    const u = new SpeechSynthesisUtterance(tr(t));
+    u.lang = locale();
     u.rate = 0.95;
     u.onstart = () => setSpeaking(true);
     u.onend = () => setSpeaking(false);
@@ -84,9 +85,9 @@ export function Alma({ dark }: { dark?: boolean }) {
 
   function listen() {
     const SR = (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionLike; SpeechRecognition?: new () => SpeechRecognitionLike }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognitionLike }).webkitSpeechRecognition;
-    if (!SR) return alert("La dictée vocale n'est pas disponible sur ce navigateur.");
+    if (!SR) return alert(tr("La dictée vocale n'est pas disponible sur ce navigateur."));
     const r = new SR();
-    r.lang = "fr-FR";
+    r.lang = locale();
     r.onresult = (e) => void send(e.results[0][0].transcript);
     r.onend = () => setListening(false);
     setListening(true);

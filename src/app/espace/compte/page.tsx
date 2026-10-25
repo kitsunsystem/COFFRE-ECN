@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { LangPicker } from "@/components/lang-picker";
+import { tr } from "@/lib/i18n";
 import { ThemePicker } from "@/components/theme-picker";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
@@ -145,6 +147,11 @@ export default function Compte() {
         <ThemePicker />
       </motion.section>
 
+      <motion.section variants={rise}>
+        <h2 className="mb-3 text-[1.3rem] font-semibold">Langue</h2>
+        <LangPicker />
+      </motion.section>
+
       <motion.div variants={rise} className="space-y-2.5">
         <Toggle checked={s.assistantVoice} onChange={(v) => void setAssistantVoice(v)} label="L'assistante parle à voix haute" hint="Les réponses sont lues automatiquement" />
         <Link href="/espace/cartes" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
@@ -236,7 +243,7 @@ export default function Compte() {
         <div className="space-y-4">
           <p className="text-ink-soft">Votre Espace, votre Coffre, ses documents et les accès de vos proches seront effacés définitivement. Personne, pas même nous, ne pourra les récupérer.</p>
           <Field label="Pour confirmer, tapez SUPPRIMER" value={confirmText} onChange={setConfirmText} />
-          <Button full variant="danger" disabled={busy || confirmText.trim().toUpperCase() !== "SUPPRIMER"} onClick={async () => { setBusy(true); if (await deleteAccount()) router.replace("/"); setBusy(false); }}>
+          <Button full variant="danger" disabled={busy || confirmText.trim().toUpperCase() !== tr("SUPPRIMER")} onClick={async () => { setBusy(true); if (await deleteAccount()) router.replace("/"); setBusy(false); }}>
             {busy ? "Suppression…" : "Tout supprimer définitivement"}
           </Button>
         </div>

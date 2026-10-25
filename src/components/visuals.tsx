@@ -277,7 +277,8 @@ export function ScoreRing({ value, size = 172, label = "préparé", dark }: { va
             {shown}
             <span className="text-[1.2rem] text-mist">%</span>
           </div>
-          <div className="mt-1 text-[0.8rem] font-semibold uppercase tracking-[0.15em] text-mist">{label}</div>
+          {/* Tight enough for "PREPARADO" inside the ring. */}
+          <div className="mt-1 text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-mist">{label}</div>
         </div>
       </div>
     </div>

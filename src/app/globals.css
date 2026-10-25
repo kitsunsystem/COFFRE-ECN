@@ -88,6 +88,11 @@ h1, h2, h3, .font-display {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
+/* Another language than French: hidden until the page is translated (src/lib/i18n.ts). */
+html.i18n-wait body {
+  visibility: hidden;
+}
+
 /* ---------- Thème « Noir et or » (data-theme="noir", see src/lib/theme.ts) ----------
    Deep black, night-blue surfaces, metallic gold, Cinzel titles. Every colour of the app is a variable, so redefining
    them restyles everything. Light screens become dark; the screens that were already dark (the Coffre, dark cards and

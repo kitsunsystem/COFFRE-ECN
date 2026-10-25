@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useHydrated } from "@/components/providers";
 import { Button, Field, Notice } from "@/components/ui";
+import { LangPicker } from "@/components/lang-picker";
 import { Aurora, Logo } from "@/components/visuals";
 import { sendCode, verifyCode } from "@/lib/api";
 import { DEMO_PIN, seedDemo } from "@/lib/demo";
@@ -50,9 +51,12 @@ export default function Connexion() {
     <div className="relative min-h-dvh overflow-hidden">
       <Aurora />
       <div className="relative mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 py-10">
-        <Link href="/" className="mb-10">
-          <Logo />
-        </Link>
+        <div className="mb-10 flex items-center justify-between">
+          <Link href="/">
+            <Logo />
+          </Link>
+          <LangPicker compact />
+        </div>
         <motion.h1 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-[2.2rem] font-semibold leading-tight">
           Bon retour parmi nous
         </motion.h1>

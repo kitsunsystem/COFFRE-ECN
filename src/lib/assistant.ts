@@ -2,6 +2,7 @@
 // Answers from the "assistant" function when connected, otherwise (demo, offline, provider down) from a local knowledge base.
 import { ASSISTANT_NAME } from "./config";
 import { PROD } from "./env";
+import { currentLang } from "./i18n";
 import { useApp } from "./store";
 import { sb } from "./supabase";
 
@@ -46,7 +47,7 @@ export async function ask(question: string, place: string): Promise<string> {
   // Production, signed in: the "assistant" function. Only the question and the page name leave the device, never Coffre content.
   if (PROD && useApp.getState().me) {
     const { data } = await sb()
-      .functions.invoke("assistant", { body: { question, place } })
+      .functions.invoke("assistant", { body: { question, place, lang: currentLang() } })
       .catch(() => ({ data: null }));
     if (data?.answer) return data.answer as string;
   }

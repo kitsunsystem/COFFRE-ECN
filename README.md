@@ -2,9 +2,13 @@
 
 Application complète conforme au *Brief développeurs — coffre familial* et au *Suivi du projet* (formule simple) : un **Espace** (compte, famille, garants, cartes, échéances, aide, services, assistante) et un **Coffre** chiffré qui s'ouvre avec une **carte, plus le code**. Le même code donne le site web, l'application iPhone et l'application Android.
 
-**Démo en ligne : https://kitsunsystem.github.io/COFFRE-ECN/** · en noir et or : https://kitsunsystem.github.io/COFFRE-ECN/?theme=noir
+**Démo en ligne : https://kitsunsystem.github.io/COFFRE-ECN/** · en noir et or : https://kitsunsystem.github.io/COFFRE-ECN/?theme=noir · en anglais : https://kitsunsystem.github.io/COFFRE-ECN/?lang=en
 
 Deux thèmes de couleurs, au choix dans Compte › Couleurs de l'application (ou en bas de la page d'accueil) : **Sillage** (crème, encre et or) et **Noir et or** (noir profond, bleu nuit, or métallique, titres en Cinzel). Toutes les couleurs sont des variables de `src/app/globals.css` ; `?theme=noir` ou `?theme=sillage` dans un lien choisit le thème (mémorisé sur l'appareil).
+
+Quatre langues : **français, anglais, espagnol, catalan** (Espagne, Andorre), au choix en haut de l'accueil et de la connexion, ou dans Compte › Langue ; `?lang=en`, `?lang=es` ou `?lang=ca` dans un lien. Les écrans sont écrits en français ; les traductions sont dans `src/i18n/*.tsv` (une ligne par texte : français, anglais, espagnol, catalan ; `{0}` = une valeur insérée). `npm run i18n` reconstruit les fichiers utilisés par l'application et liste les textes ajoutés au code sans traduction (la CI échoue s'il en manque). Les dates, le PDF, les courriers téléchargés et la voix de l'assistante suivent la langue choisie. Ajouter une langue : une colonne de plus dans les `.tsv` et une ligne dans `src/lib/i18n.ts`.
+
+Les rubriques du Coffre sont dessinées comme de petits coffres-forts (porte, charnières, pênes, volant, nom gravé) dont la porte pivote quand on les ouvre : `src/components/safe-door.tsx`.
 
 ## Deux modes, un seul code
 
@@ -28,6 +32,7 @@ npm test             # tests unitaires + règles d'accès de la base (PGlite, sa
 npm run build        # export statique dans out/ (site + applications)
 npm run build:prod   # idem + en-têtes de sécurité (CSP, HSTS…) pour Cloudflare Pages
 npm run test:e2e     # parcours complet sur un vrai Supabase (supabase start), lancé aussi par la CI
+npm run i18n         # reconstruit les traductions depuis src/i18n/*.tsv et liste les textes manquants
 npm run deploy       # met à jour la démo en ligne (toujours en mode démonstration)
 npx cap sync         # copie le site dans les projets iOS (ios/) et Android (android/)
 ```

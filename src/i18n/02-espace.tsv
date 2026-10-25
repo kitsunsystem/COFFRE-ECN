@@ -1,0 +1,396 @@
+# Français	English	Español	Català
+# Accueil de l'Espace
+Bonjour	Hello	Buenos días	Bon dia
+Bonsoir	Good evening	Buenas tardes	Bona tarda
+Bonjour, {0}	Hello, {0}	Buenos días, {0}	Bon dia, {0}
+Bonsoir, {0}	Good evening, {0}	Buenas tardes, {0}	Bona tarda, {0}
+Visite guidée	Guided tour	Visita guiada	Visita guiada
+Votre famille est préparée à {0} %	Your family is {0}% prepared	Su familia está preparada al {0} %	La vostra família està preparada al {0} %
+Prochaine étape : {0}.	Next step: {0}.	Próximo paso: {0}.	Pas següent: {0}.
+Tout l'essentiel est en place. Bravo.	All the essentials are in place. Well done.	Todo lo esencial está listo. ¡Enhorabuena!	Tot l'essencial ja és a punt. Enhorabona!
+Votre parcours	Your journey	Su recorrido	El vostre recorregut
+Besoin d'aide pour tout mettre en place ?	Need help setting everything up?	¿Necesita ayuda para ponerlo todo en marcha?	Necessiteu ajuda per posar-ho tot en marxa?
+La conciergerie le fait avec vous.	The concierge does it with you.	La conserjería lo hace con usted.	La consergeria ho fa amb vós.
+{0} : échéance le {1}	{0}: due on {1}	{0}: vence el {1}	{0}: venç el {1}
+{0}Pensez à le renouveler, puis à mettre le Coffre à jour.	{0}Remember to renew it, then to update the Vault.	{0}No olvide renovarlo y después actualizar el Cofre.	{0}Recordeu renovar-lo i després actualitzar el Cofre.
+Et {0} autre{1} dans les 3 mois.	And {0} other{1} within 3 months.	Y {0} más en los próximos 3 meses.	I {0} més en els pròxims 3 mesos.
+{0} proche{1} · {2} garant{3}	{0} loved one{1} · {2} trusted contact{3}	{0} allegado{1} · {2} garante{3}	{0} familiar{1} · {2} garant{3}
+Fiche d'urgence	Emergency sheet	Ficha de emergencia	Fitxa d'emergència
+À copier dans le téléphone	To copy into the phone	Para copiar en el teléfono	Per copiar al telèfon
+On s'occupe de tout	We take care of everything	Nos ocupamos de todo	Ens n'ocupem de tot
+Démarches	Formalities	Trámites	Tràmits
+Listes et courriers	Lists and letters	Listas y cartas	Llistes i cartes
+Tout ce qui est personnel va dans le Coffre	Everything personal goes in the Vault	Todo lo personal va en el Cofre	Tot el que és personal va al Cofre
+Ici, dans l'Espace, on ne dépose jamais rien.	Here, in the Space, nothing is ever stored.	Aquí, en el Espacio, nunca se guarda nada.	Aquí, a l'Espai, no s'hi desa mai res.
+Tout voir	See all	Ver todo	Veure-ho tot
+# Textes assemblés par le code (compteurs, étapes)
+{0} active{1}	{0} active	{0} activa{1}	Actives: {0}
+{0} suivie{1}	{0} tracked	{0} en seguimiento	{0} en seguiment
+{0} / {1} · {2}	{0} / {1} · {2}	{0} / {1} · {2}	{0} / {1} · {2}
+ou	or	o	o
+Assurance-vie	Life insurance	Seguro de vida	Assegurança de vida
+« {0} »	"{0}"	«{0}»	«{0}»
+{0} à {1} ({2})	{0} in {1} ({2})	{0} en {1} ({2})	{0} a {1} ({2})
+{0} sur {1}	{0} of {1}	{0} de {1}	{0} de {1}
+{0}/{1} étapes faites	{0}/{1} steps done	{0}/{1} pasos hechos	{0}/{1} passos fets
+{0} courrier{1}	{0} letter{1}	{0} carta{1}	Cartes: {0}
+# Aide
+Aide	Help	Ayuda	Ajuda
+Si quelque chose arrive	If something happens	Si ocurre algo	Si passa alguna cosa
+Des listes claires, des étapes simples et des courriers prêts à imprimer. Sans rien déposer ici : tout ce qui est personnel va dans le Coffre.	Clear lists, simple steps and letters ready to print. Without leaving anything here: everything personal goes in the Vault.	Listas claras, pasos sencillos y cartas listas para imprimir. Sin dejar nada aquí: todo lo personal va en el Cofre.	Llistes clares, passos senzills i cartes a punt per imprimir. Sense deixar res aquí: tot el que és personal va al Cofre.
+Toutes les rubriques	All topics	Todos los temas	Tots els temes
+Pour adapter la liste	To tailor the list	Para adaptar la lista	Per adaptar la llista
+Cochez ce qui correspond à la situation de votre proche.	Tick what matches your loved one's situation.	Marque lo que corresponda a la situación de su ser querido.	Marqueu el que correspongui a la situació del vostre ésser estimat.
+La liste à cocher	The checklist	La lista de comprobación	La llista de comprovació
+Pas à pas	Step by step	Paso a paso	Pas a pas
+Courriers à imprimer	Letters to print	Cartas para imprimir	Cartes per imprimir
+Des modèles vierges : complétez les passages entre crochets, imprimez, signez.	Blank templates: fill in the parts in brackets, print, sign.	Modelos en blanco: complete las partes entre corchetes, imprima y firme.	Models en blanc: completeu les parts entre claudàtors, imprimiu i signeu.
+Destinataire : {0}	To: {0}	Destinatario: {0}	Destinatari: {0}
+Télécharger {0}	Download {0}	Descargar {0}	Baixar {0}
+Vous ne déposez rien ici. Les papiers et informations personnelles vont dans le Coffre, où seuls ceux que vous avez choisis pourront les ouvrir.	You don't leave anything here. Personal papers and information go in the Vault, where only the people you chose can open them.	Aquí no deja nada. Los papeles y la información personal van en el Cofre, donde solo las personas que haya elegido podrán abrirlos.	Aquí no deixeu res. Els papers i la informació personal van al Cofre, on només les persones que hàgiu triat els podran obrir.
+Informations générales, qui ne remplacent pas un professionnel du droit.	General information, which does not replace a legal professional.	Información general, que no sustituye a un profesional del derecho.	Informació general, que no substitueix un professional del dret.
+# Cartes
+En fabrication	Being made	En fabricación	En fabricació
+À activer	To activate	Por activar	Per activar
+Active	Active	Activa	Activa
+Désactivée	Deactivated	Desactivada	Desactivada
+Carte perdue	Lost card	Tarjeta perdida	Targeta perduda
+Remplacer	Replace	Sustituir	Substituir
+Mes cartes	My cards	Mis tarjetas	Les meves targetes
+Votre clé, c'est votre carte	Your card is your key	Su llave es su tarjeta	La vostra clau és la vostra targeta
+Posez-la au dos du téléphone et tapez votre code : votre Coffre s'ouvre. Rien d'autre à retenir.	Place it on the back of the phone and type your code: your Vault opens. Nothing else to remember.	Acérquela a la parte trasera del teléfono y escriba su código: su Cofre se abre. Nada más que recordar.	Acosteu-la a la part posterior del telèfon i escriviu el codi: el vostre Cofre s'obre. Res més per recordar.
+Vos {0} cartes sont incluses	Your {0} cards are included	Sus {0} tarjetas están incluidas	Les vostres {0} targetes estan incloses
+Elles ouvrent toutes les trois votre Coffre. Si l'une se perd, les deux autres suffisent.	All three open your Vault. If one is lost, the other two are enough.	Las tres abren su Cofre. Si se pierde una, bastan las otras dos.	Totes tres obren el vostre Cofre. Si se'n perd una, n'hi ha prou amb les altres dues.
+Livraison à : {0}	Delivery to: {0}	Entrega en: {0}	Lliurament a: {0}
+Commander mes cartes	Order my cards	Pedir mis tarjetas	Demanar les meves targetes
+Une carte est à activer	One card needs activating	Hay una tarjeta por activar	Hi ha una targeta per activar
+{0} cartes sont à activer	{0} cards need activating	Hay {0} tarjetas por activar	Hi ha {0} targetes per activar
+Activer	Activate	Activar	Activar
+Touchez une carte pour la retourner.	Tap a card to flip it.	Toque una tarjeta para darle la vuelta.	Toqueu una targeta per girar-la.
+Démo : livrer	Demo: deliver	Demo: entregar	Demo: lliurar
+Les cartes de vos bénéficiaires	Your beneficiaries' cards	Las tarjetas de sus beneficiarios	Les targetes dels vostres beneficiaris
+Chaque bénéficiaire reçoit obligatoirement un pack de {0} cartes, à son nom. Elles n'ouvrent que ce que vous lui attribuez, au moment que vous avez choisi.	Every beneficiary must receive a pack of {0} cards in their name. They only open what you assign to them, at the time you chose.	Cada beneficiario recibe obligatoriamente un pack de {0} tarjetas a su nombre. Solo abren lo que usted le asigne, en el momento que haya elegido.	Cada beneficiari rep obligatòriament un pack de {0} targetes al seu nom. Només obren el que li assigneu, en el moment que hàgiu triat.
+Pack de {0} cartes · {1} active{2}	Pack of {0} cards · {1} active	Pack de {0} tarjetas · {1} activa{2}	Pack de {0} targetes · actives: {1}
+{0} peut aussi activer ses cartes depuis son propre compte, avec l'adresse {1}.	{0} can also activate their cards from their own account, with the address {1}.	{0} también puede activar sus tarjetas desde su propia cuenta, con la dirección {1}.	{0} també pot activar les seves targetes des del seu propi compte, amb l'adreça {1}.
+indiquée dans Famille	given in Family	indicada en Familia	indicada a Família
+Désigner un bénéficiaire	Choose a beneficiary	Designar un beneficiario	Designar un beneficiari
+Ajoutez d'abord vos proches dans « Famille ».	First add your loved ones in "Family".	Añada primero a sus seres queridos en «Familia».	Afegiu primer els vostres éssers estimats a «Família».
+Tous les 6 mois, nous demandons à chaque bénéficiaire si ses cartes sont toujours là.	Every 6 months, we ask each beneficiary whether their cards are still there.	Cada 6 meses preguntamos a cada beneficiario si sigue teniendo sus tarjetas.	Cada 6 mesos preguntem a cada beneficiari si encara té les seves targetes.
+Activer le pack	Activate the pack	Activar el pack	Activar el pack
+Activer vos cartes	Activate your cards	Activar sus tarjetas	Activar les vostres targetes
+Un pack de 2 cartes pour qui ?	A pack of 2 cards for whom?	¿Un pack de 2 tarjetas para quién?	Un pack de 2 targetes per a qui?
+Pack bénéficiaire : {0}. {1}	Beneficiary pack: {0}. {1}	Pack de beneficiario: {0}. {1}	Pack de beneficiari: {0}. {1}
+inclus ou payant, à décider	included or paid, to be decided	incluido o de pago, por decidir	inclòs o de pagament, per decidir
+Désactiver cette carte ?	Deactivate this card?	¿Desactivar esta tarjeta?	Voleu desactivar aquesta targeta?
+Elle ne pourra plus rien ouvrir, même avec le code. {0}	It will no longer open anything, even with the code. {0}	Ya no podrá abrir nada, ni siquiera con el código. {0}	Ja no podrà obrir res, ni tan sols amb el codi. {0}
+Vos autres cartes continuent de fonctionner.	Your other cards keep working.	Sus otras tarjetas siguen funcionando.	Les vostres altres targetes continuen funcionant.
+L'autre carte du pack continue de fonctionner, et une carte de remplacement peut être appairée.	The other card in the pack keeps working, and a replacement card can be paired.	La otra tarjeta del pack sigue funcionando y se puede vincular una tarjeta de sustitución.	L'altra targeta del pack continua funcionant i se'n pot vincular una de substitució.
+C'est votre dernière carte active : commandez-en une autre avant de la désactiver.	This is your last active card: order another one before deactivating it.	Es su última tarjeta activa: pida otra antes de desactivarla.	És la vostra última targeta activa: demaneu-ne una altra abans de desactivar-la.
+Désactiver la carte	Deactivate the card	Desactivar la tarjeta	Desactivar la targeta
+# Compte
+Mon compte	My account	Mi cuenta	El meu compte
+Mes coordonnées	My details	Mis datos	Les meves dades
+Modifier	Edit	Modificar	Modificar
+Téléphone	Phone	Teléfono	Telèfon
+Naissance	Birth	Nacimiento	Naixement
+Adresse	Address	Dirección	Adreça
+Situation	Situation	Situación	Situació
+Identité {0}	Identity {0}	Identidad {0}	Identitat {0}
+vérifiée	verified	verificada	verificada
+en cours de vérification	being verified	en proceso de verificación	en procés de verificació
+à vérifier	to be verified	por verificar	per verificar
+Pour que personne ne puisse se faire passer pour vous	So that no one can pretend to be you	Para que nadie pueda hacerse pasar por usted	Perquè ningú no es pugui fer passar per vós
+Déposer ma pièce d'identité	Upload my ID document	Aportar mi documento de identidad	Aportar el meu document d'identitat
+Votre identité, vos coordonnées et les noms de vos proches sont dans l'Espace : nous pouvons les lire, pour vérifier votre identité, surveiller le registre des décès et vous accompagner. Le contenu de votre Coffre, lui, est chiffré sur votre téléphone : personne chez nous ne peut le lire.	Your identity, your details and your loved ones' names are in the Space: we can read them, to verify your identity, watch the death register and support you. Your Vault's content, however, is encrypted on your phone: no one on our side can read it.	Su identidad, sus datos y los nombres de sus seres queridos están en el Espacio: podemos leerlos para verificar su identidad, vigilar el registro de defunciones y acompañarle. El contenido de su Cofre, en cambio, está cifrado en su teléfono: nadie de nuestro equipo puede leerlo.	La vostra identitat, les vostres dades i els noms dels vostres éssers estimats són a l'Espai: els podem llegir per verificar la vostra identitat, vigilar el registre de defuncions i acompanyar-vos. El contingut del vostre Cofre, en canvi, està xifrat al vostre telèfon: ningú del nostre equip no el pot llegir.
+Qui peut lire quoi ?	Who can read what?	¿Quién puede leer qué?	Qui pot llegir què?
+Formule simple	Simple plan	Plan sencillo	Pla senzill
+{0} cartes incluses · un pack de {1} cartes par bénéficiaire	{0} cards included · a pack of {1} cards per beneficiary	{0} tarjetas incluidas · un pack de {1} tarjetas por beneficiario	{0} targetes incloses · un pack de {1} targetes per beneficiari
+À jour	Up to date	Al día	Al dia
+Impayé	Unpaid	Impagado	Impagat
+Effacé	Erased	Borrado	Esborrat
+par an	per year	al año	l'any
+pack{0} bénéficiaire{1}	beneficiary pack{0}	pack{0} de beneficiario{1}	pack{0} de beneficiari{1}
+Phase découverte{0} : tout est ouvert sauf l'ajout de documents. Lancement officiel prévu {1}.	Discovery phase{0}: everything is open except adding documents. Official launch planned {1}.	Fase de descubrimiento{0}: todo está abierto salvo la carga de documentos. Lanzamiento oficial previsto {1}.	Fase de descoberta{0}: tot és obert excepte la càrrega de documents. Llançament oficial previst {1}.
+à une date communiquée prochainement	on a date to be announced soon	en una fecha que se comunicará pronto	en una data que es comunicarà aviat
+Tarifs communiqués au lancement.	Prices announced at launch.	Tarifas comunicadas en el lanzamiento.	Tarifes comunicades en el llançament.
+Paiement non reçu. Sans régularisation avant le {0}, votre Coffre sera effacé définitivement.	Payment not received. Without settlement before {0}, your Vault will be erased for good.	Pago no recibido. Si no lo regulariza antes del {0}, su Cofre se borrará definitivamente.	Pagament no rebut. Si no el regularitzeu abans del {0}, el vostre Cofre s'esborrarà definitivament.
+Régulariser maintenant	Settle now	Regularizar ahora	Regularitzar ara
+Régulariser (démo)	Settle (demo)	Regularizar (demo)	Regularitzar (demo)
+Le délai de grâce est dépassé : le contenu du Coffre a été effacé.	The grace period is over: the Vault's content has been erased.	El periodo de gracia ha vencido: el contenido del Cofre se ha borrado.	El període de gràcia ha vençut: el contingut del Cofre s'ha esborrat.
+Souscrire ou renouveler	Subscribe or renew	Suscribirse o renovar	Subscriure's o renovar
+Factures et moyen de paiement	Invoices and payment method	Facturas y medio de pago	Factures i mitjà de pagament
+Couleurs de l'application	App colours	Colores de la aplicación	Colors de l'aplicació
+L'assistante parle à voix haute	The assistant speaks aloud	La asistente habla en voz alta	L'assistent parla en veu alta
+Les réponses sont lues automatiquement	Answers are read out automatically	Las respuestas se leen automáticamente	Les respostes es llegeixen automàticament
+Mes échéances et rappels	My due dates and reminders	Mis vencimientos y recordatorios	Els meus venciments i recordatoris
+Coup dur et décès : signalements	Crisis and death: reports	Imprevisto grave y fallecimiento: avisos	Imprevist greu i defunció: avisos
+Mode démonstration	Demo mode	Modo demostración	Mode demostració
+Avancer le temps, simuler la veille des décès	Move time forward, simulate the death register watch	Adelantar el tiempo, simular la vigilancia de defunciones	Avançar el temps, simular la vigilància de defuncions
+E-mails envoyés	E-mails sent	Correos enviados	Correus enviats
+{0} rappel{1} d'échéance programmé{2}. Les e-mails ne contiennent jamais le contenu du Coffre.	{0} due-date reminder{1} scheduled. E-mails never contain the Vault's content.	{0} recordatorio{1} de vencimiento programado{2}. Los correos nunca contienen el contenido del Cofre.	{0} recordatori{1} de venciment programat{2}. Els correus no contenen mai el contingut del Cofre.
+Aucun e-mail pour l'instant.	No e-mails yet.	Ningún correo por ahora.	Cap correu de moment.
+Se déconnecter	Sign out	Cerrar sesión	Tancar la sessió
+Supprimer mon compte	Delete my account	Eliminar mi cuenta	Eliminar el meu compte
+Une question ?	A question?	¿Alguna pregunta?	Alguna pregunta?
+Votre Espace, votre Coffre, ses documents et les accès de vos proches seront effacés définitivement. Personne, pas même nous, ne pourra les récupérer.	Your Space, your Vault, its documents and your loved ones' access will be erased for good. No one, not even us, will be able to recover them.	Su Espacio, su Cofre, sus documentos y los accesos de sus seres queridos se borrarán definitivamente. Nadie, ni siquiera nosotros, podrá recuperarlos.	El vostre Espai, el vostre Cofre, els seus documents i els accessos dels vostres éssers estimats s'esborraran definitivament. Ningú, ni tan sols nosaltres, no els podrà recuperar.
+Pour confirmer, tapez SUPPRIMER	To confirm, type DELETE	Para confirmar, escriba ELIMINAR	Per confirmar, escriviu ELIMINAR
+SUPPRIMER	DELETE	ELIMINAR	ELIMINAR
+Suppression…	Deleting…	Eliminando…	Eliminant…
+Tout supprimer définitivement	Delete everything for good	Eliminarlo todo definitivamente	Eliminar-ho tot definitivament
+Situation familiale	Family situation	Situación familiar	Situació familiar
+Je dirige une entreprise	I run a business	Dirijo una empresa	Dirigeixo una empresa
+Ajoute la rubrique « Entreprise » au Coffre	Adds the "Business" section to the Vault	Añade la sección «Empresa» al Cofre	Afegeix la secció «Empresa» al Cofre
+Nom, prénom et naissance sont vérifiés avec votre identité : pour les corriger, contactez-nous.	Name, first name and birth are checked against your identity: to correct them, contact us.	El nombre, los apellidos y el nacimiento se verifican con su identidad: para corregirlos, contacte con nosotros.	El nom, els cognoms i el naixement es verifiquen amb la vostra identitat: per corregir-los, poseu-vos en contacte amb nosaltres.
+Enregistrer	Save	Guardar	Desar
+# Poste de pilotage de la démo
+Le poste de pilotage n'existe que dans la démonstration.	The control panel only exists in the demo.	El panel de control solo existe en la demostración.	El tauler de control només existeix a la demostració.
+Aucune correspondance trouvée dans le registre.	No match found in the register.	No se ha encontrado ninguna coincidencia en el registro.	No s'ha trobat cap coincidència al registre.
+Correspondance à {0} %{1}. Il faut maintenant l'acte de décès d'un bénéficiaire (Espace bénéficiaire), puis la vérification dans l'administration.	{0}% match{1}. Now a beneficiary's death certificate is needed (Beneficiary area), then the check in the administration.	Coincidencia del {0} %{1}. Ahora hace falta el certificado de defunción de un beneficiario (Espacio del beneficiario) y después la verificación en la administración.	Coincidència del {0} %{1}. Ara cal el certificat de defunció d'un beneficiari (Espai del beneficiari) i després la verificació a l'administració.
+(douteuse : {0})	(doubtful: {0})	(dudosa: {0})	(dubtosa: {0})
+Démonstration	Demo	Demostración	Demostració
+Le poste de pilotage	The control panel	El panel de control	El tauler de control
+Pour montrer tout le parcours sans attendre : avancer le temps, simuler la veille des décès, repartir de zéro.	To show the whole journey without waiting: move time forward, simulate the death register watch, start again from scratch.	Para mostrar todo el recorrido sin esperar: adelantar el tiempo, simular la vigilancia de defunciones, empezar de cero.	Per mostrar tot el recorregut sense esperar: avançar el temps, simular la vigilància de defuncions, començar de zero.
+Horloge de la démo	Demo clock	Reloj de la demo	Rellotge de la demo
++1 jour	+1 day	+1 día	+1 dia
++1 semaine	+1 week	+1 semana	+1 setmana
++1 mois	+1 month	+1 mes	+1 mes
+Aller à la fin du délai	Go to the end of the period	Ir al final del plazo	Anar al final del termini
+Aller à la fin de l'accès des bénéficiaires	Go to the end of the beneficiaries' access	Ir al final del acceso de los beneficiarios	Anar al final de l'accés dels beneficiaris
+Revenir à l'heure réelle	Back to real time	Volver a la hora real	Tornar a l'hora real
+Veille des décès	Death register watch	Vigilancia de defunciones	Vigilància de defuncions
+Chaque mois, le fichier public de l'INSEE est comparé aux comptes	Every month, the public INSEE file is compared with the accounts	Cada mes, el archivo público del INSEE se compara con las cuentas	Cada mes, el fitxer públic de l'INSEE es compara amb els comptes
+Simuler une correspondance exacte	Simulate an exact match	Simular una coincidencia exacta	Simular una coincidència exacta
+Simuler une correspondance douteuse	Simulate a doubtful match	Simular una coincidencia dudosa	Simular una coincidència dubtosa
+Espace bénéficiaire : déposer l'acte de décès	Beneficiary area: upload the death certificate	Espacio del beneficiario: aportar el certificado de defunción	Espai del beneficiari: aportar el certificat de defunció
+Administration : vérifier et confirmer	Administration: check and confirm	Administración: verificar y confirmar	Administració: verificar i confirmar
+Lancement en deux temps	Two-stage launch	Lanzamiento en dos fases	Llançament en dues fases
+Découverte : tout est ouvert sauf l'ajout de documents dans le Coffre	Discovery: everything is open except adding documents to the Vault	Descubrimiento: todo está abierto salvo la carga de documentos en el Cofre	Descoberta: tot és obert excepte la càrrega de documents al Cofre
+Phase découverte	Discovery phase	Fase de descubrimiento	Fase de descoberta
+Abonnement	Subscription	Suscripción	Subscripció
+En cas d'impayé : relances pendant {0} jours, puis effacement de tout le Coffre.	If unpaid: reminders for {0} days, then the whole Vault is erased.	En caso de impago: recordatorios durante {0} días y después se borra todo el Cofre.	En cas d'impagament: recordatoris durant {0} dies i després s'esborra tot el Cofre.
+Simuler un impayé	Simulate a missed payment	Simular un impago	Simular un impagament
+Régulariser le paiement	Settle the payment	Regularizar el pago	Regularitzar el pagament
+Remettre l'abonnement à jour	Bring the subscription up to date	Poner al día la suscripción	Posar al dia la subscripció
+Famille de démonstration	Demo family	Familia de demostración	Família de demostració
+Claire, ses proches, ses cartes et un Coffre rempli. Code des cartes : {0}	Claire, her loved ones, her cards and a filled Vault. Card code: {0}	Claire, sus seres queridos, sus tarjetas y un Cofre lleno. Código de las tarjetas: {0}	La Claire, els seus éssers estimats, les seves targetes i un Cofre ple. Codi de les targetes: {0}
+Recharger la démonstration	Reload the demo	Recargar la demostración	Recarregar la demostració
+Tout effacer	Erase everything	Borrarlo todo	Esborrar-ho tot
+# Échéances
+Passeport	Passport	Pasaporte	Passaport
+Carte d'identité	ID card	Documento de identidad	Document d'identitat
+Permis de conduire	Driving licence	Permiso de conducir	Permís de conduir
+Contrat d'assurance	Insurance contract	Contrato de seguro	Contracte d'assegurança
+Bail	Lease	Contrato de alquiler	Contracte de lloguer
+Crédit	Loan	Crédito	Crèdit
+Mes échéances	My due dates	Mis vencimientos	Els meus venciments
+On vous prévient avant	We remind you beforehand	Le avisamos antes	Us avisem abans
+Passeport, contrats, baux… Indiquez le type de document et sa date de fin. Ces deux informations restent dans l'Espace : le contenu de votre Coffre, lui, reste illisible pour nous.	Passport, contracts, leases… Enter the type of document and its end date. These two details stay in the Space: your Vault's content remains unreadable to us.	Pasaporte, contratos, alquileres… Indique el tipo de documento y su fecha de fin. Estos dos datos se quedan en el Espacio: el contenido de su Cofre sigue siendo ilegible para nosotros.	Passaport, contractes, lloguers… Indiqueu el tipus de document i la data de fi. Aquestes dues dades es queden a l'Espai: el contingut del vostre Cofre continua sent il·legible per a nosaltres.
+Activer les rappels	Turn on reminders	Activar los recordatorios	Activar els recordatoris
+J'accepte que le type de document et sa date de fin soient enregistrés dans mon Espace pour recevoir des rappels. Je peux les supprimer à tout moment.	I agree that the type of document and its end date are saved in my Space to receive reminders. I can delete them at any time.	Acepto que el tipo de documento y su fecha de fin se guarden en mi Espacio para recibir recordatorios. Puedo eliminarlos en cualquier momento.	Accepto que el tipus de document i la data de fi es desin al meu Espai per rebre recordatoris. Els puc eliminar en qualsevol moment.
+Fin le {0}	Ends on {0}	Fin el {0}	Fi el {0}
+Expiré	Expired	Caducado	Caducat
+Supprimer {0}	Delete {0}	Eliminar {0}	Eliminar {0}
+Aucune échéance pour l'instant.	No due dates yet.	Ningún vencimiento por ahora.	Cap venciment de moment.
+Ajouter une échéance	Add a due date	Añadir un vencimiento	Afegir un venciment
+Nous vous écrivons 30 jours puis 7 jours avant chaque date. Et tous les 3 mois, un petit message vous demande si tout est à jour.	We write to you 30 days, then 7 days before each date. And every 3 months, a short message asks you if everything is up to date.	Le escribimos 30 días y después 7 días antes de cada fecha. Y cada 3 meses, un breve mensaje le pregunta si todo está al día.	Us escrivim 30 dies i després 7 dies abans de cada data. I cada 3 mesos, un missatge breu us pregunta si tot està al dia.
+Nouvelle échéance	New due date	Nuevo vencimiento	Nou venciment
+Type de document	Type of document	Tipo de documento	Tipus de document
+Ex. Bail de l'appartement	E.g. Flat lease	Ej. Alquiler del piso	P. ex. Lloguer del pis
+Date de fin	End date	Fecha de fin	Data de fi
+{0} j	{0} d	{0} d	{0} d
+# Famille
+Conjoint(e)	Partner	Cónyuge	Cònjuge
+Enfant	Child	Hijo/a	Fill/a
+Parent	Parent	Padre/madre	Pare/mare
+Frère ou sœur	Brother or sister	Hermano/a	Germà/germana
+Ami(e)	Friend	Amigo/a	Amic/amiga
+Autre	Other	Otro	Altre
+Ma famille	My family	Mi familia	La meva família
+Ceux qui comptent	The people who matter	Quienes cuentan	Els qui compten
+Vos proches, vos garants, et ceux qui pourront vous aider. Ici, seulement des noms et des coordonnées : rien de personnel.	Your loved ones, your trusted contacts, and those who can help you. Here, only names and contact details: nothing personal.	Sus seres queridos, sus garantes y quienes podrán ayudarle. Aquí, solo nombres y datos de contacto: nada personal.	Els vostres éssers estimats, els vostres garants i els qui us podran ajudar. Aquí, només noms i dades de contacte: res de personal.
+Mes proches	My loved ones	Mis seres queridos	Els meus éssers estimats
+Ajouter	Add	Añadir	Afegir
+Ajoutez votre conjoint, vos enfants, vos parents… Vous choisirez ensuite qui reçoit une carte et ce qu'il peut ouvrir.	Add your partner, your children, your parents… You will then choose who receives a card and what they can open.	Añada a su cónyuge, sus hijos, sus padres… Después elegirá quién recibe una tarjeta y qué puede abrir.	Afegiu el vostre cònjuge, els vostres fills, els vostres pares… Després triareu qui rep una targeta i què pot obrir.
+Garant	Trusted contact	Garante	Garant
+Bénéficiaire · 2 cartes	Beneficiary · 2 cards	Beneficiario · 2 tarjetas	Beneficiari · 2 targetes
+Mes garants	My trusted contacts	Mis garantes	Els meus garants
+Ce sont eux qui pourront signaler un coup dur ou un décès. Choisissez autant de garants que vous voulez, et écrivez vous-même le rôle de chacun.	They are the ones who can report a crisis or a death. Choose as many trusted contacts as you like, and write each one's role yourself.	Son quienes podrán avisar de un imprevisto grave o de un fallecimiento. Elija tantos garantes como quiera y escriba usted mismo el papel de cada uno.	Són ells qui podran avisar d'un imprevist greu o d'una defunció. Trieu tants garants com vulgueu i escriviu vós mateix el paper de cadascun.
+Modifier le rôle	Edit the role	Modificar el papel	Modificar el paper
+Retirer ce garant	Remove this trusted contact	Quitar este garante	Treure aquest garant
+Désigner un garant	Choose a trusted contact	Designar un garante	Designar un garant
+Modifier ce proche	Edit this loved one	Modificar este ser querido	Modificar aquest ésser estimat
+Ajouter un proche	Add a loved one	Añadir un ser querido	Afegir un ésser estimat
+Qui ?	Who?	¿Quién?	Qui?
+Son rôle, avec vos mots	Their role, in your own words	Su papel, con sus palabras	El seu paper, amb les vostres paraules
+Ex. Prévenir les enfants et appeler le notaire	E.g. Tell the children and call the notary	Ej. Avisar a los hijos y llamar al notario	P. ex. Avisar els fills i trucar al notari
+Il ou elle recevra un e-mail pour l'en informer. Être garant ne donne accès à rien dans votre Coffre.	They will receive an e-mail to let them know. Being a trusted contact gives no access to anything in your Vault.	Recibirá un correo para informarle. Ser garante no da acceso a nada de su Cofre.	Rebrà un correu per informar-lo'n. Ser garant no dona accés a res del vostre Cofre.
+Prénom	First name	Nombre	Nom
+Nom	Last name	Apellidos	Cognoms
+Lien	Relationship	Parentesco	Parentiu
+Pour le prévenir s'il reçoit une carte ou devient garant.	To let them know if they receive a card or become a trusted contact.	Para avisarle si recibe una tarjeta o se convierte en garante.	Per avisar-lo si rep una targeta o esdevé garant.
+Retirer ce proche	Remove this loved one	Quitar este ser querido	Treure aquest ésser estimat
+# Coup dur et décès
+Vérification en cours	Being checked	Verificación en curso	Verificació en curs
+Accès ouverts	Access open	Accesos abiertos	Accessos oberts
+Transmission faite	Handover done	Transmisión realizada	Transmissió feta
+Annulée	Cancelled	Anulada	Anul·lada
+Rejetée	Rejected	Rechazada	Rebutjada
+Clôturée	Closed	Cerrada	Tancada
+Coup dur et décès	Crisis and death	Imprevisto grave y fallecimiento	Imprevist greu i defunció
+Rien ne s'ouvre sans délai	Nothing opens without a waiting period	Nada se abre sin un plazo	Res no s'obre sense un termini
+Un garant signale, vous êtes prévenu partout, et vous pouvez annuler : {0} pour un coup dur, {1} après la vérification d'un décès.	A trusted contact reports it, you are alerted everywhere, and you can cancel: {0} for a crisis, {1} after a death has been verified.	Un garante avisa, usted recibe alertas por todas partes y puede anular: {0} para un imprevisto grave, {1} tras la verificación de un fallecimiento.	Un garant avisa, rebeu alertes arreu i podeu anul·lar: {0} per a un imprevist greu, {1} després de la verificació d'una defunció.
+{0} jours	{0} days	{0} días	{0} dies
+{0} heures	{0} hours	{0} horas	{0} hores
+Aucun signalement. Votre Coffre reste fermé à tous, sauf ce que vous avez ouvert « tout de suite ».	No reports. Your Vault stays closed to everyone, except what you opened "right away".	Ningún aviso. Su Cofre permanece cerrado para todos, salvo lo que haya abierto «de inmediato».	Cap avís. El vostre Cofre continua tancat per a tothom, excepte el que hàgiu obert «de seguida».
+Coup dur signalé	Crisis reported	Imprevisto grave avisado	Imprevist greu avisat
+Décès signalé	Death reported	Fallecimiento avisado	Defunció avisada
+Par {0} · {1}	By {0} · {1}	Por {0} · {1}	Per {0} · {1}
+Correspondance registre : {0} %{1}	Register match: {0}%{1}	Coincidencia con el registro: {0} %{1}	Coincidència amb el registre: {0} %{1}
+(douteuse, vérifiée par une personne)	(doubtful, checked by a person)	(dudosa, verificada por una persona)	(dubtosa, verificada per una persona)
+Notre équipe vérifie l'acte de décès, le registre INSEE et l'identité du bénéficiaire.	Our team checks the death certificate, the INSEE register and the beneficiary's identity.	Nuestro equipo verifica el certificado de defunción, el registro INSEE y la identidad del beneficiario.	El nostre equip verifica el certificat de defunció, el registre INSEE i la identitat del beneficiari.
+En attente de l'acte de décès, fourni par un bénéficiaire, avant toute vérification.	Waiting for the death certificate, provided by a beneficiary, before any check.	A la espera del certificado de defunción, aportado por un beneficiario, antes de cualquier verificación.	A l'espera del certificat de defunció, aportat per un beneficiari, abans de qualsevol verificació.
+Ouverture des accès dans	Access opens in	Apertura de los accesos en	Obertura dels accessos en
+Alertes envoyées par e-mail, SMS et notification	Alerts sent by e-mail, text message and notification	Alertas enviadas por correo, SMS y notificación	Alertes enviades per correu, SMS i notificació
+Les proches désignés pour un coup dur peuvent ouvrir ce que vous leur avez attribué. Quand vous allez mieux, reprenez la main : leurs clés sont changées.	The loved ones chosen for a crisis can open what you assigned to them. When you are better, take back control: their keys are changed.	Los seres queridos designados para un imprevisto grave pueden abrir lo que les haya asignado. Cuando se encuentre mejor, retome el control: sus claves se cambian.	Els éssers estimats designats per a un imprevist greu poden obrir el que els hàgiu assignat. Quan us trobeu millor, recupereu el control: les seves claus es canvien.
+La période d'accès est terminée : le Coffre a été effacé définitivement.	The access period is over: the Vault has been erased for good.	El periodo de acceso ha terminado: el Cofre se ha borrado definitivamente.	El període d'accés ha acabat: el Cofre s'ha esborrat definitivament.
+Chaque bénéficiaire ouvre uniquement ce qui lui était destiné, avec sa carte, jusqu'au {0}. Ensuite, le Coffre est effacé définitivement. La rubrique « À effacer » a déjà été détruite sans être lue.	Each beneficiary only opens what was meant for them, with their card, until {0}. Then the Vault is erased for good. The "To erase" section has already been destroyed without being read.	Cada beneficiario abre únicamente lo que le estaba destinado, con su tarjeta, hasta el {0}. Después, el Cofre se borra definitivamente. La sección «Para borrar» ya se ha destruido sin ser leída.	Cada beneficiari obre únicament el que li estava destinat, amb la seva targeta, fins al {0}. Després, el Cofre s'esborra definitivament. La secció «Per esborrar» ja s'ha destruït sense ser llegida.
+Tout va bien, j'annule	All is well, I cancel	Todo va bien, anulo	Tot va bé, anul·lo
+Je vais mieux, je reprends la main	I'm better, I take back control	Estoy mejor, retomo el control	Estic millor, recupero el control
+Espace garant	Trusted contact area	Espacio del garante	Espai del garant
+Vos garants font leur signalement depuis leur propre compte, en se connectant avec l'adresse e-mail que vous avez indiquée dans « Famille ». Vous êtes prévenu aussitôt.	Your trusted contacts report from their own account, signing in with the e-mail address you gave in "Family". You are alerted at once.	Sus garantes avisan desde su propia cuenta, iniciando sesión con la dirección de correo que usted indicó en «Familia». Usted recibe un aviso al instante.	Els vostres garants avisen des del seu propi compte, iniciant la sessió amb l'adreça de correu que vau indicar a «Família». Rebeu un avís a l'instant.
+Vos garants font leur signalement depuis leur propre Espace. Pour la démonstration, vous pouvez le faire ici à leur place.	Your trusted contacts report from their own Space. For the demo, you can do it here on their behalf.	Sus garantes avisan desde su propio Espacio. Para la demostración, puede hacerlo aquí en su lugar.	Els vostres garants avisen des del seu propi Espai. Per a la demostració, ho podeu fer aquí en lloc seu.
+Signaler comme garant	Report as a trusted contact	Avisar como garante	Avisar com a garant
+Désignez d'abord un garant dans « Famille ».	First choose a trusted contact in "Family".	Designe primero un garante en «Familia».	Designeu primer un garant a «Família».
+Espace bénéficiaire : déposer un acte de décès	Beneficiary area: upload a death certificate	Espacio del beneficiario: aportar un certificado de defunción	Espai del beneficiari: aportar un certificat de defunció
+Prouvez que c'est vous	Prove it's you	Demuestre que es usted	Demostreu que sou vós
+Reprendre la main	Take back control	Retomar el control	Recuperar el control
+Signalement d'un garant	Report from a trusted contact	Aviso de un garante	Avís d'un garant
+Aucune carte active : contactez-nous pour annuler.	No active card: contact us to cancel.	Ninguna tarjeta activa: contacte con nosotros para anular.	Cap targeta activa: poseu-vos en contacte amb nosaltres per anul·lar.
+Coup dur	Crisis	Imprevisto grave	Imprevist greu
+coup dur	crisis	imprevisto grave	imprevist greu
+Je suis	I am	Soy	Soc
+Que se passe-t-il ?	What is happening?	¿Qué ocurre?	Què passa?
+Mairie et date du décès, si vous les connaissez	Town hall and date of death, if you know them	Ayuntamiento y fecha del fallecimiento, si los conoce	Ajuntament i data de la defunció, si els coneixeu
+Ex. Hospitalisée à Lyon depuis ce matin	E.g. In hospital in Lyon since this morning	Ej. Hospitalizada en Lyon desde esta mañana	P. ex. Hospitalitzada a Lió des d'aquest matí
+Ex. Mairie de Nantes, le 3 mars	E.g. Nantes town hall, 3 March	Ej. Ayuntamiento de Nantes, el 3 de marzo	P. ex. Ajuntament de Nantes, el 3 de març
+Le titulaire est prévenu partout et peut annuler pendant {0}. Ensuite, seuls les éléments prévus pour un coup dur s'ouvrent.	The holder is alerted everywhere and can cancel within {0}. After that, only the items planned for a crisis open.	El titular recibe alertas por todas partes y puede anular durante {0}. Después, solo se abren los elementos previstos para un imprevisto grave.	El titular rep alertes arreu i pot anul·lar durant {0}. Després, només s'obren els elements previstos per a un imprevist greu.
+Un décès est toujours vérifié par notre équipe : registre INSEE, acte de décès fourni par un bénéficiaire et son identité. Puis un délai de {0} s'ouvre, avec des alertes, avant toute transmission.	A death is always checked by our team: INSEE register, death certificate provided by a beneficiary, and their identity. Then a {0} period begins, with alerts, before any handover.	Un fallecimiento siempre lo verifica nuestro equipo: registro INSEE, certificado de defunción aportado por un beneficiario y su identidad. Después se abre un plazo de {0}, con alertas, antes de cualquier transmisión.	Una defunció sempre la verifica el nostre equip: registre INSEE, certificat de defunció aportat per un beneficiari i la seva identitat. Després s'obre un termini de {0}, amb alertes, abans de qualsevol transmissió.
+Envoyer le signalement	Send the report	Enviar el aviso	Enviar l'avís
+# Services et conciergerie
+Mettre en place mon Coffre	Set up my Vault	Poner en marcha mi Cofre	Posar en marxa el meu Cofre
+Cartes, bénéficiaires, l'essentiel : on le fait avec vous	Cards, beneficiaries, the essentials: we do it with you	Tarjetas, beneficiarios, lo esencial: lo hacemos con usted	Targetes, beneficiaris, l'essencial: ho fem amb vós
+Démarches après un décès	Formalities after a death	Trámites tras un fallecimiento	Tràmits després d'una defunció
+Banques, assurances, caisses de retraite, résiliations	Banks, insurers, pension funds, cancellations	Bancos, seguros, cajas de pensiones, bajas	Bancs, assegurances, caixes de pensions, baixes
+Pendant une hospitalisation	During a hospital stay	Durante una hospitalización	Durant una hospitalització
+Employeur, mutuelle, factures, quotidien	Employer, health insurance, bills, daily life	Empresa, mutua, facturas, día a día	Empresa, mútua, factures, dia a dia
+Perte d'autonomie	Loss of independence	Pérdida de autonomía	Pèrdua d'autonomia
+Aides, aménagement, aide à domicile	Benefits, home adaptations, home help	Ayudas, adaptación de la vivienda, ayuda a domicilio	Ajuts, adaptació de l'habitatge, ajuda a domicili
+Résilier des abonnements	Cancel subscriptions	Dar de baja suscripciones	Donar de baixa subscripcions
+Téléphone, énergie, plateformes, presse	Phone, energy, streaming, press	Teléfono, energía, plataformas, prensa	Telèfon, energia, plataformes, premsa
+Mandat à signer	Mandate to sign	Mandato por firmar	Mandat per signar
+Mandat signé	Mandate signed	Mandato firmado	Mandat signat
+En cours	In progress	En curso	En curs
+Terminé	Done	Terminado	Acabat
+Services	Services	Servicios	Serveis
+Quand les démarches sont trop lourdes, une conciergerie les fait pour vous. Elle ne voit que les documents que vous lui confiez, avec votre mandat.	When the formalities are too much, a concierge service handles them for you. It only sees the documents you entrust to it, with your mandate.	Cuando los trámites resultan demasiado pesados, una conserjería se encarga de ellos. Solo ve los documentos que usted le confía, con su mandato.	Quan els tràmits són massa feixucs, una consergeria se n'encarrega per vós. Només veu els documents que li confieu, amb el vostre mandat.
+La conciergerie	The concierge	La conserjería	La consergeria
+Un interlocuteur unique, par téléphone ou e-mail	A single contact person, by phone or e-mail	Un único interlocutor, por teléfono o correo	Un únic interlocutor, per telèfon o correu
+Un mandat simple, signé en ligne	A simple mandate, signed online	Un mandato sencillo, firmado en línea	Un mandat senzill, signat en línia
+Accès uniquement aux documents partagés	Access only to shared documents	Acceso únicamente a los documentos compartidos	Accés únicament als documents compartits
+Service optionnel et payant, devis avant tout engagement	Optional paid service, quote before any commitment	Servicio opcional y de pago, presupuesto antes de cualquier compromiso	Servei opcional i de pagament, pressupost abans de qualsevol compromís
+De quoi avez-vous besoin ?	What do you need?	¿Qué necesita?	Què necessiteu?
+Mes demandes	My requests	Mis solicitudes	Les meves sol·licituds
+Lire et signer le mandat	Read and sign the mandate	Leer y firmar el mandato	Llegir i signar el mandat
+{0} document{1} partagé{2} depuis le Coffre	{0} document{1} shared from the Vault	{0} documento{1} compartido{2} desde el Cofre	{0} document{1} compartit{2} des del Cofre
+Pour partager un document, ouvrez-le dans votre Coffre et choisissez « Confier à la conciergerie ».	To share a document, open it in your Vault and choose "Entrust to the concierge".	Para compartir un documento, ábralo en su Cofre y elija «Confiar a la conserjería».	Per compartir un document, obriu-lo al vostre Cofre i trieu «Confiar a la consergeria».
+Nos conseils	Our advice	Nuestros consejos	Els nostres consells
+Une messagerie chiffrée pour la famille	Encrypted e-mail for the family	Un correo cifrado para la familia	Un correu xifrat per a la família
+Pour échanger des documents confidentiels entre proches, nous recommandons une messagerie chiffrée de bout en bout, comme Proton Mail.	To exchange confidential documents between loved ones, we recommend end-to-end encrypted e-mail, such as Proton Mail.	Para intercambiar documentos confidenciales entre seres queridos, recomendamos un correo cifrado de extremo a extremo, como Proton Mail.	Per intercanviar documents confidencials entre éssers estimats, recomanem un correu xifrat d'extrem a extrem, com Proton Mail.
+Quelques mots sur votre situation (facultatif)	A few words about your situation (optional)	Unas palabras sobre su situación (opcional)	Unes paraules sobre la vostra situació (opcional)
+Ex. Mon père est hospitalisé depuis lundi…	E.g. My father has been in hospital since Monday…	Ej. Mi padre está hospitalizado desde el lunes…	P. ex. El meu pare està hospitalitzat des de dilluns…
+N'écrivez rien de confidentiel ici : les documents se partagent depuis le Coffre, une fois le mandat signé.	Don't write anything confidential here: documents are shared from the Vault, once the mandate is signed.	No escriba nada confidencial aquí: los documentos se comparten desde el Cofre, una vez firmado el mandato.	No escriviu res de confidencial aquí: els documents es comparteixen des del Cofre, un cop signat el mandat.
+Envoyer la demande	Send the request	Enviar la solicitud	Enviar la sol·licitud
+Mandat	Mandate	Mandato	Mandat
+Je soussigné(e)	I, the undersigned	El/la abajo firmante	El/la sota signant
+donne mandat à	authorise	otorgo mandato a	atorgo mandat a
+pour accomplir en mon nom les démarches suivantes :	to carry out the following formalities on my behalf:	para realizar en mi nombre los siguientes trámites:	per dur a terme en nom meu els tràmits següents:
+Le mandataire n'a accès qu'aux documents que je partage explicitement depuis mon Coffre. Il s'engage à la plus stricte confidentialité, à ne conserver ces documents que le temps de la mission et à les supprimer à son terme.	The agent only has access to the documents I explicitly share from my Vault. They commit to the strictest confidentiality, to keep these documents only for the duration of the task and to delete them at its end.	El mandatario solo tiene acceso a los documentos que comparto explícitamente desde mi Cofre. Se compromete a la más estricta confidencialidad, a conservar estos documentos solo durante el encargo y a eliminarlos al finalizarlo.	El mandatari només té accés als documents que comparteixo explícitament des del meu Cofre. Es compromet a la confidencialitat més estricta, a conservar aquests documents només durant l'encàrrec i a eliminar-los quan acabi.
+Je peux mettre fin à ce mandat à tout moment depuis mon Espace. Aucune prestation payante n'est engagée sans devis accepté.	I can end this mandate at any time from my Space. No paid service is started without an accepted quote.	Puedo poner fin a este mandato en cualquier momento desde mi Espacio. No se inicia ningún servicio de pago sin un presupuesto aceptado.	Puc posar fi a aquest mandat en qualsevol moment des del meu Espai. No s'inicia cap servei de pagament sense un pressupost acceptat.
+J'ai lu le mandat et l'engagement de confidentialité, et je les accepte.	I have read the mandate and the confidentiality commitment, and I accept them.	He leído el mandato y el compromiso de confidencialidad, y los acepto.	He llegit el mandat i el compromís de confidencialitat, i els accepto.
+Signez en tapant votre nom complet	Sign by typing your full name	Firme escribiendo su nombre completo	Signeu escrivint el vostre nom complet
+Signer le mandat	Sign the mandate	Firmar el mandato	Signar el mandat
+# Administration (équipe)
+Administration	Administration	Administración	Administració
+Retour à la démonstration	Back to the demo	Volver a la demostración	Tornar a la demostració
+Décès ({0})	Deaths ({0})	Fallecimientos ({0})	Defuncions ({0})
+Conciergerie ({0})	Concierge ({0})	Conserjería ({0})	Consergeria ({0})
+Comptes	Accounts	Cuentas	Comptes
+Un décès n'est confirmé que sur concordance : registre INSEE (ou signalement d'un garant), acte de décès fourni par un bénéficiaire, et identité de ce bénéficiaire vérifiée. Les correspondances douteuses ont d'abord été examinées par l'IA. Ensuite seulement, le délai d'annulation commence.	A death is only confirmed when everything matches: INSEE register (or a report from a trusted contact), a death certificate provided by a beneficiary, and that beneficiary's verified identity. Doubtful matches were first reviewed by AI. Only then does the cancellation period begin.	Un fallecimiento solo se confirma si todo concuerda: registro INSEE (o aviso de un garante), certificado de defunción aportado por un beneficiario e identidad de ese beneficiario verificada. Las coincidencias dudosas las ha revisado antes la IA. Solo entonces empieza el plazo de anulación.	Una defunció només es confirma si tot concorda: registre INSEE (o avís d'un garant), certificat de defunció aportat per un beneficiari i identitat d'aquest beneficiari verificada. Les coincidències dubtoses les ha revisat abans la IA. Només aleshores comença el termini d'anul·lació.
+Rien à vérifier.	Nothing to check.	Nada que verificar.	Res a verificar.
+Veille INSEE	INSEE register watch	Vigilancia del registro INSEE	Vigilància del registre INSEE
+Garant : {0}	Trusted contact: {0}	Garante: {0}	Garant: {0}
+Bénéficiaire : {0}	Beneficiary: {0}	Beneficiario: {0}	Beneficiari: {0}
+Né(e) le {0} à {1}	Born on {0} in {1}	Nacido/a el {0} en {1}	Nascut/da el {0} a {1}
+À vérifier : {0}	To check: {0}	Por verificar: {0}	Per verificar: {0}
+Note : « {0} »	Note: "{0}"	Nota: «{0}»	Nota: «{0}»
+Registre INSEE {0}	INSEE register {0}	Registro INSEE {0}	Registre INSEE {0}
+(correspondance trouvée)	(match found)	(coincidencia encontrada)	(coincidència trobada)
+(à consulter)	(to be checked)	(por consultar)	(per consultar)
+Acte de décès {0}	Death certificate {0}	Certificado de defunción {0}	Certificat de defunció {0}
+déposé par {0} ({1})	uploaded by {0} ({1})	aportado por {0} ({1})	aportat per {0} ({1})
+en attente d'un bénéficiaire	awaiting a beneficiary	pendiente de un beneficiario	pendent d'un beneficiari
+Identité et KYC du bénéficiaire vérifiés	Beneficiary's identity and KYC verified	Identidad y KYC del beneficiario verificados	Identitat i KYC del beneficiari verificats
+Vérifier l'identité et le KYC du bénéficiaire	Verify the beneficiary's identity and KYC	Verificar la identidad y el KYC del beneficiario	Verificar la identitat i el KYC del beneficiari
+Identité et KYC du bénéficiaire	Beneficiary's identity and KYC	Identidad y KYC del beneficiario	Identitat i KYC del beneficiari
+Décès confirmé	Death confirmed	Fallecimiento confirmado	Defunció confirmada
+Rejeter	Reject	Rechazar	Rebutjar
+La conciergerie ne voit que les éléments que la famille lui a confiés, chiffrés pour elle.	The concierge only sees the items the family has entrusted to it, encrypted for it.	La conserjería solo ve los elementos que la familia le ha confiado, cifrados para ella.	La consergeria només veu els elements que la família li ha confiat, xifrats per a ella.
+Aucune demande.	No requests.	Ninguna solicitud.	Cap sol·licitud.
+KYC vérifié	KYC verified	KYC verificado	KYC verificat
+KYC en attente	KYC pending	KYC pendiente	KYC pendent
+cartes actives	active cards	tarjetas activas	targetes actives
+Le contenu du Coffre n'apparaît nulle part ici : il est illisible pour l'éditeur.	The Vault's content appears nowhere here: the provider cannot read it.	El contenido del Cofre no aparece en ningún sitio aquí: es ilegible para el proveedor.	El contingut del Cofre no apareix enlloc aquí: és il·legible per al proveïdor.
+Aucun compte.	No accounts.	Ninguna cuenta.	Cap compte.
+Mandat signé par {0} le {1}	Mandate signed by {0} on {1}	Mandato firmado por {0} el {1}	Mandat signat per {0} el {1}
+Ouvrir les {0} élément{1} confié{2}	Open the {0} entrusted item{1}	Abrir los {0} elemento{1} confiado{2}	Obrir els {0} element{1} confiat{2}
+Documents : {0}	Documents: {0}	Documentos: {0}	Documents: {0}
+Prendre en charge	Take on	Hacerse cargo	Fer-se'n càrrec
+Marquer terminé	Mark as done	Marcar como terminado	Marcar com a acabat
+Documents à supprimer côté partenaire	Documents to delete on the partner's side	Documentos que el socio debe eliminar	Documents que el soci ha d'eliminar
+Document inaccessible.	Document unavailable.	Documento inaccesible.	Document inaccessible.
+Espace réservé à l'équipe.	Area reserved for the team.	Área reservada al equipo.	Àrea reservada a l'equip.
+Retour	Back	Volver	Tornar
+Équipe · {0}	Team · {0}	Equipo · {0}	Equip · {0}
+← Mon Espace	← My Space	← Mi Espacio	← El meu Espai
+Actualiser	Refresh	Actualizar	Actualitzar
+Décès	Death	Fallecimiento	Defunció
+Identités	Identities	Identidades	Identitats
+Cartes	Cards	Tarjetas	Targetes
+Conciergerie	Concierge	Conserjería	Consergeria
+Réglages	Settings	Ajustes	Configuració
+Rien à traiter.	Nothing to process.	Nada que tramitar.	Res a tramitar.
+Registre : {0} {1}, né(e) le {2} à {3}, décès le {4}	Register: {0} {1}, born on {2} in {3}, died on {4}	Registro: {0} {1}, nacido/a el {2} en {3}, fallecido/a el {4}	Registre: {0} {1}, nascut/da el {2} a {3}, mort el {4}
+Acte de décès déposé par {0}	Death certificate uploaded by {0}	Certificado de defunción aportado por {0}	Certificat de defunció aportat per {0}
+un bénéficiaire	a beneficiary	un beneficiario	un beneficiari
+Acte de décès en attente d'un bénéficiaire	Death certificate awaited from a beneficiary	Certificado de defunción pendiente de un beneficiario	Certificat de defunció pendent d'un beneficiari
+Pièce d'identité du bénéficiaire	Beneficiary's ID document	Documento de identidad del beneficiario	Document d'identitat del beneficiari
+vérifiée (annuler)	verified (undo)	verificado (anular)	verificat (anul·lar)
+marquer vérifiée	mark as verified	marcar como verificado	marcar com a verificat
+Identité du bénéficiaire	Beneficiary's identity	Identidad del beneficiario	Identitat del beneficiari
+{0} · né(e) le {1} à {2}	{0} · born on {1} in {2}	{0} · nacido/a el {1} en {2}	{0} · nascut/da el {1} a {2}
+Pièce	Document	Documento	Document
+Vérifiée	Verified	Verificada	Verificada
+Refuser	Refuse	Rechazar	Rebutjar
+{0} · commandée le {1}	{0} · ordered on {1}	{0} · pedida el {1}	{0} · demanada el {1}
+Pack bénéficiaire de {0} {1}	Beneficiary pack for {0} {1}	Pack de beneficiario de {0} {1}	Pack de beneficiari de {0} {1}
+Carte du titulaire	Holder's card	Tarjeta del titular	Targeta del titular
+À expédier	To ship	Por enviar	Per enviar
+En livraison	Being delivered	En reparto	En repartiment
+Marquer expédiée	Mark as shipped	Marcar como enviada	Marcar com a enviada
+Marquer livrée	Mark as delivered	Marcar como entregada	Marcar com a lliurada
+Lancement officiel	Official launch	Lanzamiento oficial	Llançament oficial
+Désactivé : phase découverte, aucun document ne peut être déposé dans les Coffres.	Off: discovery phase, no document can be added to the Vaults.	Desactivado: fase de descubrimiento, no se puede añadir ningún documento a los Cofres.	Desactivat: fase de descoberta, no es pot afegir cap document als Cofres.
+Réservé au rôle « admin ». Chaque changement est inscrit au journal.	Reserved for the "admin" role. Every change is written to the log.	Reservado al rol «admin». Cada cambio queda registrado.	Reservat al rol «admin». Cada canvi queda registrat.
+Clé de la conciergerie incorrecte.	Incorrect concierge key.	Clave de la conserjería incorrecta.	Clau de la consergeria incorrecta.
+Clé privée de la conciergerie (jamais enregistrée)	Concierge private key (never stored)	Clave privada de la conserjería (nunca se guarda)	Clau privada de la consergeria (no es desa mai)
+Ouvrir les {0} élément(s) confié(s)	Open the {0} entrusted item(s)	Abrir los {0} elemento(s) confiado(s)	Obrir els {0} element(s) confiat(s)

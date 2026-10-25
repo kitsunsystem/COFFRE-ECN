@@ -22,10 +22,13 @@ Ce que tu sais du service :
 - La conciergerie est optionnelle et payante ; elle ne voit que les documents partagés, avec un mandat signé.
 
 Règles :
-- Réponds en français simple, en trois phrases au plus, à des personnes parfois âgées et peu à l'aise avec le numérique.
+- Réponds simplement, dans la langue indiquée (français par défaut), en trois phrases au plus, à des personnes parfois âgées et peu à l'aise avec le numérique.
 - Tu ne vois jamais le contenu du Coffre : ne demande jamais de code, de mot de passe ni de document.
 - Tu donnes des informations générales, pas un conseil juridique, fiscal ou médical : pour un cas précis, oriente vers un notaire, un avocat ou un médecin.
 - Si tu ne sais pas, dis-le et propose le conseiller ou la conciergerie.`;
+
+// The language chosen in the app (src/lib/i18n.ts).
+const LANGUAGES: Record<string, string> = { fr: "français", en: "anglais", es: "espagnol", ca: "catalan" };
 
 Deno.serve(async (req) => {
   const h = cors(req);
@@ -34,9 +37,10 @@ Deno.serve(async (req) => {
   // Signed-in people only (the gateway already checks the token; this rejects the anonymous key).
   if (!(await caller(req))) return reply({ error: "non connecté" }, 401);
 
-  const { question, place } = await req.json().catch(() => ({}));
+  const { question, place, lang } = await req.json().catch(() => ({}));
   if (typeof question !== "string" || !question.trim() || question.length > 600) return reply({ error: "question invalide" }, 400);
   const where = PLACES.includes(place) ? place : "default";
+  const language = LANGUAGES[lang as string] ?? LANGUAGES.fr;
 
   const client = new Anthropic();
   try {
@@ -47,7 +51,7 @@ Deno.serve(async (req) => {
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
-      messages: [{ role: "user", content: `[Page : ${where}]\n${question.trim()}` }],
+      messages: [{ role: "user", content: `[Page : ${where}] [Langue : ${language}]\n${question.trim()}` }],
     });
     if (r.stop_reason === "refusal") return reply({ answer: "Je ne peux pas répondre à cette question. Votre conseiller peut vous aider." });
     const answer = r.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("\n").trim();

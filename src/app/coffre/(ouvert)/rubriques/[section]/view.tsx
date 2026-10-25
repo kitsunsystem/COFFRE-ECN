@@ -9,6 +9,7 @@ import { ItemEditor, ItemView, type Entry } from "@/components/item-editor";
 import { useNow } from "@/components/providers";
 import { Button, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
+import { colon, tr } from "@/lib/i18n";
 import { copyText } from "@/lib/native";
 import { SECTIONS } from "@/lib/sections";
 import { useApp, useSession } from "@/lib/store";
@@ -53,9 +54,9 @@ export function SectionView({ id }: { id: string }) {
   // The emergency sheet lives outside the card: the person pastes it into the phone's medical ID, readable from the lock screen.
   async function copyMedical() {
     const f = (sub: string) => (entries[sub] ?? []).map((e) => e.payload.fields);
-    const line = (label: string, v?: string) => (v?.trim() ? [`${label} : ${v.trim()}`] : []);
+    const line = (label: string, v?: string) => (v?.trim() ? [`${tr(label)}${colon()} ${tr(v.trim())}`] : []);
     const text = [
-      `FICHE D'URGENCE${account ? ` — ${account.firstName} ${account.lastName}` : ""}`,
+      `${tr("FICHE D'URGENCE")}${account ? ` — ${account.firstName} ${account.lastName}` : ""}`,
       ...f("groupe-allergies").flatMap((x) => [...line("Groupe sanguin", x.blood), ...line("Allergies", x.allergies)]),
       ...f("traitements").flatMap((x) => line("Traitement", [x.drug, x.dose].filter(Boolean).join(", "))),
       ...f("medecins").flatMap((x) => line("Médecin", [x.name, x.phone].filter(Boolean).join(" — "))),

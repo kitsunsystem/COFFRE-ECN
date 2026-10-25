@@ -4,6 +4,7 @@ import { CircleAlert, CircleCheck } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { bootstrap } from "@/lib/api";
 import { PROD } from "@/lib/env";
+import { startI18n } from "@/lib/i18n";
 import { accessEnd, graceEnd, procedureStatus } from "@/lib/rules";
 import { now, personName, useApp } from "@/lib/store";
 import { destroyPrivate, eraseCoffre } from "@/lib/vault";
@@ -90,6 +91,7 @@ function Toast() {
 
 export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
+    void startI18n();
     if (PROD) void bootstrap().finally(() => useApp.getState().set({ ready: true }));
     else void Promise.resolve(useApp.persist.rehydrate()).finally(() => useApp.getState().set({ ready: true }));
   }, []);

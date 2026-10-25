@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTrans
 import { ArrowRight, BadgeCheck, Bell, CalendarClock, ChevronRight, ConciergeBell, EyeOff, FileText, HandHeart, HeartPulse, Lock, ShieldCheck, Siren, Sparkles, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { LangPicker } from "@/components/lang-picker";
 import { ThemePicker } from "@/components/theme-picker";
 import { Button, Eyebrow } from "@/components/ui";
 import { Aurora, Emblem, Logo, NfcCard, Reveal, rise, stagger, TapDemo } from "@/components/visuals";
@@ -39,11 +40,13 @@ function Hero() {
       <nav className="relative mx-auto flex max-w-6xl items-center justify-between">
         <Logo />
         <div className="flex items-center gap-1 sm:gap-2">
+          <LangPicker compact />
           <Link href="/connexion" aria-label="Se connecter" className="grid h-11 min-w-11 place-items-center whitespace-nowrap rounded-full font-semibold text-ink-soft hover:text-ink sm:px-4">
             <UserRound className="h-6 w-6 sm:hidden" />
             <span className="hidden sm:inline">Se connecter</span>
           </Link>
-          <Button href="/inscription" className="!min-h-11 !px-4 sm:!px-5">
+          {/* Small phones: the hero's "Protéger ma famille" right below leads to the same place. */}
+          <Button href="/inscription" className="!min-h-11 whitespace-nowrap !px-4 max-[419px]:!hidden sm:!px-5">
             Commencer
           </Button>
         </div>

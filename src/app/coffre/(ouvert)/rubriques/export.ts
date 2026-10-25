@@ -1,5 +1,6 @@
 // PDF file for a notary or a hospital, built on the device only from what the person opening the Coffre may see:
 // the owner sees everything, a beneficiary only the sub-sections released to their card. Codes and passwords are left out.
+import { colon, tr } from "@/lib/i18n";
 import { SECTIONS } from "@/lib/sections";
 import { saveFile } from "@/lib/native";
 import { readItems, visibleSubsections } from "@/lib/vault";
@@ -49,7 +50,7 @@ export async function exportPdf(owner: string, reader: string) {
   };
   const text = (s: string, size: number, opts: { bold?: boolean; color?: [number, number, number]; indent?: number; gap?: number } = {}) => {
     doc.setFont("helvetica", opts.bold ? "bold" : "normal").setFontSize(size).setTextColor(...(opts.color ?? [15, 27, 45]));
-    const lines = doc.splitTextToSize(s, W - 2 * M - (opts.indent ?? 0)) as string[];
+    const lines = doc.splitTextToSize(tr(s), W - 2 * M - (opts.indent ?? 0)) as string[];
     for (const l of lines) {
       room(size * 1.35);
       doc.text(l, M + (opts.indent ?? 0), y + size);
@@ -74,7 +75,7 @@ export async function exportPdf(owner: string, reader: string) {
       for (const it of sub.items) {
         room(30);
         text(it.title, 11.5, { bold: true, indent: 10 });
-        for (const [k, v] of it.rows) text(`${k} : ${v}`, 10.5, { indent: 18 });
+        for (const [k, v] of it.rows) text(`${tr(k)}${colon()} ${tr(v)}`, 10.5, { indent: 18 });
         y += 6;
       }
     }
@@ -82,7 +83,7 @@ export async function exportPdf(owner: string, reader: string) {
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i).setFont("helvetica", "normal").setFontSize(8.5).setTextColor(107, 119, 138);
-    doc.text(`Document confidentiel · ${owner} · page ${i} sur ${pages}`, M, H - 28);
+    doc.text(tr(`Document confidentiel · ${owner} · page ${i} sur ${pages}`), M, H - 28);
   }
   const slug = owner.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-");
   await saveFile(doc.output("blob"), `Coffre-${slug}-${new Date().toISOString().slice(0, 10)}.pdf`);

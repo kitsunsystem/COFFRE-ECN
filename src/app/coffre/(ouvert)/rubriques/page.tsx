@@ -4,8 +4,8 @@ import { ArrowRight, FileDown, Hourglass, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useCoffreView } from "@/components/coffre-view";
-import { NamedIcon } from "@/components/icons";
 import { useNow } from "@/components/providers";
+import { SafeDoor } from "@/components/safe-door";
 import { Button } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
 import { accessEnd } from "@/lib/rules";
@@ -14,8 +14,6 @@ import { ESSENTIALS, SECTIONS } from "@/lib/sections";
 import { useApp } from "@/lib/store";
 import { visibleSubsections } from "@/lib/vault";
 import { exportPdf } from "./export";
-
-const GLOW: Record<string, string> = { coral: "from-coral/35", gold: "from-gold/35", sage: "from-sage/35", ink: "from-aura/50", mist: "from-mist/35" };
 
 export default function Rubriques() {
   const vault = useApp((s) => s.vault);
@@ -26,10 +24,8 @@ export default function Rubriques() {
   const end = death && accessEnd(death);
   const visible = new Set(visibleSubsections());
   const shown = SECTIONS.filter((s) => (s.optional ? view.business : true)).filter((s) => owner || s.subsections.some((x) => visible.has(x.id)));
-  // Two-column grid: the first section and "À effacer" (always last) span both columns; so does a leftover odd tile.
+  // "À effacer" always last.
   const sections = [...shown.filter((s) => s.id !== "effacer"), ...shown.filter((s) => s.id === "effacer")];
-  const narrow = sections.filter((s, i) => i > 0 && s.id !== "effacer");
-  const isWide = (s: (typeof sections)[number], i: number) => i === 0 || s.id === "effacer" || (narrow.length % 2 === 1 && s === narrow[narrow.length - 1]);
   const done = essentialsDone({ vault });
   const [exporting, setExporting] = useState(false);
 
@@ -72,28 +68,15 @@ export default function Rubriques() {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* Each rubric is a small safe; an odd last one sits centred. */}
+      <div className="grid grid-cols-2 gap-4">
         {sections.map((s, i) => {
           const subs = s.subsections.map((x) => x.id).filter((id) => owner || visible.has(id));
           const count = view.items.filter((it) => subs.includes(it.subsectionId)).length;
-          const wide = isWide(s, i);
+          const lastOdd = sections.length % 2 === 1 && i === sections.length - 1;
           return (
-            <motion.div key={s.id} variants={rise} className={wide ? "col-span-2" : ""}>
-              <Link href={`/coffre/rubriques/${s.id}`}>
-                <motion.div whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} className={`relative h-full overflow-hidden rounded-[1.6rem] bg-night-2 p-5 ring-1 ring-paper/10 ${wide ? "min-h-[9.5rem]" : "min-h-[11rem]"}`}>
-                  <div className={`absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br ${GLOW[s.tone]} to-transparent blur-2xl`} />
-                  <div className="relative flex h-full flex-col">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-paper/10 ring-1 ring-paper/15">
-                      <NamedIcon name={s.icon} className="h-6 w-6 text-gold-soft" />
-                    </span>
-                    <div className="mt-auto pt-4">
-                      <div className="text-[1.12rem] font-semibold leading-snug">{s.title}</div>
-                      <div className="mt-0.5 text-[0.82rem] text-paper/55">{wide ? s.tagline : `${count} élément${count > 1 ? "s" : ""}`}</div>
-                    </div>
-                  </div>
-                  {wide && <span className="absolute bottom-5 right-5 rounded-full bg-paper/10 px-3 py-1 text-[0.8rem] font-bold">{count}</span>}
-                </motion.div>
-              </Link>
+            <motion.div key={s.id} variants={rise} className={lastOdd ? "col-span-2 mx-auto w-[calc(50%-0.5rem)]" : ""}>
+              <SafeDoor href={`/coffre/rubriques/${s.id}`} title={s.title} icon={s.icon} count={count} sealed={s.id === "effacer"} />
             </motion.div>
           );
         })}

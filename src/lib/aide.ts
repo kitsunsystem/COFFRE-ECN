@@ -1,5 +1,6 @@
 // Help rubrics of the Espace (brief §3): check-lists, step-by-step, blank letters to download and print.
 // General information only — not legal advice; letters are templates to adapt.
+import { tr } from "./i18n";
 
 export interface Letter {
   id: string;
@@ -154,7 +155,8 @@ const rtfEscape = (s: string) =>
 
 // Blank letters download as .rtf: opens in Word, LibreOffice, Pages — nothing is uploaded, ever.
 export function downloadLetter(l: Letter) {
-  const rtf = `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Georgia;}}\\f0\\fs24\\sa200 ${rtfEscape(l.body)}}`;
+  const body = l.body.endsWith(sign) ? tr(l.body.slice(0, -sign.length)) + tr(sign) : tr(l.body);
+  const rtf = `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Georgia;}}\\f0\\fs24\\sa200 ${rtfEscape(body)}}`;
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([rtf], { type: "application/rtf" }));
   a.download = `${l.id}.rtf`;
