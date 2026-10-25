@@ -145,7 +145,7 @@ LANGS.forEach((l, i) => {
   const file = path.join(DIR, `${l}.json`);
   const json = JSON.stringify(dict, null, 0).replace(/","/g, '",\n"') + "\n";
   if (!check) fs.writeFileSync(file, json);
-  else if (!fs.existsSync(file) || fs.readFileSync(file, "utf8") !== json) stale = true;
+  else if (!fs.existsSync(file) || fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n") !== json) stale = true;
 });
 
 const found = extract();
