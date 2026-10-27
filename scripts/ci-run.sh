@@ -7,6 +7,6 @@ log=$(mktemp)
 code=${PIPESTATUS[0]}
 if [ "$code" -ne 0 ]; then
   # The error lines first (xcodebuild prints them long before its end), then the end of the output.
-  echo "::error title=$*::$( { grep -E 'error:|error |FAILED' "$log" | head -n 25; tail -n 10 "$log"; } | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' ' ' | cut -c1-3500)"
+  echo "::error title=$*::$( { grep -E 'error:|error |FAILED|ld: |Undefined symbol|duplicate symbol|ignoring file|  "_|referenced from' "$log" | grep -v '^ *cd ' | head -n 40; tail -n 10 "$log"; } | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' ' ' | cut -c1-3500)"
 fi
 exit "$code"
