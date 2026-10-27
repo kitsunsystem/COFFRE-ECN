@@ -14,10 +14,12 @@ public class TangemPlugin: CAPPlugin, CAPBridgedPlugin {
     ]
 
     private lazy var sdk = TangemSdk()
+    // Used by the SDK to check online, with Tangem, that a card is a genuine one.
+    private let network = NetworkService(session: .shared, additionalHeaders: [:])
 
     // The card and its Ed25519 key, created at its very first use (one more tap).
     @objc func scan(_ call: CAPPluginCall) {
-        sdk.scanCard(initialMessage: nil) { [weak self] result in
+        sdk.scanCard(initialMessage: nil, networkService: network) { [weak self] result in
             switch result {
             case .failure(let error):
                 Self.fail(call, error)

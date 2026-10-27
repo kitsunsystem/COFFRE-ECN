@@ -7,7 +7,7 @@ scan(): Promise<{ cardId: string; publicKey: string }>   // clé publique Ed2551
 sign(o: { cardId: string; publicKey: string; hash: string }): Promise<{ signature: string }>   // base64
 ```
 
-- iOS : `ios/Sources/TangemPlugin/TangemPlugin.swift`, SDK Tangem 3.15.0 (Swift Package Manager, iOS 15).
+- iOS : `ios/Sources/TangemPlugin/TangemPlugin.swift`, SDK Tangem 5.3.0 (Swift Package Manager) : l'application demande iOS 17.
   Droits NFC déclarés dans `ios/App/App/App.entitlements`, identifiants des cartes dans `Info.plist`.
 - Android : `android/src/main/java/app/sillage/tangem/TangemPlugin.kt`, SDK Tangem 3.9.3 (JitPack, commit `5d8617f2d1` :
   Tangem ne publie plus de versions numérotées en accès libre).
