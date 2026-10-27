@@ -40,6 +40,8 @@ repositories {
 
 dependencies {
     implementation project(':capacitor-android')
-    implementation "com.github.tangem.tangem-sdk-android:android:3.9.1"
-    implementation "com.github.tangem.tangem-sdk-android:core:3.9.1"
+    // shortcut: Tangem no longer tags its Android SDK; JitPack builds this exact commit (3.9.3). Copy the two .aar files
+    // into the project (or get Tangem's GitHub Packages access) before the launch, so a JitPack outage cannot block a release.
+    implementation "com.github.tangem.tangem-sdk-android:android:5d8617f2d1"
+    implementation "com.github.tangem.tangem-sdk-android:core:5d8617f2d1"
 }
