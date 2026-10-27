@@ -128,3 +128,19 @@ Votre adresse ne sert qu'à l'envoi : elle est effacée dès que les cartes sont
 Commander	Order	Pedir	Demanar
 Ouverture du Coffre demandée	Vault opening requested	Apertura del Cofre solicitada	Obertura del Cofre sol·licitada
 {0} attend votre accord. Touchez pour répondre.	{0} is waiting for your approval. Tap to answer.	{0} espera su aprobación. Toque para responder.	{0} espera la vostra aprovació. Toqueu per respondre.
+
+# Test de carte (application).
+Tester une carte	Test a card	Probar una tarjeta	Provar una targeta
+Test de carte	Card test	Prueba de tarjeta	Prova de targeta
+Disponible dans l'application iPhone et Android : la carte se lit en NFC.	Available in the iPhone and Android app: the card is read over NFC.	Disponible en la aplicación para iPhone y Android: la tarjeta se lee por NFC.	Disponible a l'aplicació per a iPhone i Android: la targeta es llegeix per NFC.
+Vérifie qu'une carte peut ouvrir un Coffre. Posez-la trois fois au dos du téléphone, quand c'est demandé.	Checks that a card can open a Vault. Tap it three times on the back of the phone, when asked.	Comprueba que una tarjeta puede abrir un Cofre. Acérquela tres veces a la parte trasera del teléfono cuando se le pida.	Comprova que una targeta pot obrir un Cofre. Acosteu-la tres vegades a la part posterior del telèfon quan se us demani.
+Contact {0} sur 3…	Tap {0} of 3…	Contacto {0} de 3…	Contacte {0} de 3…
+Carte lue ({0})	Card read ({0})	Tarjeta leída ({0})	Targeta llegida ({0})
+Signature Ed25519 valide	Valid Ed25519 signature	Firma Ed25519 válida	Signatura Ed25519 vàlida
+Signature invalide	Invalid signature	Firma no válida	Signatura no vàlida
+Même signature à chaque fois	Same signature every time	Misma firma cada vez	Mateixa signatura cada vegada
+Signature différente à chaque fois	Different signature every time	Firma distinta cada vez	Signatura diferent cada vegada
+Cette carte convient pour ouvrir un Coffre.	This card can open a Vault.	Esta tarjeta sirve para abrir un Cofre.	Aquesta targeta serveix per obrir un Cofre.
+Cette carte ne convient pas : aucune clé ne peut en être tirée.	This card is not suitable: no key can be derived from it.	Esta tarjeta no sirve: no se puede obtener ninguna clave de ella.	Aquesta targeta no serveix: no se'n pot obtenir cap clau.
+Recommencer le test	Run the test again	Repetir la prueba	Repetir la prova
+Lancer le test	Start the test	Iniciar la prueba	Iniciar la prova

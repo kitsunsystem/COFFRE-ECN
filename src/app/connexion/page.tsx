@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { ArrowRight, KeyRound, LogIn, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { PasswordReset } from "@/components/password-reset";
 import { useHydrated } from "@/components/providers";
 import { Button, Field, Notice } from "@/components/ui";
@@ -12,7 +12,10 @@ import { Aurora, Logo } from "@/components/visuals";
 import { PASSWORD_RULE, signIn, signUp, verifyCode } from "@/lib/api";
 import { DEMO_PIN, seedDemo } from "@/lib/demo";
 import { PROD } from "@/lib/env";
+import { isNative } from "@/lib/native";
 import { useApp } from "@/lib/store";
+
+const still = () => () => {};
 
 // Where to go once signed in: one's own Espace, the page for relatives (guarantor, beneficiary), or the sign-up.
 function landing() {
@@ -34,6 +37,7 @@ export default function Connexion() {
   // "confirm": a code has just been sent to confirm the address; "forgot": new password with a code.
   const [step, setStep] = useState<"login" | "create" | "confirm" | "forgot">("login");
   const [busy, setBusy] = useState(false);
+  const app = useSyncExternalStore(still, isNative, () => false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -160,6 +164,11 @@ export default function Connexion() {
         <Link href="/inscription" className="mt-8 flex items-center justify-center gap-2 font-semibold">
           Créer un compte <ArrowRight className="h-4 w-4" />
         </Link>
+        {app && (
+          <Link href="/test-carte" className="mt-4 text-center text-[0.88rem] font-semibold text-mist">
+            Tester une carte
+          </Link>
+        )}
       </div>
     </div>
   );

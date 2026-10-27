@@ -1,0 +1,11 @@
+{
+  "name": "capacitor-tangem",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lecture des cartes Tangem dans l'application iOS / Android (module Capacitor local, appelé « Tangem » par src/lib/cards.ts).",
+  "license": "UNLICENSED",
+  "capacitor": {
+    "ios": { "src": "ios" },
+    "android": { "src": "android" }
+  }
+}

@@ -1,12 +1,13 @@
 // Builds the demo and publishes the compiled site to the gh-pages branch (GitHub Pages source: gh-pages / root).
 // Usage: npm run deploy   (DEMO_REPO=<url> to publish to another repo)
+// The demo lives in its own public repository (compiled site only), so the source code can stay private.
 import { execSync } from "node:child_process";
 import { rmSync, writeFileSync } from "node:fs";
 
 const sh = (cmd, opts = {}) => execSync(cmd, { stdio: "inherit", ...opts });
 const read = (cmd) => execSync(cmd).toString().trim();
 
-const TARGET = process.env.DEMO_REPO ?? read("git remote get-url origin");
+const TARGET = process.env.DEMO_REPO ?? "https://github.com/kitsunsystem/COFFRE-ECN.git";
 const [owner, repo] = TARGET.replace(/\.git$/, "").split("/").slice(-2);
 const BASE = `/${repo}`; // a project site lives under /<repo>/
 const name = read("git config user.name");

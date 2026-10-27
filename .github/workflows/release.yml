@@ -1,0 +1,135 @@
+# One update everywhere at once: database and server functions, website, Android (Google Play) and iPhone
+# (TestFlight, then App Store after Apple's review). Actions › Release › Run workflow, with the version number.
+# Each part runs only when its keys are set (deploy/README.md); without them it builds and keeps the files.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version shown in the stores (e.g. 1.0.0)"
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      backend: true
+      web: true
+    secrets: inherit
+
+  android:
+    name: Android (Google Play)
+    needs: [deploy]
+    if: always() && needs.deploy.result != 'failure' && vars.SUPABASE_URL != ''
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+      GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES_JSON }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install
+        run: bash scripts/ci-run.sh npm ci
+      - run: bash scripts/ci-run.sh npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.APP_URL }}
+          NEXT_PUBLIC_PUSH: ${{ vars.PUSH }}
+      - run: bash scripts/ci-run.sh npx cap sync android
+      - name: Firebase (notifications)
+        if: env.GOOGLE_SERVICES != ''
+        run: printf '%s' "$GOOGLE_SERVICES" > android/app/google-services.json
+      - name: Signed bundle
+        if: env.KEYSTORE != ''
+        run: |
+          printf '%s' "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/upload.p12"
+          cd android && chmod +x gradlew
+          bash ../scripts/ci-run.sh ./gradlew --no-daemon bundleRelease -PversionCode=${{ github.run_number }} -PversionName=${{ inputs.version }}
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/upload.p12
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      - uses: actions/upload-artifact@v4
+        if: env.KEYSTORE != ''
+        with:
+          name: android-${{ inputs.version }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+      # The very first version must be uploaded by hand in the Play Console; then every release goes out from here.
+      - name: Google Play (internal testing)
+        if: env.KEYSTORE != '' && env.PLAY_JSON != ''
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: app.sillage.famille
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: ${{ vars.PLAY_TRACK || 'internal' }}
+          status: ${{ vars.PLAY_RELEASE_STATUS || 'draft' }}
+
+  ios:
+    name: iPhone (TestFlight)
+    needs: [deploy]
+    if: always() && needs.deploy.result != 'failure' && vars.SUPABASE_URL != ''
+    runs-on: macos-15
+    environment: production
+    env:
+      ASC_KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: bash scripts/ci-run.sh npm ci
+      - run: bash scripts/ci-run.sh npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ vars.APP_URL }}
+          NEXT_PUBLIC_PUSH: ${{ vars.PUSH }}
+      - run: bash scripts/ci-run.sh npx cap sync ios
+      # Signing is handled by Xcode with the App Store Connect key: no certificate to keep anywhere.
+      - name: Archive and send to TestFlight
+        if: env.ASC_KEY != ''
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          KEY="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s' "$ASC_KEY" > "$KEY"
+          AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$KEY" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+          bash scripts/ci-run.sh xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" "${AUTH[@]}" \
+            DEVELOPMENT_TEAM="$TEAM_ID" MARKETING_VERSION="${{ inputs.version }}" CURRENT_PROJECT_VERSION="${{ github.run_number }}" archive
+          cat > "$RUNNER_TEMP/export.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>teamID</key><string>$TEAM_ID</string>
+          </dict></plist>
+          EOF
+          bash scripts/ci-run.sh xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/export.plist" -exportPath "$RUNNER_TEMP/export" "${AUTH[@]}"

@@ -1,6 +1,6 @@
 # Native apps. Without repository variables the apps embed the demo; with SUPABASE_URL / SUPABASE_ANON_KEY set
 # (Settings › Secrets and variables › Actions › Variables) they are the production apps.
-# Store builds (signing) need the certificates: see deploy/README.md.
+# This workflow checks that both apps build; store versions come from the Release workflow (deploy/README.md).
 name: Mobile
 
 on:
@@ -41,6 +41,8 @@ jobs:
 
   ios:
     name: iOS (simulator build)
+    # macOS minutes cost 10 times more on a private repository: on demand only (Actions › Mobile › Run workflow).
+    if: github.event_name == 'workflow_dispatch'
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v5

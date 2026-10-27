@@ -1,11 +1,20 @@
-# Production deployment, started by hand (Actions › Deploy › Run workflow) once the accounts exist.
+# Production deployment, started by hand (Actions › Deploy › Run workflow) once the accounts exist, or by Release.
 # Needs, in Settings › Secrets and variables › Actions:
 #   variables: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_PROJECT_REF, CF_PAGES_PROJECT, FIDO_RP_ID
 #   secrets:   SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD, CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 # Self-hosted Supabase (OVHcloud HDS): skip the "backend" job and apply migrations with psql (deploy/README.md).
+# Each part runs only when its keys are set: without Cloudflare yet, only the database and the functions are deployed.
 name: Deploy
 
 on:
+  workflow_call:
+    inputs:
+      backend:
+        type: boolean
+        default: true
+      web:
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       backend:
@@ -44,7 +53,7 @@ jobs:
   web:
     needs: [backend]
     # Runs even when the backend job was skipped (self-hosted backend).
-    if: always() && inputs.web && vars.SUPABASE_URL != '' && needs.backend.result != 'failure'
+    if: always() && inputs.web && vars.SUPABASE_URL != '' && vars.CF_PAGES_PROJECT != '' && needs.backend.result != 'failure'
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -62,6 +71,9 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_FIDO_RP_ID: ${{ vars.FIDO_RP_ID }}
           NEXT_PUBLIC_APP_URL: https://${{ vars.FIDO_RP_ID }}
+          NEXT_PUBLIC_PUSH: ${{ vars.PUSH }}
+          NEXT_PUBLIC_STORE_IOS: ${{ vars.STORE_IOS }}
+          NEXT_PUBLIC_STORE_ANDROID: ${{ vars.STORE_ANDROID }}
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -28,6 +28,7 @@
     "@capacitor/share": "^8.0.3",
     "@capgo/capacitor-native-biometric": "^8.9.1",
     "@supabase/supabase-js": "^2.118.0",
+    "capacitor-tangem": "file:native/tangem",
     "idb-keyval": "^6.3.0",
     "jspdf": "^4.2.1",
     "libsodium-wrappers-sumo": "^0.8.4",

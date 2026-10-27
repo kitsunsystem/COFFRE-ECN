@@ -167,6 +167,21 @@ async function tangemScan() {
   }
 }
 
+// Card diagnostic (app, 3 taps): our keys only exist if the card signs the same value identically every time, with a
+// valid Ed25519 signature. A card that adds randomness to its signatures can never open a Coffre.
+export async function testCard(onStep: (step: number) => void) {
+  const s = await na();
+  onStep(1);
+  const { cardId, publicKey } = await tangemScan();
+  const message = new Uint8Array(await crypto.subtle.digest("SHA-256", label("unlock")));
+  const sign = async (step: number) => {
+    onStep(step);
+    return fromB64(s, (await Tangem.sign({ cardId, publicKey, hash: toB64(s, message) })).signature);
+  };
+  const [a, b] = [await sign(2), await sign(3)];
+  return { cardId, valid: s.crypto_sign_verify_detached(a, message, s.from_hex(publicKey)), deterministic: s.memcmp(a, b) };
+}
+
 /* ---------- contract ---------- */
 
 // A new physical card for this record.
