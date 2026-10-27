@@ -42,7 +42,7 @@ class TangemPlugin : Plugin() {
             viewDelegate = viewDelegate,
             nfcAvailabilityProvider = AndroidNfcAvailabilityProvider(activity),
             secureStorage = secureStorage,
-            wordlist = Wordlist.getWordlist(activity),
+            wordlist = Wordlist.getWordlist(),
             authenticationManager = authenticationManager,
             keystoreManager = keystoreManager,
             config = config,
@@ -59,12 +59,12 @@ class TangemPlugin : Plugin() {
                     val card = result.data
                     val wallet = card.wallets.firstOrNull { it.curve == EllipticCurve.Ed25519 }
                     if (wallet != null) {
-                        call.resolve(JSObject().put("cardId", card.cardId).put("publicKey", hex(wallet.publicKey)))
+                        resolveKey(call, card.cardId, wallet.publicKey)
                     } else {
                         sdk.createWallet(curve = EllipticCurve.Ed25519, cardId = card.cardId, initialMessage = null) { created ->
                             when (created) {
                                 is CompletionResult.Failure -> fail(call, created.error)
-                                is CompletionResult.Success -> call.resolve(JSObject().put("cardId", card.cardId).put("publicKey", hex(created.data.wallet.publicKey)))
+                                is CompletionResult.Success -> resolveKey(call, card.cardId, created.data.wallet.publicKey)
                             }
                         }
                     }
@@ -91,7 +91,10 @@ class TangemPlugin : Plugin() {
     private fun fail(call: PluginCall, error: TangemError) =
         call.reject((error as? TangemSdkError)?.localizedDescription(context) ?: error.customMessage, error.code.toString())
 
-    private fun hex(bytes: ByteArray) = bytes.joinToString("") { "%02x".format(it) }
+    private fun resolveKey(call: PluginCall, cardId: String, publicKey: ByteArray?) {
+        if (publicKey == null) return call.reject("La clé de la carte est illisible.")
+        call.resolve(JSObject().put("cardId", cardId).put("publicKey", publicKey.joinToString("") { "%02x".format(it) }))
+    }
 
     private fun bytes(hex: String): ByteArray? =
         if (hex.length % 2 != 0) null else runCatching { ByteArray(hex.length / 2) { hex.substring(it * 2, it * 2 + 2).toInt(16).toByte() } }.getOrNull()
