@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { render, type TemplateId } from "../../supabase/functions/_shared/templates";
 import { LAUNCH } from "./config";
+import { currentLang } from "./i18n";
 import type { Sealed } from "./crypto";
 import { PROD } from "./env";
 import type { Moment, Procedure } from "./rules";
@@ -15,7 +16,6 @@ export interface Person {
   lastName: string;
   relation: string;
   email?: string;
-  phone?: string;
   managesMe?: boolean; // child who manages this account under a signed power of attorney
 }
 
@@ -27,8 +27,7 @@ export interface Account {
   birthDate: string;
   birthCity: string;
   birthCountry: string;
-  address: string;
-  situation: string;
+  address: string; // only until the cards are shipped, then erased
   isBusinessOwner: boolean;
   kyc: "a_faire" | "en_cours" | "verifie";
   createdAt: number;
@@ -210,7 +209,7 @@ export const useApp = create<State & Actions>()(
       email: (to, template, data) => {
         // Demo only: a local outbox shows the e-mails. In production the database queues them and "mailer" sends them (Brevo).
         if (PROD) return;
-        const e = render(template, data);
+        const e = render(template, data, currentLang());
         set((s) => ({ outbox: [{ id: crypto.randomUUID(), to, template, subject: e.subject, title: e.title, body: e.body, at: Date.now() + s.clockOffset }, ...s.outbox] }));
       },
       reset: () => set({ ...initial, ready: true }),

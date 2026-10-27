@@ -3,9 +3,7 @@
 // Release itself is enforced by RLS (is_released); this function only notifies and erases.
 import { admin, enqueue, eraseCoffre, internalOnly, json } from "../_shared/server.ts";
 
-const fmt = (t: string) => new Date(t).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris" });
-const day = (t: string) => new Date(t).toLocaleDateString("fr-FR", { dateStyle: "long", timeZone: "Europe/Paris" });
-
+// Dates go out as ISO strings: each e-mail writes them in its reader's language.
 // deno-lint-ignore no-explicit-any
 async function beneficiaries(db: any, ownerId: string, moments: string[]) {
   const { data: envs } = await db.from("envelopes").select("card_id, cards!inner(holder_person_id, people(first_name, email))").eq("owner_id", ownerId).in("moment", moments);
@@ -26,7 +24,7 @@ async function endOfAccess(db: ReturnType<typeof admin>) {
       await db.from("procedures").update({ erased_at: new Date().toISOString() }).eq("id", p.id);
       erased++;
     } else if (!p.end_warned_at && left < 30 * 86_400_000) {
-      for (const b of await beneficiaries(db, p.owner_id, ["now", "coup_dur", "deces"])) await enqueue(db, b, "acces-fin", { ownerName, until: day(p.end) });
+      for (const b of await beneficiaries(db, p.owner_id, ["now", "coup_dur", "deces"])) await enqueue(db, b, "acces-fin", { ownerName, until: p.end });
       await db.from("procedures").update({ end_warned_at: new Date().toISOString() }).eq("id", p.id);
       warned++;
     }
@@ -52,7 +50,7 @@ Deno.serve(async (req) => {
     const o = p.profiles;
     const ends = new Date(p.ends_at).getTime();
     const template = p.kind === "coup_dur" ? "coup-dur-declare" : "deces-delai";
-    const data = { declaredBy: p.declared_by, endsAt: fmt(p.ends_at) };
+    const data = { declaredBy: p.declared_by, endsAt: p.ends_at };
     if (now < ends) {
       // shortcut: e-mail only; add Brevo SMS and a push notification here once the sender and app ids exist.
       if (!p.alerted_at) {
@@ -70,7 +68,7 @@ Deno.serve(async (req) => {
     // Window over: tell each beneficiary who now has something to open.
     const moments = p.kind === "deces" ? ["coup_dur", "deces"] : ["coup_dur"];
     for (const b of await beneficiaries(db, p.owner_id, moments))
-      await enqueue(db, b, "acces-ouvert", { ownerName: `${o.first_name} ${o.last_name}`, ...(p.end ? { until: day(p.end) } : {}) });
+      await enqueue(db, b, "acces-ouvert", { ownerName: `${o.first_name} ${o.last_name}`, ...(p.end ? { until: p.end } : {}) });
 
     if (p.kind === "deces") {
       // "À effacer": ciphertext and files destroyed without ever being read (nobody holds its key).

@@ -30,7 +30,6 @@ function ProcedureRunner() {
   useEffect(() => {
     const st = useApp.getState();
     const owner = st.account ? `${st.account.firstName} ${st.account.lastName}` : "Votre proche";
-    const day = (ms: number) => new Date(ms).toLocaleDateString("fr-FR", { dateStyle: "long" });
     for (const p of st.procedures) {
       // After a death, the beneficiaries have a limited time; then the whole Coffre is erased for good.
       const end = accessEnd(p);
@@ -47,7 +46,7 @@ function ProcedureRunner() {
       const holders = new Set(st.vault.envelopes.filter((e) => moments.includes(e.moment)).map((e) => st.cards.find((c) => c.id === e.cardId)?.holderId ?? ""));
       for (const id of holders) {
         const person = st.people.find((x) => x.id === id);
-        st.email(person?.email ?? personName(st.people, id), "acces-ouvert", { ownerName: owner, ...(end ? { until: day(end) } : {}) });
+        st.email(person?.email ?? personName(st.people, id), "acces-ouvert", { ownerName: owner, ...(end ? { until: new Date(end).toISOString() } : {}) });
       }
       if (p.kind === "deces") void destroyPrivate();
       st.set((s) => ({ procedures: s.procedures.map((x) => (x.id === p.id ? { ...x, finalizedAt: now() } : x)) }));

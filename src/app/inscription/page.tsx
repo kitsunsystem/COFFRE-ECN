@@ -13,19 +13,10 @@ import { ASSISTANT_NAME } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { uid, useApp, type Account, type Person } from "@/lib/store";
 
-const SITUATIONS = ["En couple", "Marié(e)", "Pacsé(e)", "Célibataire", "Veuf ou veuve", "Divorcé(e)"];
 const RELATIONS = ["Conjoint", "Enfant", "Parent", "Frère ou sœur", "Ami", "Autre"];
 
 type Draft = Omit<Account, "kyc" | "createdAt">;
-const empty: Draft = { firstName: "", lastName: "", email: "", phone: "", birthDate: "", birthCity: "", birthCountry: "France", address: "", situation: "", isBusinessOwner: false };
-
-function Choice({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onClick} className={`rounded-2xl px-4 py-3.5 text-left font-semibold ring-2 transition-colors ${on ? "bg-ink text-paper ring-ink" : "bg-paper ring-line hover:ring-ink/30"}`}>
-      {children}
-    </motion.button>
-  );
-}
+const empty: Draft = { firstName: "", lastName: "", email: "", phone: "", birthDate: "", birthCity: "", birthCountry: "France", address: "", isBusinessOwner: false };
 
 export default function Inscription() {
   const router = useRouter();
@@ -67,7 +58,7 @@ export default function Inscription() {
     { valid: d.firstName && d.lastName && /.+@.+\..+/.test(d.email) && d.phone.length >= 6 && (!PROD || !!me) },
     { valid: d.birthDate && d.birthCity },
     { valid: d.address.length > 5 },
-    { valid: !!d.situation },
+    { valid: true },
     { valid: true },
     { valid: PROD ? !!kycFile || later : kyc === "done" },
     { valid: true },
@@ -205,13 +196,6 @@ export default function Inscription() {
                   <div>
                     <Eyebrow>Votre famille</Eyebrow>
                     <h1 className="mt-2 text-[2rem] font-semibold">Qui compte pour vous ?</h1>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {SITUATIONS.map((s) => (
-                      <Choice key={s} on={d.situation === s} onClick={() => up("situation")(s)}>
-                        {s}
-                      </Choice>
-                    ))}
                   </div>
                   <div className="space-y-2.5">
                     <AnimatePresence initial={false}>

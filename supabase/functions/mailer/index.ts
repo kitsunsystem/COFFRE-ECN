@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   let sent = 0, failed = 0;
   for (const m of batch ?? []) {
     try {
-      const id = dry ? `dry-${m.id}` : await sendBrevo({ email: m.to_email, name: m.to_name ?? undefined }, m.template as TemplateId, m.data ?? {});
+      const id = dry ? `dry-${m.id}` : await sendBrevo({ email: m.to_email, name: m.to_name ?? undefined }, m.template as TemplateId, m.data ?? {}, m.lang);
       if (dry) console.log("mailer (dry run)", m.template, m.to_email);
       await db.from("outbox").update({ status: "sent", sent_at: new Date().toISOString(), provider_id: id, last_error: null }).eq("id", m.id);
       sent++;

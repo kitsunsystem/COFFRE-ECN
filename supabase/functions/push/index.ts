@@ -2,6 +2,7 @@
 // the request). Android: Firebase Cloud Messaging (HTTP v1, service account). iOS: APNs (token key .p8).
 // Without those secrets nothing is sent: the request still waits in the app. The notification never carries a key.
 import { admin, caller, cors, json } from "../_shared/server.ts";
+import { pushMessage } from "../_shared/templates.ts";
 
 type Message = { title: string; body: string; request: string };
 
@@ -65,8 +66,8 @@ Deno.serve(async (req) => {
   const { data: r } = await db.from("device_requests").select("id, name, kind, status, created_at").eq("id", request).eq("user_id", user.id).maybeSingle();
   if (!r || r.kind !== "open" || r.status !== "pending" || Date.now() - Date.parse(r.created_at) > 60_000) return json({ sent: 0 }, 200, h);
   const { data: tokens } = await db.from("push_tokens").select("token, platform").eq("user_id", user.id);
-  // shortcut: notification in French only, like the e-mails; send the person's language once it is stored on the account.
-  const m: Message = { title: "Ouverture du Coffre demandée", body: `${r.name} attend votre accord. Touchez pour répondre.`, request: r.id };
+  const { data: profile } = await db.from("profiles").select("lang").eq("id", user.id).maybeSingle();
+  const m: Message = { ...pushMessage(r.name, profile?.lang ?? user.user_metadata?.lang ?? "fr"), request: r.id };
   let sent = 0;
   for (const t of tokens ?? []) {
     const res = await (t.platform === "android" ? fcm(t.token, m) : apns(t.token, m)).catch((e) => (console.error(e), false));

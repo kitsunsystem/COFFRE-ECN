@@ -48,7 +48,7 @@ const weak = await createClient(URL_, ANON, { auth: { persistSession: false } })
 assert.ok(weak.error, "mot de passe trop faible accepté");
 ok("connexion par e-mail et mot de passe (3 comptes) ; mot de passe faible refusé");
 
-await must(claire.c.from("profiles").insert({ id: claire.id, first_name: "Claire", last_name: "Durand", birth_date: "1972-03-14", birth_city: "Lyon" }), "profil");
+await must(claire.c.from("profiles").insert({ id: claire.id, first_name: "Claire", last_name: "Durand", birth_date: "1972-03-14", birth_city: "Lyon", address: "12 rue des Lilas, Lyon" }), "profil");
 const [profile] = await must(claire.c.from("profiles").select("kyc, email"), "lecture profil");
 assert.equal(profile.kyc, "a_faire");
 assert.equal(profile.email, mail("claire"));
@@ -60,7 +60,7 @@ await must(claire.c.from("people").insert({ id: pMarc, owner_id: claire.id, firs
 await must(claire.c.from("guarantors").insert({ owner_id: claire.id, person_id: pMarc, role: "Prévenir les enfants" }), "garant");
 // Exactly what the app sends when the role is edited (upsert).
 await must(claire.c.from("guarantors").upsert({ owner_id: claire.id, person_id: pMarc, role: "Prévenir les enfants et le notaire" }), "garant modifié");
-await must(claire.c.from("people").update({ phone: "0612345678" }).eq("id", pMarc), "proche modifié");
+await must(claire.c.from("people").update({ relation: "Époux" }).eq("id", pMarc), "proche modifié");
 assert.equal((await must(eve.c.from("people").select("*"), "eve")).length, 0);
 ok("famille et garant ; invisibles pour un inconnu");
 

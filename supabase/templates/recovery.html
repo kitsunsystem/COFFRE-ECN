@@ -1,9 +1,20 @@
-<div style="background:#f7f2e9;padding:32px 16px">
+{{ $l := printf "%v" .Data.lang }}<div style="background:#f7f2e9;padding:32px 16px">
   <div style="max-width:520px;margin:auto;background:#fffdf9;border-radius:24px;padding:32px">
     <div style="font:600 13px Arial;letter-spacing:.2em;color:#9c7a34;text-transform:uppercase">Sillage</div>
+    {{ if eq $l "en" }}
+    <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Change your password</h1>
+    <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Type this code in the app, then choose your new password. It is valid for one hour.</p>
+    {{ else if eq $l "es" }}
+    <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Cambie su contraseña</h1>
+    <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Escriba este código en la aplicación y elija su nueva contraseña. Es válido durante una hora.</p>
+    {{ else if eq $l "ca" }}
+    <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Canvieu la contrasenya</h1>
+    <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Escriviu aquest codi a l'aplicació i trieu la vostra nova contrasenya. És vàlid durant una hora.</p>
+    {{ else }}
     <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Changer de mot de passe</h1>
     <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Tapez ce code dans l'application, puis choisissez votre nouveau mot de passe. Il est valable une heure.</p>
+    {{ end }}
     <p style="margin:18px 0;font:700 34px/1 Arial,sans-serif;letter-spacing:.3em;color:#0f1b2d">{{ .Token }}</p>
-    <p style="margin:0;font:14px/1.6 Arial,sans-serif;color:#6b778a">Vous n'avez rien demandé ? Ignorez cet e-mail : votre mot de passe ne change pas sans ce code. Votre Coffre, lui, ne s'ouvre jamais avec un mot de passe.</p>
+    <p style="margin:0;font:14px/1.6 Arial,sans-serif;color:#6b778a">{{ if eq $l "en" }}Did not ask for anything? Ignore this e-mail: your password does not change without this code. Your Vault never opens with a password.{{ else if eq $l "es" }}¿No ha pedido nada? Ignore este correo: su contraseña no cambia sin este código. Su Cofre nunca se abre con una contraseña.{{ else if eq $l "ca" }}No heu demanat res? Ignoreu aquest correu: la contrasenya no canvia sense aquest codi. El vostre Cofre no s'obre mai amb una contrasenya.{{ else }}Vous n'avez rien demandé ? Ignorez cet e-mail : votre mot de passe ne change pas sans ce code. Votre Coffre, lui, ne s'ouvre jamais avec un mot de passe.{{ end }}</p>
   </div>
 </div>

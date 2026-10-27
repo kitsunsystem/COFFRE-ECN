@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+// A production build (Supabase keys present) with simulated cards would let anyone open a Coffre: refused.
+if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_CARD_DRIVER === "demo")
+  throw new Error("Build refusé : NEXT_PUBLIC_CARD_DRIVER=demo est réservé aux tests, jamais à une version de production.");
+
 // Static export: the same build runs as a website and, wrapped with Capacitor, as the iOS/Android app (NFC needs a native app on iPhone).
 const nextConfig: NextConfig = {
   output: "export",

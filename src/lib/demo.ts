@@ -9,7 +9,7 @@ export async function seedDemo() {
   const st = useApp.getState();
   st.reset();
   lock();
-  const marc: Person = { id: uid(), firstName: "Marc", lastName: "Durand", relation: "Conjoint", email: "marc.durand@exemple.fr", phone: "06 12 34 56 78" };
+  const marc: Person = { id: uid(), firstName: "Marc", lastName: "Durand", relation: "Conjoint", email: "marc.durand@exemple.fr" };
   const lea: Person = { id: uid(), firstName: "Léa", lastName: "Durand", relation: "Enfant", email: "lea.durand@exemple.fr" };
   const paul: Person = { id: uid(), firstName: "Paul", lastName: "Durand", relation: "Enfant", email: "paul.durand@exemple.fr" };
   const sophie: Person = { id: uid(), firstName: "Sophie", lastName: "Martin", relation: "Ami", email: "sophie.martin@exemple.fr" };
@@ -19,7 +19,7 @@ export async function seedDemo() {
   // Every beneficiary has a pack of 2 cards.
   const packs = [marc, lea, paul].flatMap((p) => [card(p.id, `${p.firstName} ${p.lastName}`, true), card(p.id, `${p.firstName} ${p.lastName}`, true)]);
   st.set({
-    account: { firstName: "Claire", lastName: "Durand", email: "claire.durand@exemple.fr", phone: "06 98 76 54 32", birthDate: "1972-03-14", birthCity: "Lyon", birthCountry: "France", address: "12 rue des Lilas\n69003 Lyon", situation: "Marié(e)", isBusinessOwner: true, kyc: "verifie", createdAt: t - 12 * 86_400_000 },
+    account: { firstName: "Claire", lastName: "Durand", email: "claire.durand@exemple.fr", phone: "06 98 76 54 32", birthDate: "1972-03-14", birthCity: "Lyon", birthCountry: "France", address: "12 rue des Lilas\n69003 Lyon", isBusinessOwner: true, kyc: "verifie", createdAt: t - 12 * 86_400_000 },
     people: [marc, lea, paul, sophie],
     cards: [...owner, ...packs],
     guarantors: [

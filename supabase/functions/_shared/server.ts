@@ -29,8 +29,8 @@ export async function enqueue(db: SupabaseClient, to: { email?: string | null; n
   if (error) throw new Error(`outbox: ${error.message}`);
 }
 
-export async function sendBrevo(to: { email: string; name?: string }, template: TemplateId, data: Record<string, string> = {}) {
-  const e = render(template, data);
+export async function sendBrevo(to: { email: string; name?: string }, template: TemplateId, data: Record<string, string> = {}, lang = "fr") {
+  const e = render(template, data, lang);
   const r = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": env("BREVO_API_KEY"), "content-type": "application/json", accept: "application/json" },

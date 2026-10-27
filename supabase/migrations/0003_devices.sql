@@ -111,7 +111,7 @@ begin
     delete from trusted_devices where user_id = r.user_id and pk = r.pk;
     insert into trusted_devices (user_id, name, pk) values (r.user_id, r.name, r.pk) returning id into d;
     perform enqueue_email((select email from auth.users where id = r.user_id), (select first_name from profiles where id = r.user_id), 'nouvel-appareil',
-      jsonb_build_object('name', r.name, 'date', to_char(now() at time zone 'Europe/Paris', 'DD/MM/YYYY à HH24:MI')));
+      jsonb_build_object('name', r.name, 'date', now()));
   else
     select id into d from trusted_devices where id = r.device_id and expires_at > now();
     if d is null then raise exception 'appareil à revalider'; end if;

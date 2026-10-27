@@ -4,11 +4,12 @@ import { CircleAlert, Gift, Plus, RefreshCw, Truck } from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Activation, PACK_WARNING, type ActivationMode } from "@/components/activation";
-import { Badge, Button, Card, Notice, PageTitle, Sheet } from "@/components/ui";
+import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { NfcCard } from "@/components/visuals";
-import { declareLost, orderOwnerCards, orderPack, orderReplacement } from "@/lib/api";
+import { declareLost, orderOwnerCards, orderPack, orderReplacement, saveAccount } from "@/lib/api";
 import { OFFER } from "@/lib/config";
 import { PROD } from "@/lib/env";
+import { isNative } from "@/lib/native";
 import { ownerCards, packOf, personName, useApp, type Card as CardT, type CardStatus } from "@/lib/store";
 
 const STATUS: Record<CardStatus, { label: string; tone: "ink" | "gold" | "sage" | "coral" | "mist" }> = {
@@ -38,6 +39,10 @@ export default function Cartes() {
     setBusy(false);
     return ok;
   };
+  // The postal address is erased once the cards are shipped: asked again for the next order.
+  const [pending, setPending] = useState<(() => Promise<boolean>) | null>(null);
+  const [address, setAddress] = useState("");
+  const order = (fn: () => Promise<boolean>) => (s.account.address.trim() ? run(fn) : (setPending(() => fn), Promise.resolve(false)));
 
   // Demo only: stands in for the delivery of the cards.
   const advance = (cards: CardT[]) => s.set((x) => ({ cards: x.cards.map((y) => (cards.some((c) => c.id === y.id) && NEXT[y.status] ? { ...y, status: NEXT[y.status]! } : y)) }));
@@ -51,7 +56,7 @@ export default function Cartes() {
       )}
       {/* A replacement only while the set is short of a card (3 for the owner, 2 in a pack). */}
       {c.status === "perdue" && s.cards.filter((x) => x.holderId === c.holderId && x.status !== "perdue").length < (c.holderId === "owner" ? OFFER.ownerCards : OFFER.packCards) && (
-        <button disabled={busy} onClick={() => run(() => orderReplacement(c))} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[0.8rem] font-semibold ring-1 ring-line">
+        <button disabled={busy} onClick={() => order(() => orderReplacement(c))} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[0.8rem] font-semibold ring-1 ring-line">
           <RefreshCw className="h-3.5 w-3.5" /> Remplacer
         </button>
       )}
@@ -73,8 +78,9 @@ export default function Cartes() {
           </div>
           <h2 className="text-[1.5rem] font-semibold">Vos {OFFER.ownerCards} cartes sont incluses</h2>
           <p className="mx-auto mt-2 max-w-sm text-ink-soft">Elles ouvrent toutes les trois votre Coffre. Si l&apos;une se perd, les deux autres suffisent.</p>
-          <p className="mt-2 text-[0.9rem] text-mist">Livraison à : {s.account.address.replace(/\n/g, ", ")}</p>
-          <Button className="mt-6" variant="gold" full disabled={busy} icon={<Gift className="h-5 w-5" />} onClick={() => run(orderOwnerCards)}>
+          {s.account.address.trim() && <p className="mt-2 text-[0.9rem] text-mist">Livraison à : {s.account.address.replace(/\n/g, ", ")}</p>}
+          <p className="mt-1 text-[0.85rem] text-mist">Votre adresse est effacée dès l&apos;envoi des cartes.</p>
+          <Button className="mt-6" variant="gold" full disabled={busy} icon={<Gift className="h-5 w-5" />} onClick={() => order(orderOwnerCards)}>
             Commander mes cartes
           </Button>
         </Card>
@@ -171,7 +177,9 @@ export default function Cartes() {
 
       <Sheet open={assign} onClose={() => setAssign(false)} title="Un pack de 2 cartes pour qui ?">
         <p className="mb-4 text-ink-soft">
-          Pack bénéficiaire : {OFFER.packPrice ? `${OFFER.packPrice} €` : "inclus ou payant, à décider"}. {PACK_WARNING}
+          {/* No price in the apps (store rules). */}
+          {!isNative() && <>Pack bénéficiaire : {OFFER.packPrice ? `${OFFER.packPrice} €` : "inclus ou payant, à décider"}. </>}
+          {PACK_WARNING}
         </p>
         <div className="space-y-2.5">
           {s.people
@@ -181,7 +189,8 @@ export default function Cartes() {
                 key={p.id}
                 disabled={busy}
                 onClick={async () => {
-                  if (await run(() => orderPack(p.id))) setAssign(false);
+                  if (await order(() => orderPack(p.id))) setAssign(false);
+                  else if (!s.account.address.trim()) setAssign(false);
                 }}
                 className="flex w-full items-center justify-between rounded-2xl bg-paper p-4 text-left ring-1 ring-line hover:ring-ink/30"
               >
@@ -195,6 +204,26 @@ export default function Cartes() {
               </button>
             ))}
         </div>
+      </Sheet>
+
+      <Sheet open={!!pending} onClose={() => setPending(null)} title="Où livrer les cartes ?">
+        <p className="mb-4 text-ink-soft">Votre adresse ne sert qu&apos;à l&apos;envoi : elle est effacée dès que les cartes sont parties.</p>
+        <Field label="Adresse postale" multiline value={address} onChange={setAddress} placeholder={"12 rue des Lilas\n75011 Paris"} />
+        <Button
+          className="mt-5"
+          variant="gold"
+          full
+          disabled={busy || address.trim().length < 6}
+          icon={<Truck className="h-5 w-5" />}
+          onClick={async () => {
+            const fn = pending!;
+            if (!(await run(() => saveAccount({ ...s.account, address: address.trim() })))) return;
+            setPending(null);
+            await run(fn);
+          }}
+        >
+          Commander
+        </Button>
       </Sheet>
 
       <Sheet open={!!lost} onClose={() => setLost(null)} title="Désactiver cette carte ?">

@@ -119,3 +119,12 @@ Un ordinateur peut ouvrir votre Coffre	A computer can open your Vault	Un ordenad
 « {0} » a été approuvé depuis votre téléphone le {1}. Il pourra demander l'ouverture du Coffre, toujours avec votre carte et votre accord sur le téléphone.	"{0}" was approved from your phone on {1}. It will be able to ask to open the Vault, always with your card and your approval on the phone.	«{0}» se aprobó desde su teléfono el {1}. Podrá pedir la apertura del Cofre, siempre con su tarjeta y su aprobación en el teléfono.	«{0}» es va aprovar des del vostre telèfon el {1}. Podrà demanar l'obertura del Cofre, sempre amb la vostra targeta i la vostra aprovació al telèfon.
 Ce n'est pas vous ? Retirez-le tout de suite dans Compte › Appareils de confiance, puis changez votre mot de passe.	Wasn't you? Remove it at once in Account › Trusted devices, then change your password.	¿No ha sido usted? Retírelo enseguida en Cuenta › Dispositivos de confianza y cambie su contraseña.	No heu estat vós? Retireu-lo de seguida a Compte › Dispositius de confiança i canvieu la contrasenya.
 Mes appareils	My devices	Mis dispositivos	Els meus dispositius
+
+# Données minimisées (adresse effacée après l'envoi), notification multilingue.
+Votre adresse est effacée dès l'envoi des cartes.	Your address is erased as soon as the cards are sent.	Su dirección se borra en cuanto se envían las tarjetas.	La vostra adreça s'esborra tan bon punt s'envien les targetes.
+Pack bénéficiaire : {0}.	Beneficiary pack: {0}.	Pack de beneficiario: {0}.	Pack de beneficiari: {0}.
+Où livrer les cartes ?	Where should we deliver the cards?	¿Dónde entregamos las tarjetas?	On lliurem les targetes?
+Votre adresse ne sert qu'à l'envoi : elle est effacée dès que les cartes sont parties.	Your address is only used for delivery: it is erased as soon as the cards have been sent.	Su dirección solo sirve para el envío: se borra en cuanto salen las tarjetas.	La vostra adreça només serveix per a l'enviament: s'esborra tan bon punt surten les targetes.
+Commander	Order	Pedir	Demanar
+Ouverture du Coffre demandée	Vault opening requested	Apertura del Cofre solicitada	Obertura del Cofre sol·licitada
+{0} attend votre accord. Touchez pour répondre.	{0} is waiting for your approval. Tap to answer.	{0} espera su aprobación. Toque para responder.	{0} espera la vostra aprovació. Toqueu per respondre.

@@ -1,6 +1,7 @@
 // Every change the app makes goes through here. Demo: the local store only. Production: Supabase first (the database
 // checks the rules), then the local store with what the server accepted. Errors are shown to the person, never swallowed.
 import { CONCIERGE, OFFER } from "./config";
+import { currentLang } from "./i18n";
 import { PROD } from "./env";
 import { declare, type Moment, type ProcedureKind } from "./rules";
 import { envelopeRow, itemRow, personRow, profileRow, toAccount, toCard, toCase, toDevice, toDeviceRequest, toEnvelope, toItem, toPerson, toProcedure, toReminder, toRights, toTrust } from "./rows";
@@ -42,7 +43,8 @@ function authError(e: { message: string }) {
 
 // New account: the address is confirmed with the 6-digit code it receives (verifyCode).
 export async function signUp(email: string, password: string) {
-  const { data, error } = await sb().auth.signUp({ email: clean(email), password });
+  // The language goes with the account: the confirmation and reset e-mails are written in it.
+  const { data, error } = await sb().auth.signUp({ email: clean(email), password, options: { data: { lang: currentLang() } } });
   if (error) throw new Error(authError(error));
   // An address that already has an account receives nothing (Supabase hides it on purpose).
   if (data.user && !data.user.identities?.length) throw new Error("Un compte existe déjà avec cette adresse : connectez-vous.");
@@ -169,7 +171,7 @@ export async function createProfile(draft: Omit<Account, "kyc" | "createdAt">, p
     return;
   }
   const id = me();
-  await q(sb().from("profiles").insert(profileRow(id, draft)));
+  await q(sb().from("profiles").insert(profileRow(id, draft, currentLang())));
   if (people.length) await q(sb().from("people").insert(people.map((p) => personRow(p, id))));
   await loadAll();
 }
@@ -191,7 +193,7 @@ const ext = (f: File) => (f.name.split(".").pop() || "bin").toLowerCase().replac
 export const saveAccount = (a: Account) =>
   attempt(async () => {
     if (PROD) {
-      await q(sb().from("profiles").update({ phone: a.phone, address: a.address, situation: a.situation, is_business_owner: a.isBusinessOwner }).eq("id", me()));
+      await q(sb().from("profiles").update({ phone: a.phone, address: a.address, is_business_owner: a.isBusinessOwner }).eq("id", me()));
       const old = st().account?.email;
       if (old && a.email.trim().toLowerCase() !== old.toLowerCase()) {
         const { error } = await sb().auth.updateUser({ email: a.email.trim().toLowerCase() });
@@ -202,6 +204,13 @@ export const saveAccount = (a: Account) =>
     }
     st().set({ account: a });
   });
+
+// E-mails and notifications follow the language chosen in the app (the account's, and the profile's once it exists).
+export async function saveLang(lang: string) {
+  if (!PROD || !st().me) return;
+  await sb().auth.updateUser({ data: { lang } }).catch(console.error);
+  if (st().account) await sb().from("profiles").update({ lang }).eq("id", me());
+}
 
 export const setAssistantVoice = (assistantVoice: boolean) =>
   attempt(async () => {
@@ -218,8 +227,8 @@ export const savePerson = (p: Person) =>
     // Not an upsert: the account link (user_id) and the owner of a relative can never be written by the app.
     if (PROD && isNew) await q(sb().from("people").insert(personRow(person, me())));
     if (PROD && !isNew) {
-      const { first_name, last_name, relation, email, phone } = personRow(person, me());
-      await q(sb().from("people").update({ first_name, last_name, relation, email, phone }).eq("id", person.id).eq("owner_id", me()));
+      const { first_name, last_name, relation, email } = personRow(person, me());
+      await q(sb().from("people").update({ first_name, last_name, relation, email }).eq("id", person.id).eq("owner_id", me()));
     }
     st().set((x) => ({ people: isNew ? [...x.people, person] : x.people.map((y) => (y.id === person.id ? person : y)) }));
   });
@@ -372,7 +381,7 @@ export const declareAsGuarantor = (ownerId: string | null, kind: ProcedureKind, 
     }
     const p = declare(kind, "garant", by, now(), { note: note || undefined });
     st().set((x) => ({ procedures: [p, ...x.procedures] }));
-    if (p.kind === "coup_dur") st().email(st().account!.email, "coup-dur-declare", { declaredBy: by, endsAt: new Date(p.endsAt!).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" }) });
+    if (p.kind === "coup_dur") st().email(st().account!.email, "coup-dur-declare", { declaredBy: by, endsAt: new Date(p.endsAt!).toISOString() });
   });
 
 // A beneficiary hands in the death certificate and their ID: they go to the verification team, never to the Coffre.
@@ -496,7 +505,7 @@ export const devices = {
       const dev: DemoDevice = { id: uid(), name: r.name, pk: r.pk, createdAt: Date.now(), expiresAt: Date.now() + 90 * 86_400_000 };
       d.devices = [...d.devices.filter((x) => x.pk !== r.pk), dev];
       r.deviceId = dev.id;
-      st().email(st().account?.email ?? st().me?.email ?? "", "nouvel-appareil", { name: r.name, date: new Date().toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) });
+      st().email(st().account?.email ?? st().me?.email ?? "", "nouvel-appareil", { name: r.name, date: new Date().toISOString() });
     } else if (!d.devices.some((x) => x.id === r.deviceId && x.expiresAt > Date.now())) throw new Error("Appareil à revalider.");
     Object.assign(r, { status: "approved", sealed });
     saveDemoDevices(d);

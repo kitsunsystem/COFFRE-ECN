@@ -15,6 +15,7 @@ import { rise, stagger } from "@/components/visuals";
 import { deleteAccount, openBillingPortal, openCheckout, saveAccount, setAssistantVoice, signOut, submitKyc } from "@/lib/api";
 import { LAUNCH, OFFER, SUPPORT_EMAIL } from "@/lib/config";
 import { PROD } from "@/lib/env";
+import { isNative } from "@/lib/native";
 import { graceEnd } from "@/lib/rules";
 import { toast, useApp, type Account } from "@/lib/store";
 import { lock } from "@/lib/vault";
@@ -29,6 +30,7 @@ export default function Compte() {
   const [mail, setMail] = useState<string | null>(null);
   const [password, setPassword] = useState(false);
   const a = s.account;
+  const app = isNative();
   const packs = new Set(s.cards.filter((c) => c.holderId !== "owner").map((c) => c.holderId)).size;
   const opened = s.outbox.find((m) => m.id === mail);
 
@@ -49,7 +51,6 @@ export default function Compte() {
               ["Téléphone", a.phone],
               ["Naissance", `${new Date(a.birthDate).toLocaleDateString("fr-FR")} à ${a.birthCity} (${a.birthCountry})`],
               ["Adresse", a.address.replace(/\n/g, ", ")],
-              ["Situation", a.situation],
             ].map(([k, v]) => (
               <div key={k} className="flex gap-3">
                 <dt className="w-28 shrink-0 text-mist">{k}</dt>
@@ -109,30 +110,35 @@ export default function Compte() {
             </div>
             <Badge tone={s.billing.status === "a_jour" ? "sage" : "coral"}>{s.billing.status === "a_jour" ? "À jour" : s.billing.status === "impaye" ? "Impayé" : "Effacé"}</Badge>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-            <div className="rounded-2xl bg-ink/[0.04] p-3">
-              <div className="font-display text-[1.6rem] font-semibold">{OFFER.price ? `${OFFER.price} €` : "—"}</div>
-              <div className="text-[0.8rem] text-mist">par an</div>
-            </div>
+          {/* Apple and Google forbid showing a price or a way to pay outside their stores: the app only shows the status. */}
+          <div className={`mt-4 grid gap-3 text-center ${app ? "grid-cols-1" : "grid-cols-2"}`}>
+            {!app && (
+              <div className="rounded-2xl bg-ink/[0.04] p-3">
+                <div className="font-display text-[1.6rem] font-semibold">{OFFER.price ? `${OFFER.price} €` : "—"}</div>
+                <div className="text-[0.8rem] text-mist">par an</div>
+              </div>
+            )}
             <div className="rounded-2xl bg-ink/[0.04] p-3">
               <div className="font-display text-[1.6rem] font-semibold">{packs}</div>
               <div className="text-[0.8rem] text-mist">pack{packs > 1 ? "s" : ""} bénéficiaire{packs > 1 ? "s" : ""}</div>
             </div>
           </div>
-          {s.phase === "decouverte" && <p className="mt-3 text-[0.85rem] text-mist">Phase découverte{LAUNCH.discoveryPrice ? ` (${LAUNCH.discoveryPrice} €)` : ""} : tout est ouvert sauf l&apos;ajout de documents. Lancement officiel prévu {LAUNCH.plannedDate ?? "à une date communiquée prochainement"}.</p>}
-          {!OFFER.price && <p className="mt-2 text-[0.85rem] text-mist">Tarifs communiqués au lancement.</p>}
+          {s.phase === "decouverte" && <p className="mt-3 text-[0.85rem] text-mist">Phase découverte{LAUNCH.discoveryPrice && !app ? ` (${LAUNCH.discoveryPrice} €)` : ""} : tout est ouvert sauf l&apos;ajout de documents. Lancement officiel prévu {LAUNCH.plannedDate ?? "à une date communiquée prochainement"}.</p>}
+          {!OFFER.price && !app && <p className="mt-2 text-[0.85rem] text-mist">Tarifs communiqués au lancement.</p>}
           {s.billing.status === "impaye" && s.billing.since && (
             <div className="mt-4">
               <Notice tone="coral">
                 <p>Paiement non reçu. Sans régularisation avant le {new Date(graceEnd(s.billing.since)).toLocaleDateString("fr-FR", { dateStyle: "long" })}, votre Coffre sera effacé définitivement.</p>
-                <Button className="mt-3" variant="danger" onClick={() => (PROD ? openBillingPortal() : s.set({ billing: { status: "a_jour" } }))}>
-                  {PROD ? "Régulariser maintenant" : "Régulariser (démo)"}
-                </Button>
+                {!app && (
+                  <Button className="mt-3" variant="danger" onClick={() => (PROD ? openBillingPortal() : s.set({ billing: { status: "a_jour" } }))}>
+                    {PROD ? "Régulariser maintenant" : "Régulariser (démo)"}
+                  </Button>
+                )}
               </Notice>
             </div>
           )}
           {s.billing.status === "efface" && <p className="mt-3 text-[0.88rem] font-semibold text-coral">Le délai de grâce est dépassé : le contenu du Coffre a été effacé.</p>}
-          {PROD && OFFER.price && (
+          {PROD && OFFER.price && !app && (
             <div className="mt-4 grid gap-2">
               <Button full variant="gold" icon={<CreditCard className="h-5 w-5" />} onClick={() => openCheckout()}>
                 Souscrire ou renouveler
@@ -293,7 +299,6 @@ function AccountForm({ value, onSave }: { value: Account; onSave: (a: Account) =
       <Field label="Téléphone" type="tel" inputMode="tel" value={a.phone} onChange={up("phone")} />
       <Field label="E-mail" type="email" inputMode="email" value={a.email} onChange={up("email")} />
       <Field label="Adresse" multiline value={a.address} onChange={up("address")} />
-      <Field label="Situation familiale" value={a.situation} onChange={up("situation")} />
       <Toggle checked={a.isBusinessOwner} onChange={(isBusinessOwner) => setA({ ...a, isBusinessOwner })} label="Je dirige une entreprise" hint="Ajoute la rubrique « Entreprise » au Coffre" />
       <p className="text-[0.85rem] text-mist">Nom, prénom et naissance sont vérifiés avec votre identité : pour les corriger, contactez-nous.</p>
       <Button full variant="gold" onClick={() => onSave(a)}>

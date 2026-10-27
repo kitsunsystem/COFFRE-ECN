@@ -4,6 +4,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Check, ChevronDown, Globe } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { saveLang } from "@/lib/api";
 import { currentLang, LANGS, setLang, type Lang } from "@/lib/i18n";
 
 // The language only changes through a reload: nothing to subscribe to.
@@ -29,7 +30,7 @@ export function LangPicker({ compact }: { compact?: boolean }) {
 
   const choose = (l: Lang) => {
     setOpen(false);
-    if (l !== lang) setLang(l);
+    if (l !== lang) void saveLang(l).finally(() => setLang(l));
   };
 
   if (compact)

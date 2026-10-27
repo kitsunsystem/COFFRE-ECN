@@ -55,16 +55,17 @@ max_frequency = "60s"
 otp_length = 6
 otp_expiry = 3600
 
+# Written in the language of the account (user metadata "lang", sent at sign-up and when it changes in the app).
 [auth.email.template.confirmation]
-subject = "Confirmez votre adresse"
+subject = '{{ $l := printf "%v" .Data.lang }}{{ if eq $l "en" }}Confirm your address{{ else if eq $l "es" }}Confirme su dirección{{ else if eq $l "ca" }}Confirmeu la vostra adreça{{ else }}Confirmez votre adresse{{ end }}'
 content_path = "./supabase/templates/code.html"
 
 [auth.email.template.recovery]
-subject = "Votre code pour changer de mot de passe"
+subject = '{{ $l := printf "%v" .Data.lang }}{{ if eq $l "en" }}Your code to change your password{{ else if eq $l "es" }}Su código para cambiar la contraseña{{ else if eq $l "ca" }}El vostre codi per canviar la contrasenya{{ else }}Votre code pour changer de mot de passe{{ end }}'
 content_path = "./supabase/templates/recovery.html"
 
 [auth.email.template.email_change]
-subject = "Confirmez votre nouvelle adresse"
+subject = '{{ $l := printf "%v" .Data.lang }}{{ if eq $l "en" }}Confirm your new address{{ else if eq $l "es" }}Confirme su nueva dirección{{ else if eq $l "ca" }}Confirmeu la vostra nova adreça{{ else }}Confirmez votre nouvelle adresse{{ end }}'
 content_path = "./supabase/templates/email-change.html"
 
 [edge_runtime]

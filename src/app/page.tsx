@@ -2,12 +2,14 @@
 import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
 import { ArrowRight, BadgeCheck, Bell, CalendarClock, ChevronRight, ConciergeBell, EyeOff, FileText, HandHeart, HeartPulse, Lock, ShieldCheck, Siren, Sparkles, UserRound, Users } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { LangPicker } from "@/components/lang-picker";
 import { ThemePicker } from "@/components/theme-picker";
 import { Button, Eyebrow } from "@/components/ui";
 import { Aurora, Emblem, Logo, NfcCard, Reveal, rise, stagger, TapDemo } from "@/components/visuals";
 import { APP_NAME, LAUNCH, OFFER } from "@/lib/config";
+import { isNative } from "@/lib/native";
 import { moment, type Moment } from "@/lib/rules";
 
 function FloatChip({ icon: I, text, className, delay }: { icon: typeof Bell; text: string; className: string; delay: number }) {
@@ -390,6 +392,11 @@ function Faq() {
 }
 
 export default function Landing() {
+  const router = useRouter();
+  // The app opens on the sign-in, not on the website's sales page (store rules: no price, no outside payment).
+  useEffect(() => {
+    if (isNative()) router.replace("/connexion");
+  }, [router]);
   return (
     <>
       <Hero />

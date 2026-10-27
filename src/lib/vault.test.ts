@@ -14,7 +14,7 @@ let file: FileMeta;
 
 beforeAll(async () => {
   useApp.getState().set({
-    account: { firstName: "Claire", lastName: "Durand", email: "c@x.fr", phone: "", birthDate: "1972-03-14", birthCity: "Lyon", birthCountry: "France", address: "", situation: "", isBusinessOwner: false, kyc: "verifie", createdAt: 0 },
+    account: { firstName: "Claire", lastName: "Durand", email: "c@x.fr", phone: "", birthDate: "1972-03-14", birthCity: "Lyon", birthCountry: "France", address: "", isBusinessOwner: false, kyc: "verifie", createdAt: 0 },
     people: [{ id: "marc", firstName: "Marc", lastName: "Durand", relation: "Conjoint" }],
     cards: [card("c1", "owner"), card("c2", "owner"), card("m1", "marc")],
     phase: "lancement",

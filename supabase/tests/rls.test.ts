@@ -18,7 +18,7 @@ const outbox = async (template: string) => (await db.query<{ to_email: string }>
 
 describe("profil", () => {
   it("creates one's own profile, with KYC and billing forced by the server", async () => {
-    await claire(`insert into profiles (id, first_name, last_name, birth_date, birth_city) values ($1, 'Claire', 'Durand', '1972-03-14', 'Lyon')`, [ids.claire]);
+    await claire(`insert into profiles (id, first_name, last_name, birth_date, birth_city, address) values ($1, 'Claire', 'Durand', '1972-03-14', 'Lyon', '12 rue des Lilas, Lyon')`, [ids.claire]);
     const [p] = await claire("select email, kyc, billing_status from profiles where id = $1", [ids.claire]);
     expect(p).toEqual({ email: "claire@exemple.fr", kyc: "a_faire", billing_status: "a_jour" });
     expect(await outbox("bienvenue")).toContain("claire@exemple.fr");
@@ -84,7 +84,8 @@ describe("famille et garants", () => {
 });
 
 describe("cartes", () => {
-  it("orders the 3 included cards once, and a pack of 2 per beneficiary", async () => {
+  it("orders the 3 included cards once, and a pack of 2 per beneficiary; never without a delivery address", async () => {
+    await refused(as(db, ids.eve, "select * from order_owner_cards()"), /adresse de livraison manquante/);
     expect(await claire("select * from order_owner_cards()")).toHaveLength(3);
     await refused(claire("select * from order_owner_cards()"), /déjà commandées/);
     const pack = await claire<{ id: string; extra: boolean }>("select * from order_pack($1)", [ids.pMarc]);
@@ -126,6 +127,14 @@ describe("cartes", () => {
     await refused(claire("select staff_card_status($1, 'en_route')", [ids.c2]), /interdit/);
     await as(db, ids.logistique, "select staff_card_status($1, 'en_route')", [ids.c2]);
     expect((await claire("select status from cards where id = $1", [ids.c2]))[0].status).toBe("en_route");
+  });
+
+  it("the postal address is erased once nothing is left to ship", async () => {
+    const address = async () => (await claire<{ address: string | null }>("select address from profiles where id = $1", [ids.claire]))[0].address;
+    expect(await address()).not.toBeNull(); // other cards still waiting
+    for (const { id } of await claire<{ id: string }>("select id from cards where status = 'commandee'")) await as(db, ids.logistique, "select staff_card_status($1, 'en_route')", [id]);
+    expect(await address()).toBeNull();
+    await claire("update profiles set address = '12 rue des Lilas, Lyon' where id = $1", [ids.claire]); // given again for the next order
   });
 });
 
@@ -333,5 +342,19 @@ describe("clés et départs", () => {
     await claire("delete from people where id = $1", [ids.pLea]);
     expect(await as(db, ids.lea, "select * from cards")).toHaveLength(0);
     expect(await as(db, ids.lea, "select * from vault_items")).toHaveLength(0);
+  });
+});
+
+describe("langue des e-mails", () => {
+  it("goes out in the reader's language, or in the owner's for a relative without an account", async () => {
+    await claire("update profiles set lang = 'es' where id = $1", [ids.claire]);
+    await refused(claire("update profiles set lang = 'de' where id = $1", [ids.claire]), /check/);
+    const [{ id }] = await claire<{ id: string }>(`insert into people (owner_id, first_name, last_name, relation, email) values ($1, 'Ana', 'Ruiz', 'Ami', 'ana@exemple.es') returning id`, [ids.claire]);
+    await claire("insert into guarantors (owner_id, person_id, role) values ($1, $2, 'Prévenir')", [ids.claire, id]);
+    await db.query("insert into outbox (to_email, template) values ('claire@exemple.fr', 'a-jour')");
+    const lang = async (to: string) => (await db.query<{ lang: string }>("select lang from outbox where to_email = $1 order by created_at desc limit 1", [to])).rows[0].lang;
+    expect(await lang("ana@exemple.es")).toBe("es");
+    expect(await lang("claire@exemple.fr")).toBe("es");
+    await claire("update profiles set lang = 'fr' where id = $1", [ids.claire]);
   });
 });

@@ -1,9 +1,20 @@
-<div style="background:#f7f2e9;padding:32px 16px">
+{{ $l := printf "%v" .Data.lang }}<div style="background:#f7f2e9;padding:32px 16px">
   <div style="max-width:520px;margin:auto;background:#fffdf9;border-radius:24px;padding:32px">
     <div style="font:600 13px Arial;letter-spacing:.2em;color:#9c7a34;text-transform:uppercase">Sillage</div>
+    {{ if eq $l "en" }}
+    <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Confirm your address</h1>
+    <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Type this code in the app to confirm your e-mail address. It is valid for one hour.</p>
+    {{ else if eq $l "es" }}
+    <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Confirme su dirección</h1>
+    <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Escriba este código en la aplicación para confirmar su correo electrónico. Es válido durante una hora.</p>
+    {{ else if eq $l "ca" }}
+    <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Confirmeu la vostra adreça</h1>
+    <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Escriviu aquest codi a l'aplicació per confirmar el vostre correu electrònic. És vàlid durant una hora.</p>
+    {{ else }}
     <h1 style="font:600 26px Georgia,serif;color:#0f1b2d;margin:12px 0 18px">Confirmez votre adresse</h1>
     <p style="margin:0 0 14px;font:17px/1.6 Arial,sans-serif;color:#2a3a52">Tapez ce code dans l'application pour confirmer votre adresse e-mail. Il est valable une heure.</p>
+    {{ end }}
     <p style="margin:18px 0;font:700 34px/1 Arial,sans-serif;letter-spacing:.3em;color:#0f1b2d">{{ .Token }}</p>
-    <p style="margin:0;font:14px/1.6 Arial,sans-serif;color:#6b778a">Vous n'avez rien demandé ? Ignorez cet e-mail : rien ne sera créé sans ce code.</p>
+    <p style="margin:0;font:14px/1.6 Arial,sans-serif;color:#6b778a">{{ if eq $l "en" }}Did not ask for anything? Ignore this e-mail: nothing will be created without this code.{{ else if eq $l "es" }}¿No ha pedido nada? Ignore este correo: no se creará nada sin este código.{{ else if eq $l "ca" }}No heu demanat res? Ignoreu aquest correu: no es crearà res sense aquest codi.{{ else }}Vous n'avez rien demandé ? Ignorez cet e-mail : rien ne sera créé sans ce code.{{ end }}</p>
   </div>
 </div>

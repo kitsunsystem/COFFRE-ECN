@@ -9,7 +9,7 @@ import { removeGuarantor, removePerson, saveGuarantor, savePerson } from "@/lib/
 import { useApp, type Person } from "@/lib/store";
 
 const RELATIONS = ["Conjoint(e)", "Enfant", "Parent", "Frère ou sœur", "Ami(e)", "Autre"];
-const empty: Person = { id: "", firstName: "", lastName: "", relation: "Enfant", email: "", phone: "" };
+const empty: Person = { id: "", firstName: "", lastName: "", relation: "Enfant", email: "" };
 
 export default function Famille() {
   const s = useApp(useShallow((x) => ({ people: x.people, guarantors: x.guarantors, cards: x.cards })));
@@ -155,7 +155,6 @@ function PersonForm({ value, onSave, onDelete }: { value: Person; onSave: (p: Pe
         </div>
       </div>
       <Field label="E-mail" type="email" inputMode="email" value={p.email ?? ""} onChange={up("email")} hint="Pour le prévenir s'il reçoit une carte ou devient garant." />
-      <Field label="Téléphone" type="tel" inputMode="tel" value={p.phone ?? ""} onChange={up("phone")} />
       <Button full variant="gold" disabled={!p.firstName.trim() || !p.lastName.trim()} onClick={() => onSave({ ...p, firstName: p.firstName.trim(), lastName: p.lastName.trim() })}>
         Enregistrer
       </Button>

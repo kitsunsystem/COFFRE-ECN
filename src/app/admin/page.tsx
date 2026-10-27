@@ -109,7 +109,7 @@ function DemoAdmin() {
                         const v = verify(p, now());
                         s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === p.id ? v : y)) }));
                         // shortcut: e-mail only in the demo; production also sends SMS (Brevo) and a push notification.
-                        if (s.account) s.email(s.account.email, "deces-delai", { endsAt: fmt(v.endsAt!) });
+                        if (s.account) s.email(s.account.email, "deces-delai", { endsAt: new Date(v.endsAt!).toISOString() });
                       }}
                     >
                       Décès confirmé

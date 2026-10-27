@@ -30,13 +30,12 @@ export const toAccount = (r: Row): Account => ({
   birthCity: r.birth_city ?? "",
   birthCountry: r.birth_country ?? "",
   address: r.address ?? "",
-  situation: r.situation ?? "",
   isBusinessOwner: r.is_business_owner,
   kyc: r.kyc === "refuse" ? "a_faire" : r.kyc,
   createdAt: ms(r.created_at)!,
 });
 
-export const profileRow = (id: string, a: Omit<Account, "kyc" | "createdAt" | "email">) => ({
+export const profileRow = (id: string, a: Omit<Account, "kyc" | "createdAt" | "email">, lang: string) => ({
   id,
   first_name: a.firstName,
   last_name: a.lastName,
@@ -45,12 +44,12 @@ export const profileRow = (id: string, a: Omit<Account, "kyc" | "createdAt" | "e
   birth_city: a.birthCity,
   birth_country: a.birthCountry,
   address: a.address,
-  situation: a.situation,
   is_business_owner: a.isBusinessOwner,
+  lang,
 });
 
-export const toPerson = (r: Row): Person => ({ id: r.id, firstName: r.first_name, lastName: r.last_name, relation: r.relation, email: r.email ?? "", phone: r.phone ?? "", managesMe: r.manages_me });
-export const personRow = (p: Person, ownerId: string) => ({ id: p.id, owner_id: ownerId, first_name: p.firstName, last_name: p.lastName, relation: p.relation, email: p.email || null, phone: p.phone || null });
+export const toPerson = (r: Row): Person => ({ id: r.id, firstName: r.first_name, lastName: r.last_name, relation: r.relation, email: r.email ?? "", managesMe: r.manages_me });
+export const personRow = (p: Person, ownerId: string) => ({ id: p.id, owner_id: ownerId, first_name: p.firstName, last_name: p.lastName, relation: p.relation, email: p.email || null });
 
 export const toCard = (r: Row): Card => ({
   id: r.id,
