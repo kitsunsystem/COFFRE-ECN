@@ -41,8 +41,8 @@ jobs:
 
   ios:
     name: iOS (simulator build)
-    # macOS minutes cost 10 times more on a private repository: on demand only (Actions › Mobile › Run workflow).
-    if: github.event_name == 'workflow_dispatch'
+    # macOS minutes cost 10 times more on a private repository: there, on demand only (Actions › Mobile › Run workflow).
+    if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v5
