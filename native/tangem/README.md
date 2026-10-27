@@ -9,7 +9,8 @@ sign(o: { cardId: string; publicKey: string; hash: string }): Promise<{ signatur
 
 - iOS : `ios/Sources/TangemPlugin/TangemPlugin.swift`, SDK Tangem 3.15.0 (Swift Package Manager, iOS 15).
   Droits NFC déclarés dans `ios/App/App/App.entitlements`, identifiants des cartes dans `Info.plist`.
-- Android : `android/src/main/java/app/sillage/tangem/TangemPlugin.kt`, SDK Tangem 3.9.1 (JitPack).
+- Android : `android/src/main/java/app/sillage/tangem/TangemPlugin.kt`, SDK Tangem 3.9.3 (JitPack, commit `5d8617f2d1` :
+  Tangem ne publie plus de versions numérotées en accès libre).
 
 Pourquoi Ed25519 : ses signatures sont déterministes (RFC 8032). Signer toujours le même message donne toujours
 les mêmes octets, donc une clé reproductible, combinée au code à 6 chiffres (Argon2id).
