@@ -88,7 +88,7 @@ jobs:
     name: iPhone (TestFlight)
     needs: [deploy]
     if: always() && needs.deploy.result != 'failure' && vars.SUPABASE_URL != ''
-    runs-on: macos-15
+    runs-on: macos-26 # Xcode 26: required by the Tangem SDK and by the App Store
     environment: production
     env:
       ASC_KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}

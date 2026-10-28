@@ -43,7 +43,7 @@ jobs:
     name: iOS (simulator build)
     # macOS minutes cost 10 times more on a private repository: there, on demand only (Actions › Mobile › Run workflow).
     if: github.event_name == 'workflow_dispatch' || !github.event.repository.private
-    runs-on: macos-15
+    runs-on: macos-26 # Xcode 26: required by the Tangem SDK and by the App Store
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
