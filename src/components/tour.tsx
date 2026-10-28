@@ -179,10 +179,10 @@ function Packs() {
 
 const SCENARIO = [
   ["Ouvrez le Coffre avec une carte de Claire", `code ${DEMO_PIN} · essayez « Copier dans la fiche médicale »`],
-  ["Rouvrez-le avec une carte de Marc", "il ne voit que l'urgence"],
-  ["Compte → Coup dur et décès → Signaler comme garant", "puis Mode démonstration → Aller à la fin du délai, et rouvrez avec Marc"],
+  ["Rouvrez-le comme Marc, avec son téléphone", "Face ID et son code : il ne voit que l'urgence"],
+  ["Compte → Coup dur et décès → Signaler comme garant", "puis Mode démonstration → Aller à la fin du délai, et rouvrez comme Marc"],
   ["Mode démonstration → simulez un décès (INSEE)", "puis Espace bénéficiaire : Léa dépose l'acte de décès"],
-  ["Administration → vérifiez l'identité et confirmez", "fin du délai, puis Léa ouvre avec sa carte et exporte en PDF"],
+  ["Administration → vérifiez l'identité et confirmez", "les cartes partent ; fin du délai, puis Léa ouvre sa part et l'exporte en PDF"],
 ];
 
 const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; extra?: ReactNode }[] = [
@@ -201,7 +201,7 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
   {
     eyebrow: "Les cartes",
     title: "Votre carte, c'est votre clé",
-    text: "Claire a trois cartes : chacune ouvre tout son Coffre. Chaque bénéficiaire reçoit un pack de 2 cartes à son nom, à ranger dans deux endroits différents. Elles n'ouvrent que ce que Claire lui a confié.",
+    text: "Claire a trois cartes : chacune ouvre tout son Coffre. Ses proches, eux, ouvrent leur part depuis leur téléphone, avec Face ID et leur code, une fois leur demande acceptée par Claire. Leurs 2 cartes sont réservées à leur nom et leur seront envoyées à son décès.",
     visual: <Packs />,
   },
   {

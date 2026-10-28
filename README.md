@@ -37,23 +37,24 @@ npm run deploy       # met à jour la démo en ligne (toujours en mode démonstr
 npx cap sync         # copie le site dans les projets iOS (ios/) et Android (android/)
 ```
 
-**Démonstration** : page *Connexion* → « Découvrir la démonstration ». Code de toutes les cartes : `123456`. Le *Mode démonstration* (Compte) avance le temps, simule la veille INSEE, bascule entre phase découverte et lancement officiel, simule un impayé, et ouvre l'Espace bénéficiaire et l'administration.
+**Démonstration** : page *Connexion* → « Découvrir la démonstration ». Code de toutes les cartes et des téléphones des proches : `123456`. Le *Mode démonstration* (Compte) avance le temps, simule la veille INSEE, bascule entre phase découverte et lancement officiel, simule un impayé, et ouvre l'Espace bénéficiaire et l'administration.
 
 Parcours à montrer :
-1. Coffre avec une carte de Claire → « Urgence et santé » → « Copier dans la fiche médicale de mon téléphone » → « Qui voit quoi ». Pour revenir à l'Espace, il faut **fermer le Coffre**.
-2. Coffre avec une carte de Marc : il ne voit que l'urgence ; chaque information se copie, et le PDF ne contient que sa part.
+1. Espace : « Paul Durand demande l'accès » → « Ouvrir le Coffre » avec une carte de Claire → « Qui voit quoi » : code de contrôle, « Accepter ». Puis « Urgence et santé » → « Copier dans la fiche médicale de mon téléphone ». Pour revenir à l'Espace, il faut **fermer le Coffre**.
+2. Coffre → « Démo : ouvrir comme un proche » → Marc (Face ID simulé, code) : il ne voit que l'urgence ; chaque information se copie, et le PDF ne contient que sa part.
 3. Compte → Coup dur et décès → signaler un coup dur comme garant → Démo : « Aller à la fin du délai » → Marc voit Banques et Téléphone, pas l'assurance-vie.
-4. Démo : correspondance INSEE → Espace bénéficiaire : Léa dépose l'acte de décès → Administration : vérifier son identité, puis « Décès confirmé ».
-5. Démo : fin du délai → Léa ouvre le Coffre et télécharge son PDF → Démo : « Aller à la fin de l'accès » → le Coffre est effacé.
+4. Démo : correspondance INSEE → Espace bénéficiaire : Léa s'identifie avec son téléphone et dépose l'acte de décès → Administration : vérifier son identité, puis « Décès confirmé » : les packs réservés partent.
+5. Mes cartes : « Démo : livrer » puis « Démo : activer » le pack de Léa (avec son téléphone) → Démo : fin du délai → Léa ouvre le Coffre avec sa carte (ou son téléphone) et télécharge son PDF → Démo : « Aller à la fin de l'accès » → le Coffre est effacé.
 
 ## Décisions intégrées (suivi du projet)
 - **Trois niveaux d'accès**, un seul code couleur partout : Urgence (vert), Coup dur (rouge, garant + délai), Décès (doré). « Jamais » par défaut.
-- **Cartes** : 3 pour le titulaire ; **un pack de 2 cartes obligatoire par bénéficiaire** ; la carte est toujours nécessaire, le code en plus. Marque ECN retirée.
+- **Cartes** : 3 pour le titulaire ; la carte est toujours nécessaire, le code en plus. **Un pack de 2 cartes obligatoire par bénéficiaire**, payé à sa désignation mais **réservé jusqu'au décès confirmé** (rangées des années, des cartes se perdent et leur puce vieillit) : il part pendant le délai d'annulation, à l'adresse que le bénéficiaire donne alors, et s'active avec son téléphone (chaque carte garde la clé du téléphone). Marque ECN retirée.
+- **Accès des proches sans carte** (urgence, coup dur : hospitalisation, banque, procuration…) : le bénéficiaire demande son accès dans l'application ; son téléphone crée sa clé, protégée par **Face ID + un code à 6 chiffres** ; le titulaire reçoit un e-mail et **accepte depuis son Coffre** (« Qui voit quoi », code de contrôle à comparer au besoin par téléphone). Un seul téléphone par proche ; le serveur ne voit que la clé publique.
 - **Coffre séparé de l'Espace** : on ne revient à l'Espace qu'en fermant le Coffre (et ouvrir l'Espace le ferme).
 - **Décès** : veille INSEE ou garant, **acte de décès déposé par un bénéficiaire**, vérification par l'équipe (identité du bénéficiaire), pas de notaire par défaut ; délai d'annulation ; **accès limité dans le temps puis effacement définitif**.
 - **Fiche d'urgence** copiée dans la fiche médicale du téléphone ; **PDF téléchargeable** contenant uniquement ce que la personne a le droit de voir (sans codes ni mots de passe).
 - **Vidéos** retirées du lancement : « Où se trouvent mes vidéos » dans Volontés et messages.
-- **Échéances** saisies dans l'Espace avec consentement ; relances « tout est-il à jour ? » tous les 3 mois ; contrôle des cartes des bénéficiaires tous les 6 mois.
+- **Échéances** saisies dans l'Espace avec consentement ; relances « tout est-il à jour ? » tous les 3 mois.
 - **Lancement en deux temps** : phase découverte (tout sauf l'ajout de documents, bloqué aussi par la base), puis lancement officiel (Administration › Réglages).
 - **Impayé** : relances pendant le délai de grâce, puis effacement.
 - Pour plus tard : formule famille, mode aidant (procuration), notaire partenaire, vidéos dans le Coffre, avatar vidéo.

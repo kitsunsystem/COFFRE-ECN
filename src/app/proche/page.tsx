@@ -1,23 +1,27 @@
 "use client";
-// Production: the page of a relative who signs in — what they are for others (guarantor, beneficiary) and what they can do.
+// Production: the page of a relative who signs in — what they are for others (guarantor, beneficiary), their access
+// from this phone, and their cards, which only arrive after a death.
 import { motion } from "motion/react";
-import { ArrowRight, FileUp, Lock, LogOut, ShieldAlert, ShieldCheck } from "lucide-react";
+import { ArrowRight, FileUp, Lock, LogOut, ScanFace, ShieldAlert, ShieldCheck, Smartphone, Truck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Activation, PACK_WARNING, type ActivationMode } from "@/components/activation";
+import { AccessRequest } from "@/components/access";
+import { Activation, type ActivationMode } from "@/components/activation";
 import { useHydrated, useNow } from "@/components/providers";
 import { Loader } from "@/components/shell";
 import { Badge, Button, Card, Field, Notice, Segmented, Sheet } from "@/components/ui";
 import { Aurora, Countdown, Logo, NfcCard } from "@/components/visuals";
-import { declareAsGuarantor, declareLost, signOut } from "@/lib/api";
+import { hasAccessKey } from "@/lib/access";
+import { declareAsGuarantor, declareLost, setPackAddress, signOut } from "@/lib/api";
 import { DELAYS } from "@/lib/config";
 import { PROD } from "@/lib/env";
+import { isNative } from "@/lib/native";
 import { activeProcedure, procedureStatus, type ProcedureKind } from "@/lib/rules";
-import { useApp, type Card as CardT, type Trust } from "@/lib/store";
+import { isPhone, useApp, type Card as CardT, type Trust } from "@/lib/store";
 
 const hours = (ms: number) => (ms >= 86_400_000 ? `${Math.round(ms / 86_400_000)} jours` : `${Math.round(ms / 3_600_000)} heures`);
-const STATUS: Record<string, string> = { commandee: "En fabrication", en_route: "En livraison", recue: "À activer", active: "Active", perdue: "Désactivée" };
+const STATUS: Record<string, string> = { reservee: "Réservée", commandee: "En fabrication", en_route: "En livraison", recue: "À activer", active: "Active", perdue: "Désactivée" };
 
 export default function Proche() {
   const hydrated = useHydrated();
@@ -29,12 +33,22 @@ export default function Proche() {
   const [mode, setMode] = useState<ActivationMode | null>(null);
   const [declaring, setDeclaring] = useState<Trust | null>(null);
   const [lost, setLost] = useState<CardT | null>(null);
+  const [asking, setAsking] = useState<Trust | null>(null);
+  // Whether this phone holds the person's access key (it never leaves the phone where it was made).
+  const [here, setHere] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!hydrated) return;
     if (!PROD) router.replace("/espace");
     else if (!me) router.replace("/connexion?suite=/proche");
   }, [hydrated, me, router]);
+  useEffect(() => {
+    let alive = true;
+    void Promise.all(trusts.map(async (x) => [x.personId, await hasAccessKey(x.personId).catch(() => false)] as const)).then((r) => alive && setHere(Object.fromEntries(r)));
+    return () => {
+      alive = false;
+    };
+  }, [trusts, asking]);
   if (!hydrated || !me) return <Loader />;
 
   return (
@@ -57,7 +71,7 @@ export default function Proche() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-8">
           <div className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-gold-deep">Mon espace de proche</div>
           <h1 className="mt-2 text-[2rem] font-semibold leading-tight">Ceux qui comptent sur vous</h1>
-          <p className="mt-2 text-ink-soft">Connecté avec {me.email}. Vous ne voyez ici aucun contenu de leur Coffre : seulement votre rôle et vos cartes.</p>
+          <p className="mt-2 text-ink-soft">Connecté avec {me.email}. Ici, seulement votre rôle, votre accès et vos cartes : leur Coffre s&apos;ouvre à part, avec Face ID et votre code.</p>
         </motion.div>
 
         {trusts.length === 0 && (
@@ -70,9 +84,13 @@ export default function Proche() {
           {trusts.map((x) => {
             const live = activeProcedure(x.procedures, t);
             const status = live && procedureStatus(live, t);
-            const isBeneficiary = x.cards.some((c) => c.status !== "perdue");
-            const toActivate = x.cards.filter((c) => c.status === "en_route" || c.status === "recue");
-            const active = x.cards.filter((c) => c.status === "active");
+            const pack = x.cards.filter((c) => !isPhone(c));
+            const phone = x.cards.find((c) => isPhone(c) && c.status !== "perdue");
+            const isBeneficiary = pack.some((c) => c.status !== "perdue");
+            const ready = phone?.status === "active" && here[x.personId];
+            const toActivate = pack.filter((c) => c.status === "en_route" || c.status === "recue");
+            const toShip = pack.filter((c) => c.status === "commandee");
+            const first = x.ownerName.split(" ")[0];
             return (
               <Card key={x.ownerId} layout>
                 <div className="flex flex-wrap items-center gap-2">
@@ -98,14 +116,45 @@ export default function Proche() {
                 )}
 
                 {isBeneficiary && (
+                  <div className="mt-4 rounded-2xl bg-ink/[0.04] p-4">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <Smartphone className="h-5 w-5 text-gold-deep" /> Mon accès depuis ce téléphone
+                    </div>
+                    {ready ? (
+                      <>
+                        <p className="mt-1 text-[0.92rem] text-ink-soft">Accès validé. Avec Face ID et votre code, vous ouvrez ce que {first} vous confie, au moment prévu.</p>
+                        <Button className="mt-3" full variant="gold" href="/coffre" icon={<ScanFace className="h-5 w-5" />}>
+                          Ouvrir avec Face ID et mon code
+                        </Button>
+                      </>
+                    ) : phone?.status === "demandee" && here[x.personId] ? (
+                      <p className="mt-1 text-[0.92rem] text-ink-soft">Demande envoyée : {x.ownerName} doit l&apos;accepter depuis son Coffre. Vous serez prévenu par e-mail.</p>
+                    ) : !isNative() ? (
+                      <p className="mt-1 text-[0.92rem] text-ink-soft">Votre accès se demande depuis l&apos;application, sur votre téléphone : Face ID et un code à 6 chiffres.</p>
+                    ) : (
+                      <>
+                        <p className="mt-1 text-[0.92rem] text-ink-soft">
+                          {phone?.status === "active"
+                            ? `Votre accès est validé sur un autre téléphone. Pour utiliser celui-ci, demandez-le de nouveau : ${first} devra l'accepter.`
+                            : `Pour l'urgence ou un coup dur, pas besoin de cartes : demandez votre accès, avec Face ID et un code à 6 chiffres. ${first} reçoit un e-mail pour l'accepter.`}
+                        </p>
+                        <Button className="mt-3" full onClick={() => setAsking(x)}>
+                          Demander mon accès
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {isBeneficiary && (
                   <div className="mt-4">
                     <div className="mb-2 text-[0.92rem] font-semibold text-ink-soft">Mes cartes pour ce Coffre</div>
                     <div className="grid grid-cols-2 gap-3">
-                      {x.cards.map((c) => (
+                      {pack.map((c) => (
                         <div key={c.id} className="space-y-1.5">
-                          <NfcCard name={c.printedName} flipped dim={c.status === "perdue"} />
+                          <NfcCard name={c.printedName} flipped dim={c.status === "perdue" || c.status === "reservee"} />
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <Badge tone={c.status === "active" ? "sage" : c.status === "perdue" ? "mist" : "gold"}>{STATUS[c.status]}</Badge>
+                            <Badge tone={c.status === "active" ? "sage" : c.status === "perdue" || c.status === "reservee" ? "mist" : "gold"}>{STATUS[c.status]}</Badge>
                             {c.status === "active" && (
                               <button onClick={() => setLost(c)} className="rounded-full px-2.5 py-1 text-[0.75rem] font-semibold text-coral ring-1 ring-coral/30">
                                 Perdue
@@ -115,19 +164,24 @@ export default function Proche() {
                         </div>
                       ))}
                     </div>
+                    {pack.every((c) => c.status === "reservee") && <p className="mt-3 text-[0.88rem] text-mist">Elles sont réservées à votre nom et vous seront envoyées le moment venu, pendant le délai de vérification. Rangées des années, des cartes se perdent : elles ne partent qu&apos;à ce moment-là.</p>}
+                    {toShip.length > 0 && <ShipTo personId={x.personId} address={toShip[0].shipTo} />}
                     <div className="mt-3 grid gap-2">
-                      {toActivate.length > 0 && (
-                        <Button full onClick={() => setMode({ kind: "holder", cards: toActivate, who: "vous" })}>
-                          Activer mes cartes
-                        </Button>
-                      )}
-                      {active.length > 0 && (
+                      {toActivate.length > 0 &&
+                        (ready ? (
+                          <Button full onClick={() => setMode({ kind: "holder", cards: toActivate, who: x.ownerName, phone: phone! })}>
+                            Activer mes cartes
+                          </Button>
+                        ) : (
+                          <Notice tone="gold">Vos cartes s&apos;activent depuis le téléphone où votre accès est validé.</Notice>
+                        ))}
+                      {pack.some((c) => c.status === "active") && (
                         <Button full variant="gold" href="/coffre" icon={<Lock className="h-5 w-5" />}>
                           Ouvrir avec ma carte
                         </Button>
                       )}
                       <Button full variant="ghost" href="/beneficiaire" icon={<FileUp className="h-5 w-5" />}>
-                        {x.ownerName.split(" ")[0]} est décédé(e) : déposer l&apos;acte
+                        {first} est décédé(e) : déposer l&apos;acte
                       </Button>
                     </div>
                   </div>
@@ -156,16 +210,51 @@ export default function Proche() {
         {mode && <Activation mode={mode} onClose={() => setMode(null)} />}
       </Sheet>
 
+      <Sheet open={!!asking} onClose={() => setAsking(null)} title="Mon accès">
+        {asking && <AccessRequest personId={asking.personId} ownerName={asking.ownerName} onDone={() => setAsking(null)} />}
+      </Sheet>
+
       <Sheet open={!!declaring} onClose={() => setDeclaring(null)} title="Votre signalement">
         {declaring && <Declare ownerName={declaring.ownerName} onDeclare={async (kind, note) => (await declareAsGuarantor(declaring.ownerId, kind, "", note)) && setDeclaring(null)} />}
       </Sheet>
 
       <Sheet open={!!lost} onClose={() => setLost(null)} title="Désactiver cette carte ?">
-        <p className="text-ink-soft">Elle ne pourra plus rien ouvrir, même avec le code. {PACK_WARNING}</p>
+        <p className="text-ink-soft">Elle ne pourra plus rien ouvrir, même avec le code. Votre autre carte et votre téléphone continuent de fonctionner.</p>
         <Button className="mt-6" variant="danger" full onClick={async () => lost && (await declareLost(lost)) && setLost(null)}>
           Désactiver la carte
         </Button>
       </Sheet>
+    </div>
+  );
+}
+
+// After a confirmed death: where to send the cards. The address only serves this shipment.
+function ShipTo({ personId, address }: { personId: string; address?: string }) {
+  const [value, setValue] = useState("");
+  const [busy, setBusy] = useState(false);
+  if (address)
+    return (
+      <p className="mt-3 flex items-start gap-2 text-[0.9rem] text-ink-soft">
+        <Truck className="mt-0.5 h-4 w-4 shrink-0 text-gold-deep" /> Envoi en préparation, à : {address.replace(/\n/g, ", ")}
+      </p>
+    );
+  return (
+    <div className="mt-4 space-y-3">
+      <Notice tone="gold">Vos cartes partent dès que vous indiquez votre adresse. Elle ne sert qu&apos;à cet envoi : elle est effacée dès le départ des cartes.</Notice>
+      <Field label="Adresse postale" multiline value={value} onChange={setValue} placeholder={"12 rue des Lilas\n75011 Paris"} />
+      <Button
+        full
+        variant="gold"
+        disabled={busy || value.trim().length < 6}
+        icon={<Truck className="h-5 w-5" />}
+        onClick={async () => {
+          setBusy(true);
+          await setPackAddress(personId, value);
+          setBusy(false);
+        }}
+      >
+        Recevoir mes cartes à cette adresse
+      </Button>
     </div>
   );
 }

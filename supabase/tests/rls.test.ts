@@ -14,6 +14,8 @@ beforeAll(async () => {
 }, 60_000);
 
 const claire = <T = Record<string, unknown>>(q: string, p: unknown[] = []) => as<T>(db, ids.claire, q, p);
+// A phone's public key (X25519, base64), as the app sends it with an access request.
+const pk = (n: number) => Buffer.alloc(32, n).toString("base64");
 const outbox = async (template: string) => (await db.query<{ to_email: string }>("select to_email from outbox where template = $1", [template])).rows.map((r) => r.to_email);
 
 describe("profil", () => {
@@ -84,13 +86,13 @@ describe("famille et garants", () => {
 });
 
 describe("cartes", () => {
-  it("orders the 3 included cards once, and a pack of 2 per beneficiary; never without a delivery address", async () => {
+  it("orders the 3 included cards once, never without a delivery address; a pack of 2 per beneficiary is reserved", async () => {
     await refused(as(db, ids.eve, "select * from order_owner_cards()"), /adresse de livraison manquante/);
     expect(await claire("select * from order_owner_cards()")).toHaveLength(3);
     await refused(claire("select * from order_owner_cards()"), /déjà commandées/);
-    const pack = await claire<{ id: string; extra: boolean }>("select * from order_pack($1)", [ids.pMarc]);
+    const pack = await claire<{ id: string; extra: boolean; status: string }>("select * from order_pack($1)", [ids.pMarc]);
     expect(pack).toHaveLength(2);
-    expect(pack.every((c) => c.extra)).toBe(true);
+    expect(pack.every((c) => c.extra && c.status === "reservee")).toBe(true); // only shipped once the death is confirmed
     await claire("select * from order_pack($1)", [ids.pLea]);
     await refused(as(db, ids.eve, "select * from order_pack($1)", [ids.pMarc]), /proche inconnu/);
     expect(await outbox("invitation-porteur")).toEqual(expect.arrayContaining(["marc@exemple.fr", "LEA@exemple.fr"]));
@@ -110,17 +112,35 @@ describe("cartes", () => {
     await refused(as(db, ids.eve, "select activate_owner_card($1, 'demo', 'chip-x', $2::jsonb)", [ids.c2, sealed]), /non activable/);
   });
 
-  it("a beneficiary activates their own pack, nobody else can", async () => {
-    const mine = await as<{ id: string; status: string }>(db, ids.marc, "select id, status from cards");
-    expect(mine).toHaveLength(2); // only their own cards
-    ids.m1 = mine[0].id;
-    ids.m2 = mine[1].id;
-    await refused(as(db, ids.lea, "select activate_holder_card($1, 'demo', 'chip-m', 'pk', 'salt')", [ids.m1]), /non activable/);
-    await as(db, ids.marc, "select activate_holder_card($1, 'demo', 'chip-m1', 'pk-m1', 'salt')", [ids.m1]);
-    await as(db, ids.marc, "select activate_holder_card($1, 'demo', 'chip-m2', 'pk-m2', 'salt')", [ids.m2]);
-    const lea = await as<{ id: string }>(db, ids.lea, "select id from cards");
-    ids.l1 = lea[0].id;
-    await claire("select activate_holder_card($1, 'demo', 'chip-l1', 'pk-l1', 'salt')", [ids.l1]); // from the owner's phone
+  it("a beneficiary asks for access from their phone; only the owner accepts or refuses", async () => {
+    await refused(as(db, ids.eve, "select * from request_access($1, $2)", [ids.pMarc, pk(1)]), /proche inconnu/);
+    await refused(as(db, ids.lea, "select * from request_access($1, $2)", [ids.pMarc, pk(1)]), /proche inconnu/);
+    await refused(as(db, ids.marc, "select * from request_access($1, 'court')", [ids.pMarc]), /clé invalide/);
+    const [m] = await as<{ id: string; status: string }>(db, ids.marc, "select id, status from request_access($1, $2)", [ids.pMarc, pk(1)]);
+    expect(m.status).toBe("demandee");
+    expect(await outbox("demande-acces")).toContain("claire@exemple.fr");
+    await refused(as(db, ids.marc, "select * from approve_access($1, '[]')", [m.id]), /demande inconnue/); // never one's own
+    await refused(as(db, ids.eve, "select * from approve_access($1, '[]')", [m.id]), /demande inconnue/);
+    await refused(claire("update cards set status = 'active' where id = $1", [m.id]), /permission denied/);
+    await claire("select * from approve_access($1, '[]')", [m.id]);
+    expect(await outbox("acces-valide")).toContain("marc@exemple.fr");
+    ids.m1 = m.id;
+    // Léa: refused once (the request disappears), then accepted.
+    const [first] = await as<{ id: string }>(db, ids.lea, "select id from request_access($1, $2)", [ids.pLea, pk(2)]);
+    await claire("select refuse_access($1)", [first.id]);
+    expect(await as(db, ids.lea, "select id from cards where kind = 'telephone'")).toHaveLength(0);
+    const [again] = await as<{ id: string }>(db, ids.lea, "select id from request_access($1, $2)", [ids.pLea, pk(3)]);
+    await claire("select * from approve_access($1, '[]')", [again.id]);
+    ids.l1 = again.id;
+  });
+
+  it("a reserved pack opens nothing, cannot be activated nor lost before the death", async () => {
+    const mine = await as<{ id: string; holder_person_id: string }>(db, ids.marc, "select id, holder_person_id from cards where kind is null order by ordered_at, id");
+    expect(mine.map((c) => c.holder_person_id)).toEqual([ids.pMarc, ids.pMarc]); // only their own cards
+    [ids.mp1, ids.mp2] = mine.map((c) => c.id);
+    await refused(as(db, ids.marc, "select activate_pack_card($1, 'demo', 'chip-mp1', $2::jsonb, 'salt', $3)", [ids.mp1, sealed, ids.m1]), /non activable/);
+    await refused(claire("select declare_card_lost($1)", [ids.mp1]), /carte inconnue/);
+    await refused(claire(`insert into envelopes (card_id, owner_id, subsection_id, moment, sealed) values ($1, $2, 'banques', 'now', 'x')`, [ids.mp1, ids.claire]), /carte invalide/);
   });
 
   it("only the logistics team moves cards along the delivery", async () => {
@@ -232,6 +252,24 @@ describe("décès", () => {
     expect(await outbox("deces-delai")).toContain("claire@exemple.fr");
   });
 
+  it("the packs leave at the confirmed death, to the address each beneficiary gives, erased once shipped", async () => {
+    expect((await as<{ status: string }>(db, ids.marc, "select status from cards where id = $1", [ids.mp1]))[0].status).toBe("commandee");
+    expect(await outbox("cartes-beneficiaire")).toEqual(expect.arrayContaining(["marc@exemple.fr", "LEA@exemple.fr"]));
+    await refused(as(db, ids.logistique, "select staff_card_status($1, 'en_route')", [ids.mp1]), /adresse de livraison manquante/);
+    await refused(as(db, ids.eve, "select set_pack_address($1, '1 rue X, Paris')", [ids.pMarc]), /aucune carte/);
+    await as(db, ids.marc, "select set_pack_address($1, '5 avenue Foch, Lyon')", [ids.pMarc]);
+    await as(db, ids.logistique, "select staff_card_status($1, 'en_route')", [ids.mp1]);
+    expect((await as<{ ship_to: string | null }>(db, ids.marc, "select ship_to from cards where id = $1", [ids.mp1]))[0].ship_to).toBeNull();
+  });
+
+  it("a card is activated by its beneficiary only, with their own approved phone", async () => {
+    await refused(as(db, ids.lea, "select activate_pack_card($1, 'demo', 'chip-mp1', $2::jsonb, 'salt', $3)", [ids.mp1, sealed, ids.m1]), /non activable/);
+    await refused(as(db, ids.marc, "select activate_pack_card($1, 'demo', 'chip-mp1', $2::jsonb, 'salt', $3)", [ids.mp1, sealed, ids.l1]), /non activable/);
+    await as(db, ids.marc, "select activate_pack_card($1, 'demo', 'chip-mp1', $2::jsonb, 'salt', $3)", [ids.mp1, sealed, ids.m1]);
+    const [c] = await as<{ status: string; phone_id: string }>(db, ids.marc, "select status, phone_id from cards where id = $1", [ids.mp1]);
+    expect(c).toEqual({ status: "active", phone_id: ids.m1 });
+  });
+
   it("during the cancellation delay nothing opens; after it, each one gets their part, never « À effacer »", async () => {
     expect((await as<{ subsection_id: string }>(db, ids.lea, "select subsection_id from envelopes")).map((e) => e.subsection_id)).toEqual([]);
     await db.query("update procedures set ends_at = now() - interval '1 second' where id = $1", [ids.death]);
@@ -332,10 +370,20 @@ describe("clés et départs", () => {
     expect((await claire<{ sealed: string }>("select sealed from envelopes where subsection_id = 'banques'"))[0].sealed).toBe("k2-new"); // all or nothing
   });
 
-  it("a lost card stops opening anything at once", async () => {
-    await as(db, ids.marc, "select declare_card_lost($1)", [ids.m1]);
+  it("accepting a relative's new phone retires the previous one at once", async () => {
+    const [phone] = await as<{ id: string }>(db, ids.marc, "select id from request_access($1, $2)", [ids.pMarc, pk(4)]);
+    await claire("select * from approve_access($1, $2::jsonb)", [phone.id, JSON.stringify([{ subsection_id: "a-prevenir", moment: "now", sealed: "k-new" }])]);
+    expect(await as(db, ids.marc, "select id from cards where id = $1", [ids.m1])).toHaveLength(0);
+    expect((await as<{ card_id: string }>(db, ids.marc, "select card_id from envelopes")).map((e) => e.card_id)).toEqual([phone.id]);
+    ids.m1 = phone.id;
+  });
+
+  it("the owner withdraws a phone, a beneficiary only their cards; both stop opening anything at once", async () => {
+    await refused(as(db, ids.marc, "select declare_card_lost($1)", [ids.m1]), /carte inconnue/);
+    await claire("select declare_card_lost($1)", [ids.m1]);
     expect(await as(db, ids.marc, "select * from envelopes")).toHaveLength(0);
-    await refused(as(db, ids.eve, "select declare_card_lost($1)", [ids.m2]), /carte inconnue/);
+    await as(db, ids.marc, "select declare_card_lost($1)", [ids.mp1]);
+    await refused(as(db, ids.eve, "select declare_card_lost($1)", [ids.mp2]), /carte inconnue/);
   });
 
   it("removing a relative removes their cards and envelopes", async () => {

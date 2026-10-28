@@ -107,9 +107,12 @@ function DemoAdmin() {
                       disabled={!canConfirmDeath(p)}
                       onClick={() => {
                         const v = verify(p, now());
-                        s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === p.id ? v : y)) }));
+                        // The reserved packs leave now (as staff_confirm_death does): they arrive during the delay.
+                        s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === p.id ? v : y)), cards: x.cards.map((c) => (c.status === "reservee" ? { ...c, status: "commandee" as const } : c)) }));
                         // shortcut: e-mail only in the demo; production also sends SMS (Brevo) and a push notification.
                         if (s.account) s.email(s.account.email, "deces-delai", { endsAt: new Date(v.endsAt!).toISOString() });
+                        for (const b of s.people.filter((x) => s.cards.some((c) => c.holderId === x.id && c.status === "reservee")))
+                          s.email(b.email || `${b.firstName} ${b.lastName}`, "cartes-beneficiaire", { ownerName: owner });
                       }}
                     >
                       Décès confirmé

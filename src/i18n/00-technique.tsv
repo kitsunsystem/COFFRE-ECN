@@ -1,7 +1,7 @@
 # Textes trouvés dans le code mais jamais traduits : noms propres, identifiants, mots-clés de l'assistante (comparés à la question en français).
 *, profiles!inner(first_name,last_name,birth_date,birth_city,email), acteur:people!acte_by(first_name,last_name,email)
 id,first_name,last_name,birth_date,birth_city,email,kyc,kyc_doc_path,created_at
-id,printed_name,status,ordered_at,holder_person_id,profiles!inner(first_name,last_name,address)
+id,printed_name,status,ordered_at,holder_person_id,ship_to,profiles!inner(first_name,last_name,address)
 *, profiles!inner(first_name,last_name,email,phone), concierge_shares(item_id,sealed)
 launched, concierge_public_key
 SIGNED_OUT
@@ -26,7 +26,6 @@ Escape
 NotAllowedError
 InvalidStateError
 SecurityError
-bad code
 BedDouble
 Siren
 HandHeart

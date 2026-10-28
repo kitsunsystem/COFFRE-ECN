@@ -33,8 +33,9 @@ export interface Account {
   createdAt: number;
 }
 
-export type CardStatus = "commandee" | "en_route" | "recue" | "active" | "perdue";
-export type CardKind = "demo" | "fido" | "tangem";
+// A beneficiary's pack is "reservee" until the death is confirmed; a relative's phone is "demandee" until the owner agrees.
+export type CardStatus = "reservee" | "demandee" | "commandee" | "en_route" | "recue" | "active" | "perdue";
+export type CardKind = "demo" | "fido" | "tangem" | "telephone";
 export interface Card {
   id: string;
   holderId: "owner" | string;
@@ -45,9 +46,11 @@ export interface Card {
   extra: boolean; // beyond the 3 included cards (paid)
   kind?: CardKind; // known once activated
   chipId?: string; // FIDO2 credential id or Tangem card key: recognises the card when it is tapped
-  wrappedVmk?: Sealed; // owner cards: vault key wrapped by card + code
-  boxPk?: string; // holder cards: public key that envelopes are sealed to
-  salt?: string; // holder cards: Argon2id salt for the holder's code
+  wrappedVmk?: Sealed; // owner cards: vault key wrapped by card + code; beneficiary cards: their phone's key, the same way
+  boxPk?: string; // relatives' phones: public key that envelopes are sealed to
+  salt?: string; // beneficiary cards: Argon2id salt for the code
+  phoneId?: string; // beneficiary cards: the phone whose key they keep
+  shipTo?: string; // beneficiary cards: delivery address, from the confirmed death until shipping
 }
 
 export interface Guarantor {
@@ -105,7 +108,7 @@ export interface Vault {
   envelopes: Envelope[];
 }
 
-// Production: what the signed-in person is for others (guarantor, beneficiary with a pack of cards).
+// Production: what the signed-in person is for others (guarantor, beneficiary with a pack of cards and their phone).
 export interface Trust {
   ownerId: string;
   ownerName: string;
@@ -216,7 +219,7 @@ export const useApp = create<State & Actions>()(
     }),
     {
       // Bumped whenever the stored shape changes; older demo data is simply ignored.
-      name: "sillage-demo-5",
+      name: "sillage-demo-6",
       skipHydration: true,
       // Production keeps nothing on the device (shared phones): the server is the only copy.
       partialize: (s) => {
@@ -233,8 +236,11 @@ export const uid = () => crypto.randomUUID();
 export const toast = (text: string, tone: "error" | "ok" = "error") => useApp.getState().set({ toast: { id: Date.now(), text, tone } });
 
 export const ownerCards = (s: { cards: Card[] }) => s.cards.filter((c) => c.holderId === "owner");
-export const holderCards = (s: { cards: Card[] }) => s.cards.filter((c) => c.holderId !== "owner");
+// Every key of a person: their pack and their phone. Rights apply to each of them.
 export const packOf = (s: { cards: Card[] }, personId: string) => s.cards.filter((c) => c.holderId === personId && c.status !== "perdue");
+// A relative's phone is kept as a card without a chip: same envelopes, same moments, same removal.
+export const isPhone = (c: Pick<Card, "kind">) => c.kind === "telephone";
+export const phoneOf = (s: { cards: Card[] }, personId: string) => s.cards.find((c) => c.holderId === personId && isPhone(c) && c.status !== "perdue");
 export const personName = (people: Person[], id: string) => {
   if (id === "owner") return "Vous";
   const p = people.find((x) => x.id === id);
@@ -242,7 +248,9 @@ export const personName = (people: Person[], id: string) => {
 };
 
 // Coffre session: keys in memory only, gone on reload or lock.
+// A relative opens as their phone (cardId: the phone's record), with the phone itself or with one of their cards.
 export type OpenSession = { mode: "owner"; cardId: string; vmk: Uint8Array } | { mode: "holder"; cardId: string; publicKey: Uint8Array; privateKey: Uint8Array };
+export type HolderSession = Extract<OpenSession, { mode: "holder" }>;
 type Session = { mode: "locked" } | OpenSession;
 
 export const useSession = create<{ session: Session; setSession: (s: Session) => void }>()((set) => ({

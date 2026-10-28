@@ -68,8 +68,9 @@ const cards = await must(claire.c.rpc("order_owner_cards"), "cartes");
 assert.equal(cards.length, 3);
 const pack = await must(claire.c.rpc("order_pack", { person: pMarc }), "pack");
 assert.equal(pack.length, 2);
+assert.ok(pack.every((c) => c.status === "reservee"), "pack réservé jusqu'au décès");
 await must(claire.c.rpc("activate_owner_card", { card: cards[0].id, card_kind: "demo", chip: `chip-${tag}`, vmk: sealed }), "activation");
-ok("3 cartes + un pack de 2 ; activation d'une carte");
+ok("3 cartes + un pack de 2 réservé ; activation d'une carte");
 
 await must(claire.c.from("vaults").insert({ owner_id: claire.id, salt: "c2FsdA==", ssk: {} }), "coffre");
 const item = randomUUID();
@@ -89,15 +90,17 @@ ok("phase découverte respectée, puis dépôt chiffré ; rien dans le Coffre d'
 assert.equal(await must(marc.c.rpc("claim_invitations"), "rattachement"), 1);
 const [trust] = await must(marc.c.rpc("my_trusts"), "my_trusts");
 assert.equal(trust.owner_name, "Claire Durand");
-const mine = trust.cards;
-await must(marc.c.rpc("activate_holder_card", { card: mine[0].id, card_kind: "demo", chip: `chip-m-${tag}`, pk: "cGs=", card_salt: "c2FsdA==" }), "pack activé par Marc");
-ok("Marc rattaché par son adresse vérifiée ; il active lui-même son pack");
+// His phone asks for access with its public key; Claire accepts it (her app seals the keys she attributes to it).
+const phone = await must(marc.c.rpc("request_access", { person: trust.person_id, pk: Buffer.alloc(32, 5).toString("base64") }), "demande d'accès");
+await refused(marc.c.rpc("approve_access", { card: phone.id, envs: [] }), "accord par le proche lui-même");
+await must(claire.c.rpc("approve_access", { card: phone.id, envs: [] }), "accès accepté");
+ok("Marc rattaché par son adresse vérifiée ; il demande l'accès depuis son téléphone, Claire l'accepte");
 
 assert.equal((await must(marc.c.from("vault_items").select("id"), "avant droits")).length, 0);
 // The app writes rights with an upsert: first time, then a change of level.
 await must(claire.c.from("rights").upsert({ person_id: pMarc, owner_id: claire.id, subsection_id: "a-prevenir", moment: "deces" }), "droit");
 await must(claire.c.from("rights").upsert({ person_id: pMarc, owner_id: claire.id, subsection_id: "a-prevenir", moment: "now" }), "droit modifié");
-await must(claire.c.from("envelopes").insert({ card_id: mine[0].id, owner_id: claire.id, subsection_id: "a-prevenir", moment: "now", sealed: "a2V5" }), "enveloppe");
+await must(claire.c.from("envelopes").insert({ card_id: phone.id, owner_id: claire.id, subsection_id: "a-prevenir", moment: "now", sealed: "a2V5" }), "enveloppe");
 assert.deepEqual((await must(marc.c.from("vault_items").select("id"), "après droits")).map((x) => x.id), [item]);
 const dl = await marc.c.storage.from("coffre").download(`${claire.id}/a-prevenir/f-${tag}`);
 assert.ok(!dl.error && dl.data.size === 3, "téléchargement par le bénéficiaire");
@@ -132,7 +135,7 @@ assert.equal((await fn("push", ANON, { request: opening.id })).status, 401);
 ok("ordinateur de confiance : nombre de contrôle, clés scellées reprises une seule fois, notification");
 
 const queued = await must(admin.from("outbox").select("template, to_email").in("to_email", [mail("claire"), mail("marc")]), "outbox");
-for (const t of ["bienvenue", "invitation-garant", "cartes-commandees", "invitation-porteur", "coup-dur-declare", "nouvel-appareil"]) assert.ok(queued.some((m) => m.template === t), `e-mail ${t} en file`);
+for (const t of ["bienvenue", "invitation-garant", "cartes-commandees", "invitation-porteur", "demande-acces", "acces-valide", "coup-dur-declare", "nouvel-appareil"]) assert.ok(queued.some((m) => m.template === t), `e-mail ${t} en file`);
 await refused(claire.c.from("outbox").select("*"), "lecture de la file d'e-mails");
 const r = await fn("mailer", SERVICE);
 assert.equal(r.status, 200, `mailer: ${await r.clone().text()}`);

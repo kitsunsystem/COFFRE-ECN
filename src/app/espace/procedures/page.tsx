@@ -86,7 +86,7 @@ export default function Procedures() {
                   <p className="mt-4 text-ink-soft">
                     {p.erasedAt
                       ? "La période d'accès est terminée : le Coffre a été effacé définitivement."
-                      : `Chaque bénéficiaire ouvre uniquement ce qui lui était destiné, avec sa carte, jusqu'au ${new Date(accessEnd(p)!).toLocaleDateString("fr-FR", { dateStyle: "long" })}. Ensuite, le Coffre est effacé définitivement. La rubrique « À effacer » a déjà été détruite sans être lue.`}
+                      : `Chaque bénéficiaire ouvre uniquement ce qui lui était destiné, avec son téléphone ou ses cartes, jusqu'au ${new Date(accessEnd(p)!).toLocaleDateString("fr-FR", { dateStyle: "long" })}. Ensuite, le Coffre est effacé définitivement. La rubrique « À effacer » a déjà été détruite sans être lue.`}
                   </p>
                 )}
 

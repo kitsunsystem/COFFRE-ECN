@@ -1,14 +1,14 @@
 // Coffre operations. Each sub-section has its own key (SSK); the owner's vault key (VMK) wraps them all.
-// A card holder only ever receives the SSKs the owner attributed to them, sealed to their card.
+// A relative only ever receives the SSKs the owner attributed to them, sealed to their phone's key (their cards keep that key).
 // Each file has its own key, kept inside its (encrypted) element: changing a sub-section key never re-uploads files.
 import { del, get, set as idbSet } from "idb-keyval";
 import { closeProcedureRemote, loadHolderView, remote, trustOfCard } from "./api";
-import { holderKeys, keyFrom, purposeOf, type Enrolled, type Tap } from "./cards";
+import { keyFrom, purposeOf, type Enrolled, type Tap } from "./cards";
 import { fromB64, na, newKey, newSalt, open, openBytes, openFrom, openJson, seal, sealBytes, sealJson, sealTo, toB64, type Sealed } from "./crypto";
 import { PROD } from "./env";
 import { isReleased, type Moment } from "./rules";
 import { ALL_SUBSECTIONS, SECTIONS } from "./sections";
-import { now, ownerCards, packOf, uid, useApp, useSession, type Card, type Envelope, type OpenSession, type VaultItem } from "./store";
+import { isPhone, now, ownerCards, packOf, uid, useApp, useSession, type Card, type Envelope, type HolderSession, type OpenSession, type VaultItem } from "./store";
 
 export interface FileMeta {
   id: string;
@@ -24,6 +24,7 @@ export interface ItemPayload {
 }
 
 const vmkAad = (cardId: string) => `vmk:${cardId}`;
+const phoneAad = (cardId: string) => `phone:${cardId}`;
 const sskAad = (subId: string) => `ssk:${subId}`;
 const itemAad = (id: string) => `item:${id}`;
 const fileAad = (id: string) => `file:${id}`;
@@ -85,15 +86,34 @@ export async function activateOwnerCard(card: Card, enrolled: Enrolled, pin?: st
   useSession.getState().setSession({ mode: "owner", cardId: card.id, vmk });
 }
 
-// A beneficiary's card: from the owner's phone (pack handed over in person) or from the beneficiary's own account.
-export async function activateHolderCard(card: Card, enrolled: Enrolled, pin?: string) {
+// A beneficiary's card, received after the death: it keeps the key of their approved phone, sealed by the card and its
+// code. Their phone lost or changed, the card still opens their part.
+export async function activatePackCard(card: Card, enrolled: Enrolled, pin: string | undefined, phone: HolderSession) {
   const salt = await newSalt();
-  const keys = await holderKeys(enrolled.secret, enrolled.kind, pin, salt);
-  await remote.activateHolderCard(card.id, enrolled.kind, enrolled.chipId, keys.publicKeyB64, salt);
-  const update = (c: Card): Card => (c.id === card.id ? { ...c, status: "active", activatedAt: now(), boxPk: keys.publicKeyB64, salt, kind: enrolled.kind, chipId: enrolled.chipId } : c);
+  const wrapped = await seal(await keyFrom(enrolled.secret, enrolled.kind, pin, salt), phone.privateKey, phoneAad(card.id));
+  await remote.activatePackCard(card.id, enrolled.kind, enrolled.chipId, wrapped, salt, phone.cardId);
+  const update = (c: Card): Card => (c.id === card.id ? { ...c, status: "active", activatedAt: now(), wrappedVmk: wrapped, salt, phoneId: phone.cardId, kind: enrolled.kind, chipId: enrolled.chipId } : c);
   useApp.getState().set((s) => ({ cards: s.cards.map(update), trusts: s.trusts.map((t) => ({ ...t, cards: t.cards.map(update) })) }));
-  // The new card inherits its person's rights now if the Coffre is open, otherwise the next time the owner opens it.
-  if (useSession.getState().session.mode === "owner") await syncEnvelopes();
+}
+
+// The owner agrees to a relative's phone: it receives the keys of everything already attributed to that person, and
+// their previous phone, if any, stops opening anything.
+export async function approveAccess(phone: Card) {
+  ownerVmk();
+  const st = useApp.getState();
+  const added: Envelope[] = [];
+  for (const [subId, m] of Object.entries(st.rights[phone.holderId] ?? {})) {
+    const key = m === "jamais" ? null : await subsectionKey(subId);
+    if (key) added.push({ cardId: phone.id, subsectionId: subId, moment: m as Envelope["moment"], sealed: await sealTo(phone.boxPk!, key) });
+  }
+  await remote.approveAccess(phone.id, added);
+  const old = st.cards.filter((c) => c.holderId === phone.holderId && isPhone(c) && c.id !== phone.id).map((c) => c.id);
+  st.set((s) => ({
+    cards: s.cards.filter((c) => !old.includes(c.id)).map((c) => (c.id === phone.id ? { ...c, status: "active" as const, activatedAt: now() } : c)),
+    vault: { ...s.vault, envelopes: [...s.vault.envelopes.filter((e) => !old.includes(e.cardId)), ...added] },
+  }));
+  const p = st.people.find((x) => x.id === phone.holderId);
+  if (!PROD && p && st.account) st.email(p.email || phone.printedName, "acces-valide", { ownerName: `${st.account.firstName} ${st.account.lastName}` });
 }
 
 // The keys a card and its code give, without opening anything here: the phone uses them to approve a computer.
@@ -108,9 +128,9 @@ export async function cardKeys(tap: Tap, pin?: string): Promise<OpenSession> {
       const kek = await keyFrom(tap.secret, card.kind, pin, st.vault.salt!);
       keys = { mode: "owner", cardId: card.id, vmk: await open(kek, card.wrappedVmk!, vmkAad(card.id)) };
     } else {
-      const k = await holderKeys(tap.secret, card.kind, pin, card.salt!);
-      if (k.publicKeyB64 !== card.boxPk) throw new Error("bad code");
-      keys = { mode: "holder", cardId: card.id, publicKey: k.publicKey, privateKey: k.privateKey };
+      // A beneficiary's card keeps their phone's key: the Coffre opens as that phone.
+      const privateKey = await open(await keyFrom(tap.secret, card.kind, pin, card.salt!), card.wrappedVmk!, phoneAad(card.id));
+      keys = { mode: "holder", cardId: card.phoneId!, publicKey: (await na()).crypto_scalarmult_base(privateKey), privateKey };
     }
     failedAttempts = 0;
     return keys;
@@ -256,7 +276,7 @@ export async function rotate(subId: string) {
   st.set((s) => ({ vault: { ...s.vault, items, envelopes, ssk: { ...s.vault.ssk, [subId]: wrapped } } }));
 }
 
-// Rights belong to a person and apply to every active card of their 2-card pack.
+// Rights belong to a person and apply to their approved phone (their cards, after the death, keep its key).
 export async function setRight(personId: string, subId: string, moment: Moment) {
   ownerVmk();
   const st = useApp.getState();
@@ -276,7 +296,7 @@ export async function setSectionRight(personId: string, sectionId: string, momen
   for (const sub of section.subsections) await setRight(personId, sub.id, moment);
 }
 
-// Seals the missing envelopes, e.g. for a card activated while the Coffre was closed (keys are only available when it is open).
+// Seals the missing envelopes, if one was ever left out (keys are only available when the Coffre is open).
 export async function syncEnvelopes() {
   ownerVmk();
   const st = useApp.getState();

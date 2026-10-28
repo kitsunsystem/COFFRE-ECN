@@ -44,7 +44,7 @@ async function fetchTab(tab: Tab): Promise<{ rows: Row[]; launched?: boolean }> 
   if (tab === "deces")
     return { rows: await q<Row[]>(c.from("procedures").select("*, profiles!inner(first_name,last_name,birth_date,birth_city,email), acteur:people!acte_by(first_name,last_name,email)").is("verified_at", null).is("rejected_at", null).is("cancelled_at", null).eq("needs_verification", true).order("declared_at") as never) };
   if (tab === "kyc") return { rows: await q<Row[]>(c.from("profiles").select("id,first_name,last_name,birth_date,birth_city,email,kyc,kyc_doc_path,created_at").eq("kyc", "en_cours").order("created_at") as never) };
-  if (tab === "cartes") return { rows: await q<Row[]>(c.from("cards").select("id,printed_name,status,ordered_at,holder_person_id,profiles!inner(first_name,last_name,address)").in("status", ["commandee", "en_route"]).order("ordered_at") as never) };
+  if (tab === "cartes") return { rows: await q<Row[]>(c.from("cards").select("id,printed_name,status,ordered_at,holder_person_id,ship_to,profiles!inner(first_name,last_name,address)").in("status", ["commandee", "en_route"]).order("ordered_at") as never) };
   if (tab === "conciergerie") return { rows: await q<Row[]>(c.from("concierge_cases").select("*, profiles!inner(first_name,last_name,email,phone), concierge_shares(item_id,sealed)").order("created_at", { ascending: false }) as never) };
   const s = await q<Row>(c.from("app_settings").select("launched").single() as never);
   return { rows: [], launched: s.launched };
@@ -237,13 +237,14 @@ export function ProdAdmin() {
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold">{c.printed_name}</div>
                     <div className="text-[0.85rem] text-mist">
-                      {c.holder_person_id ? `Pack bénéficiaire de ${c.profiles.first_name} ${c.profiles.last_name}` : "Carte du titulaire"} · commandée le {fmt(c.ordered_at)}
+                      {c.holder_person_id ? `Pack bénéficiaire (Coffre de ${c.profiles.first_name} ${c.profiles.last_name}), après le décès` : "Carte du titulaire"} · commandée le {fmt(c.ordered_at)}
                     </div>
-                    <div className="mt-1 whitespace-pre-line text-[0.9rem]">{c.profiles.address}</div>
+                    {/* A pack goes to the beneficiary's own address, given in their app once the death is confirmed. */}
+                    <div className="mt-1 whitespace-pre-line text-[0.9rem]">{c.holder_person_id ? (c.ship_to ?? "En attente de l'adresse du bénéficiaire") : c.profiles.address}</div>
                   </div>
                   <Badge tone="gold">{c.status === "commandee" ? "À expédier" : "En livraison"}</Badge>
                 </div>
-                <Button className="mt-3" full variant="outline" onClick={async () => (await rpc("staff_card_status", { card: c.id, new_status: c.status === "commandee" ? "en_route" : "recue" })) && load()}>
+                <Button className="mt-3" full variant="outline" disabled={c.status === "commandee" && !!c.holder_person_id && !c.ship_to} onClick={async () => (await rpc("staff_card_status", { card: c.id, new_status: c.status === "commandee" ? "en_route" : "recue" })) && load()}>
                   {c.status === "commandee" ? "Marquer expédiée" : "Marquer livrée"}
                 </Button>
               </Card>

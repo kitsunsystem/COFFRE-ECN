@@ -64,6 +64,8 @@ export const toCard = (r: Row): Card => ({
   wrappedVmk: (r.wrapped_vmk ?? undefined) as Sealed | undefined,
   boxPk: r.box_pk ?? undefined,
   salt: r.salt ?? undefined,
+  phoneId: r.phone_id ?? undefined,
+  shipTo: r.ship_to ?? undefined,
 });
 
 export const toProcedure = (r: Row): Procedure => ({

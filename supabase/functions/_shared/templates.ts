@@ -14,10 +14,12 @@ export type TemplateId =
   | "invitation-garant"
   | "cartes-commandees"
   | "a-jour"
-  | "controle-cartes"
   | "impaye"
   | "acces-fin"
-  | "nouvel-appareil";
+  | "nouvel-appareil"
+  | "demande-acces"
+  | "acces-valide"
+  | "cartes-beneficiaire";
 
 export type MailLang = "fr" | "en" | "es" | "ca";
 
@@ -62,20 +64,24 @@ export function render(id: TemplateId, d: Record<string, string> = {}, lang = "f
       return { subject: t`${d.label} : échéance le ${when(d.date)}`, title: t`Pensez à le renouveler`, body: [t`${d.label} arrive à échéance le ${when(d.date)}.`, t`Une fois renouvelé, mettez à jour la date dans votre Espace et le document dans votre Coffre.`], cta: { label: t`Mes échéances`, path: "/espace/echeances" } };
     case "a-jour":
       return { subject: t`Tout est-il à jour ?`, title: t`Un petit point sur votre Coffre`, body: [t`Un changement de banque, un nouveau contrat, un déménagement ? Prenez deux minutes pour vérifier que votre Coffre et vos échéances sont à jour.`], cta: { label: t`Vérifier`, path: "/espace" } };
-    case "controle-cartes":
-      return { subject: t`Vos cartes sont-elles toujours là ?`, title: t`Vérifiez vos 2 cartes`, body: [t`${d.ownerName} vous a confié un pack de 2 cartes. Vérifiez qu'elles sont toujours rangées à deux endroits différents.`, t`Si l'une manque, dites-le-nous : une nouvelle carte peut être appairée tant que le titulaire est en vie. Après son décès, perdre vos deux cartes ferait perdre votre accès définitivement.`] };
     case "impaye":
       return { subject: t`Votre abonnement n'est pas réglé`, title: t`Votre Coffre sera effacé sans régularisation`, body: [t`Nous n'avons pas reçu votre paiement. Sans régularisation avant le ${when(d.until)}, votre Coffre et tout son contenu seront effacés définitivement.`], cta: { label: t`Régulariser`, path: "/espace/compte" } };
     case "acces-fin":
-      return { subject: t`Le Coffre de ${d.ownerName} sera bientôt effacé`, title: t`Récupérez ce qui vous a été confié`, body: [t`Le Coffre de ${d.ownerName} reste ouvert jusqu'au ${when(d.until)}. Ensuite, il sera effacé définitivement.`, t`Ouvrez-le avec votre carte et exportez ce qui vous a été confié.`], cta: { label: t`Ouvrir avec ma carte`, path: "/coffre" } };
+      return { subject: t`Le Coffre de ${d.ownerName} sera bientôt effacé`, title: t`Récupérez ce qui vous a été confié`, body: [t`Le Coffre de ${d.ownerName} reste ouvert jusqu'au ${when(d.until)}. Ensuite, il sera effacé définitivement.`, t`Ouvrez-le dans l'application, avec votre téléphone ou votre carte, et exportez ce qui vous a été confié.`], cta: { label: t`Ouvrir le Coffre`, path: "/coffre" } };
     case "coup-dur-declare":
       return { subject: t`Important : un coup dur a été signalé`, title: t`Êtes-vous en sécurité ?`, body: [t`${d.declaredBy} a signalé un coup dur vous concernant.`, t`Si tout va bien, annulez avant le ${when(d.endsAt, true)}. Sinon, vos proches recevront uniquement ce que vous avez prévu pour ce cas.`], cta: { label: t`Tout va bien, j'annule`, path: "/espace/procedures" } };
     case "deces-delai":
       return { subject: t`Important : une procédure vous concerne`, title: t`Si vous lisez ce message, annulez`, body: [t`Une procédure de transmission a été ouverte à votre nom.`, t`Si c'est une erreur, une seule action suffit avant le ${when(d.endsAt, true)}.`], cta: { label: t`Annuler la procédure`, path: "/espace/procedures" } };
     case "acces-ouvert":
-      return { subject: t`${d.ownerName} vous a confié des éléments`, title: t`Des éléments vous attendent`, body: [t`${d.ownerName} avait prévu de vous transmettre certains éléments.`, t`Posez votre carte sur votre téléphone pour les ouvrir. Une liste de démarches et des modèles de courriers vous accompagnent.`, ...(d.until ? [t`L'accès reste ouvert jusqu'au ${when(d.until)}, puis le Coffre sera effacé définitivement : pensez à exporter ce qui vous est utile.`] : [])], cta: { label: t`Ouvrir avec ma carte`, path: "/coffre" } };
+      return { subject: t`${d.ownerName} vous a confié des éléments`, title: t`Des éléments vous attendent`, body: [t`${d.ownerName} avait prévu de vous transmettre certains éléments.`, t`Ouvrez-les dans l'application, avec Face ID et votre code, ou avec votre carte. Une liste de démarches et des modèles de courriers vous accompagnent.`, ...(d.until ? [t`L'accès reste ouvert jusqu'au ${when(d.until)}, puis le Coffre sera effacé définitivement : pensez à exporter ce qui vous est utile.`] : [])], cta: { label: t`Ouvrir le Coffre`, path: "/coffre" } };
     case "invitation-porteur":
-      return { subject: t`${d.ownerName} vous confie un pack de 2 cartes`, title: t`Vos 2 cartes arrivent`, body: [t`${d.ownerName} vous a désigné comme bénéficiaire. Vos 2 cartes n'ouvriront que ce qu'il ou elle a choisi de partager avec vous.`, t`Rangez-les dans deux endroits différents : après le décès du titulaire, perdre les deux ferait perdre votre accès définitivement.`] };
+      return { subject: t`${d.ownerName} vous désigne comme bénéficiaire`, title: t`Validez votre accès`, body: [t`${d.ownerName} vous a désigné comme bénéficiaire. Vous n'ouvrirez que ce qu'il ou elle a choisi de partager avec vous, au moment prévu.`, t`Installez l'application, connectez-vous avec cette adresse et demandez votre accès depuis votre téléphone : Face ID et un code à 6 chiffres. ${d.ownerName} le validera.`, t`Deux cartes sont aussi réservées à votre nom : elles vous seront envoyées le moment venu.`], cta: { label: t`Valider mon accès`, path: "/proche" } };
+    case "demande-acces":
+      return { subject: t`${d.name} demande l'accès à votre Coffre`, title: t`Une demande d'accès vous attend`, body: [t`${d.name} demande, depuis son téléphone, à pouvoir ouvrir ce que vous lui confiez. Demande faite le ${when(d.date, true)}.`, t`Si c'est bien lui ou elle, acceptez depuis votre Coffre, dans « Qui voit quoi ». Sinon, refusez : rien ne s'ouvre sans votre accord.`], cta: { label: t`Répondre`, path: "/coffre" } };
+    case "acces-valide":
+      return { subject: t`${d.ownerName} a validé votre accès`, title: t`Votre accès est prêt`, body: [t`${d.ownerName} a accepté votre demande. Dans l'application, avec Face ID et votre code, vous ouvrez ce qu'il ou elle vous confie, au moment prévu.`], cta: { label: t`Ouvrir l'application`, path: "/proche" } };
+    case "cartes-beneficiaire":
+      return { subject: t`Vos cartes pour le Coffre de ${d.ownerName}`, title: t`Où vous envoyer vos 2 cartes ?`, body: [t`Toutes nos condoléances. ${d.ownerName} vous avait réservé 2 cartes à votre nom.`, t`Indiquez dans l'application l'adresse où les recevoir : elles partent aussitôt et arrivent pendant le délai de vérification. Cette adresse est effacée dès leur envoi.`], cta: { label: t`Indiquer mon adresse`, path: "/proche" } };
     case "invitation-garant":
       return { subject: t`${d.ownerName} compte sur vous`, title: t`Vous êtes garant`, body: [t`${d.ownerName} vous a désigné comme garant. Votre rôle : ${d.role}.`, t`Si un coup dur ou un décès survient, vous pourrez le déclarer depuis votre Espace.`] };
     case "cartes-commandees":

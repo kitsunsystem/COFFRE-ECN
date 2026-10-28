@@ -69,22 +69,16 @@ Activer	Activate	Activar	Activar
 Touchez une carte pour la retourner.	Tap a card to flip it.	Toque una tarjeta para darle la vuelta.	Toqueu una targeta per girar-la.
 Démo : livrer	Demo: deliver	Demo: entregar	Demo: lliurar
 Les cartes de vos bénéficiaires	Your beneficiaries' cards	Las tarjetas de sus beneficiarios	Les targetes dels vostres beneficiaris
-Chaque bénéficiaire reçoit obligatoirement un pack de {0} cartes, à son nom. Elles n'ouvrent que ce que vous lui attribuez, au moment que vous avez choisi.	Every beneficiary must receive a pack of {0} cards in their name. They only open what you assign to them, at the time you chose.	Cada beneficiario recibe obligatoriamente un pack de {0} tarjetas a su nombre. Solo abren lo que usted le asigne, en el momento que haya elegido.	Cada beneficiari rep obligatòriament un pack de {0} targetes al seu nom. Només obren el que li assigneu, en el moment que hàgiu triat.
 Pack de {0} cartes · {1} active{2}	Pack of {0} cards · {1} active	Pack de {0} tarjetas · {1} activa{2}	Pack de {0} targetes · actives: {1}
-{0} peut aussi activer ses cartes depuis son propre compte, avec l'adresse {1}.	{0} can also activate their cards from their own account, with the address {1}.	{0} también puede activar sus tarjetas desde su propia cuenta, con la dirección {1}.	{0} també pot activar les seves targetes des del seu propi compte, amb l'adreça {1}.
 indiquée dans Famille	given in Family	indicada en Familia	indicada a Família
 Désigner un bénéficiaire	Choose a beneficiary	Designar un beneficiario	Designar un beneficiari
 Ajoutez d'abord vos proches dans « Famille ».	First add your loved ones in "Family".	Añada primero a sus seres queridos en «Familia».	Afegiu primer els vostres éssers estimats a «Família».
-Tous les 6 mois, nous demandons à chaque bénéficiaire si ses cartes sont toujours là.	Every 6 months, we ask each beneficiary whether their cards are still there.	Cada 6 meses preguntamos a cada beneficiario si sigue teniendo sus tarjetas.	Cada 6 mesos preguntem a cada beneficiari si encara té les seves targetes.
 Activer le pack	Activate the pack	Activar el pack	Activar el pack
 Activer vos cartes	Activate your cards	Activar sus tarjetas	Activar les vostres targetes
 Un pack de 2 cartes pour qui ?	A pack of 2 cards for whom?	¿Un pack de 2 tarjetas para quién?	Un pack de 2 targetes per a qui?
 Pack bénéficiaire : {0}. {1}	Beneficiary pack: {0}. {1}	Pack de beneficiario: {0}. {1}	Pack de beneficiari: {0}. {1}
 inclus ou payant, à décider	included or paid, to be decided	incluido o de pago, por decidir	inclòs o de pagament, per decidir
 Désactiver cette carte ?	Deactivate this card?	¿Desactivar esta tarjeta?	Voleu desactivar aquesta targeta?
-Elle ne pourra plus rien ouvrir, même avec le code. {0}	It will no longer open anything, even with the code. {0}	Ya no podrá abrir nada, ni siquiera con el código. {0}	Ja no podrà obrir res, ni tan sols amb el codi. {0}
-Vos autres cartes continuent de fonctionner.	Your other cards keep working.	Sus otras tarjetas siguen funcionando.	Les vostres altres targetes continuen funcionant.
-L'autre carte du pack continue de fonctionner, et une carte de remplacement peut être appairée.	The other card in the pack keeps working, and a replacement card can be paired.	La otra tarjeta del pack sigue funcionando y se puede vincular una tarjeta de sustitución.	L'altra targeta del pack continua funcionant i se'n pot vincular una de substitució.
 C'est votre dernière carte active : commandez-en une autre avant de la désactiver.	This is your last active card: order another one before deactivating it.	Es su última tarjeta activa: pida otra antes de desactivarla.	És la vostra última targeta activa: demaneu-ne una altra abans de desactivar-la.
 Désactiver la carte	Deactivate the card	Desactivar la tarjeta	Desactivar la targeta
 # Compte
@@ -253,7 +247,6 @@ Ouverture des accès dans	Access opens in	Apertura de los accesos en	Obertura de
 Alertes envoyées par e-mail, SMS et notification	Alerts sent by e-mail, text message and notification	Alertas enviadas por correo, SMS y notificación	Alertes enviades per correu, SMS i notificació
 Les proches désignés pour un coup dur peuvent ouvrir ce que vous leur avez attribué. Quand vous allez mieux, reprenez la main : leurs clés sont changées.	The loved ones chosen for a crisis can open what you assigned to them. When you are better, take back control: their keys are changed.	Los seres queridos designados para un imprevisto grave pueden abrir lo que les haya asignado. Cuando se encuentre mejor, retome el control: sus claves se cambian.	Els éssers estimats designats per a un imprevist greu poden obrir el que els hàgiu assignat. Quan us trobeu millor, recupereu el control: les seves claus es canvien.
 La période d'accès est terminée : le Coffre a été effacé définitivement.	The access period is over: the Vault has been erased for good.	El periodo de acceso ha terminado: el Cofre se ha borrado definitivamente.	El període d'accés ha acabat: el Cofre s'ha esborrat definitivament.
-Chaque bénéficiaire ouvre uniquement ce qui lui était destiné, avec sa carte, jusqu'au {0}. Ensuite, le Coffre est effacé définitivement. La rubrique « À effacer » a déjà été détruite sans être lue.	Each beneficiary only opens what was meant for them, with their card, until {0}. Then the Vault is erased for good. The "To erase" section has already been destroyed without being read.	Cada beneficiario abre únicamente lo que le estaba destinado, con su tarjeta, hasta el {0}. Después, el Cofre se borra definitivamente. La sección «Para borrar» ya se ha destruido sin ser leída.	Cada beneficiari obre únicament el que li estava destinat, amb la seva targeta, fins al {0}. Després, el Cofre s'esborra definitivament. La secció «Per esborrar» ja s'ha destruït sense ser llegida.
 Tout va bien, j'annule	All is well, I cancel	Todo va bien, anulo	Tot va bé, anul·lo
 Je vais mieux, je reprends la main	I'm better, I take back control	Estoy mejor, retomo el control	Estic millor, recupero el control
 Espace garant	Trusted contact area	Espacio del garante	Espai del garant
@@ -382,7 +375,6 @@ Pièce	Document	Documento	Document
 Vérifiée	Verified	Verificada	Verificada
 Refuser	Refuse	Rechazar	Rebutjar
 {0} · commandée le {1}	{0} · ordered on {1}	{0} · pedida el {1}	{0} · demanada el {1}
-Pack bénéficiaire de {0} {1}	Beneficiary pack for {0} {1}	Pack de beneficiario de {0} {1}	Pack de beneficiari de {0} {1}
 Carte du titulaire	Holder's card	Tarjeta del titular	Targeta del titular
 À expédier	To ship	Por enviar	Per enviar
 En livraison	Being delivered	En reparto	En repartiment

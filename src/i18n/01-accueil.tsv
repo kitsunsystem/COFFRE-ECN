@@ -15,7 +15,6 @@ Passeport : expire dans 30 jours	Passport: expires in 30 days	Pasaporte: caduca 
 Marc voit : Urgence et santé	Marc sees: Emergency and health	Marc ve: Urgencia y salud	Marc veu: Urgència i salut
 Famille préparée à 88 %	Family 88% prepared	Familia preparada al 88 %	Família preparada al 88 %
 Urgence	Emergency	Urgencia	Urgència
-Santé, personnes à prévenir : vos proches autorisés y accèdent tout de suite, à tout moment, avec leur carte. Et votre fiche médicale se copie dans votre téléphone.	Health, people to notify: your authorised loved ones access it right away, at any time, with their card. And your medical sheet copies into your phone.	Salud, personas a quien avisar: sus seres queridos autorizados acceden de inmediato, en cualquier momento, con su tarjeta. Y su ficha médica se copia en su teléfono.	Salut, persones a qui avisar: els vostres éssers estimats autoritzats hi accedeixen de seguida, en qualsevol moment, amb la seva targeta. I la vostra fitxa mèdica es copia al telèfon.
 Banques, codes, contrats : un garant signale la situation, un court délai s'écoule, puis seuls les éléments prévus pour ce cas s'ouvrent.	Banks, codes, contracts: a trusted contact reports the situation, a short period passes, then only the items planned for this case open.	Bancos, códigos, contratos: un garante avisa de la situación, transcurre un breve plazo y después solo se abren los elementos previstos para este caso.	Bancs, codis, contractes: un garant avisa de la situació, transcorre un termini breu i després només s'obren els elements previstos per a aquest cas.
 Veille du registre des décès, acte de décès, vérification par notre équipe : chaque bénéficiaire reçoit uniquement sa part.	Death register watch, death certificate, check by our team: each beneficiary receives only their share.	Vigilancia del registro de defunciones, certificado de defunción, verificación por nuestro equipo: cada beneficiario recibe únicamente su parte.	Vigilància del registre de defuncions, certificat de defunció, verificació pel nostre equip: cada beneficiari rep únicament la seva part.
 Trois niveaux d'accès	Three levels of access	Tres niveles de acceso	Tres nivells d'accés
@@ -27,8 +26,6 @@ Recevez vos trois cartes	Receive your three cards	Reciba sus tres tarjetas	Rebeu
 Elles sont fabriquées pour vous et livrées chez vous.	They are made for you and delivered to your home.	Se fabrican para usted y se entregan en su domicilio.	Es fabriquen per a vós i es lliuren a casa vostra.
 Activez-les avec votre téléphone	Activate them with your phone	Actívelas con su teléfono	Activeu-les amb el telèfon
 La carte crée son secret dans sa puce : il n'en sort jamais.	The card creates its secret in its chip: it never leaves it.	La tarjeta crea su secreto en su chip: nunca sale de él.	La targeta crea el seu secret al xip: no en surt mai.
-Chaque bénéficiaire reçoit 2 cartes	Each beneficiary receives 2 cards	Cada beneficiario recibe 2 tarjetas	Cada beneficiari rep 2 targetes
-À ranger dans deux endroits. Elles n'ouvrent que ce que vous lui avez attribué.	To keep in two places. They only open what you assigned to them.	Para guardar en dos lugares. Solo abren lo que usted le haya asignado.	Per guardar en dos llocs. Només obren el que li hàgiu assignat.
 Fille	Daughter	Hija	Filla
 Fils	Son	Hijo	Fill
 Urgence et santé	Emergency and health	Urgencia y salud	Urgència i salut
@@ -68,7 +65,6 @@ Non. Vous ouvrez votre Coffre avec votre carte, plus votre code ou Face ID. La c
 Que se passe-t-il si je perds une carte ?	What happens if I lose a card?	¿Qué pasa si pierdo una tarjeta?	Què passa si perdo una targeta?
 Vos deux autres cartes ouvrent toujours votre Coffre. La carte perdue est désactivée en un geste, et une nouvelle peut être appairée.	Your other two cards still open your Vault. The lost card is deactivated in one tap, and a new one can be paired.	Sus otras dos tarjetas siguen abriendo su Cofre. La tarjeta perdida se desactiva en un gesto y se puede vincular una nueva.	Les altres dues targetes continuen obrint el vostre Cofre. La targeta perduda es desactiva amb un gest i se'n pot vincular una de nova.
 Et mes bénéficiaires ?	And my beneficiaries?	¿Y mis beneficiarios?	I els meus beneficiaris?
-Chacun reçoit un pack de 2 cartes à son nom, à ranger dans deux endroits différents. Après votre décès, un bénéficiaire qui aurait perdu ses deux cartes perdrait son accès : nous le lui expliquons à la réception, et nous lui demandons régulièrement si ses cartes sont toujours là.	Each receives a pack of 2 cards in their name, to keep in two different places. After your death, a beneficiary who had lost both cards would lose their access: we explain this when they receive them, and we regularly ask them whether their cards are still there.	Cada uno recibe un pack de 2 tarjetas a su nombre, para guardar en dos lugares distintos. Tras su fallecimiento, un beneficiario que hubiera perdido sus dos tarjetas perdería su acceso: se lo explicamos al recibirlas y le preguntamos con regularidad si sigue teniéndolas.	Cadascú rep un pack de 2 targetes al seu nom, per guardar en dos llocs diferents. Després de la vostra defunció, un beneficiari que hagués perdut les dues targetes perdria l'accés: l'hi expliquem quan les rep i li preguntem regularment si encara les té.
 Est-ce un testament ?	Is it a will?	¿Es un testamento?	És un testament?
 Non. Le Coffre ne remplace ni un notaire ni un testament : il indique où se trouve l'original et aide vos proches à tout retrouver.	No. The Vault replaces neither a notary nor a will: it shows where the original is and helps your loved ones find everything.	No. El Cofre no sustituye ni a un notario ni un testamento: indica dónde está el original y ayuda a sus seres queridos a encontrarlo todo.	No. El Cofre no substitueix ni un notari ni un testament: indica on és l'original i ajuda els vostres éssers estimats a trobar-ho tot.
 Qui décide qu'il y a un coup dur ou un décès ?	Who decides there is a crisis or a death?	¿Quién decide que hay un imprevisto grave o un fallecimiento?	Qui decideix que hi ha un imprevist greu o una defunció?
@@ -154,12 +150,9 @@ Création de votre Espace…	Creating your Space…	Creando su Espacio…	Creant
 Découvrir mon Espace	Discover my Space	Descubrir mi Espacio	Descobrir el meu Espai
 J'ai déjà un compte	I already have an account	Ya tengo una cuenta	Ja tinc un compte
 # Espace bénéficiaire
-Connectez-vous avec l'adresse e-mail où vous avez reçu vos cartes	Sign in with the e-mail address where you received your cards	Inicie sesión con la dirección de correo en la que recibió sus tarjetas	Inicieu la sessió amb l'adreça de correu on vau rebre les targetes
-Identifiez-vous avec votre carte et votre code	Identify yourself with your card and your code	Identifíquese con su tarjeta y su código	Identifiqueu-vos amb la vostra targeta i el vostre codi
 Déposez l'acte de décès et votre pièce d'identité	Upload the death certificate and your ID document	Aporte el certificado de defunción y su documento de identidad	Aporteu el certificat de defunció i el vostre document d'identitat
 Notre équipe vérifie : registre INSEE, acte de décès, votre identité	Our team checks: INSEE register, death certificate, your identity	Nuestro equipo verifica: registro INSEE, certificado de defunción, su identidad	El nostre equip verifica: registre INSEE, certificat de defunció, la vostra identitat
 Un délai de {0} jours s'écoule, avec des alertes, pour éviter toute erreur	A {0}-day period runs, with alerts, to avoid any mistake	Transcurre un plazo de {0} días, con alertas, para evitar cualquier error	Transcorre un termini de {0} dies, amb alertes, per evitar qualsevol error
-Vous ouvrez ce qui vous a été confié avec votre carte, pendant {0} mois	You open what was entrusted to you with your card, for {0} months	Abre lo que se le ha confiado con su tarjeta, durante {0} meses	Obriu el que se us ha confiat amb la vostra targeta, durant {0} mesos
 votre proche	your loved one	su ser querido	el vostre ésser estimat
 Photo ou PDF uniquement, 20 Mo maximum.	Photo or PDF only, 20 MB maximum.	Solo foto o PDF, 20 MB como máximo.	Només foto o PDF, 20 MB com a màxim.
 Mon espace	My space	Mi espacio	El meu espai
@@ -169,24 +162,17 @@ Un proche nous a quittés	A loved one has passed away	Un ser querido nos ha deja
 Toutes nos condoléances. Si {0} vous a confié des éléments, voici comment y accéder. Nous vous accompagnons à chaque étape.	Our deepest sympathy. If {0} entrusted items to you, here is how to access them. We are with you at every step.	Le acompañamos en el sentimiento. Si {0} le confió elementos, así es como puede acceder a ellos. Le acompañamos en cada paso.	Us acompanyem en el sentiment. Si {0} us va confiar elements, així és com hi podeu accedir. Us acompanyem a cada pas.
 Connectez-vous avec l'adresse e-mail à laquelle vous avez été prévenu de l'envoi de vos cartes. Pas de mot de passe : vous recevez un code.	Sign in with the e-mail address at which you were told your cards had been sent. No password: you receive a code.	Inicie sesión con la dirección de correo en la que se le avisó del envío de sus tarjetas. Sin contraseña: recibirá un código.	Inicieu la sessió amb l'adreça de correu on se us va avisar de l'enviament de les targetes. Sense contrasenya: rebreu un codi.
 Me connecter	Sign in	Iniciar sesión	Iniciar la sessió
-Aucun pack de cartes n'est associé à l'adresse {0}. Seuls les bénéficiaires désignés, avec leurs cartes, peuvent accéder à un Coffre.	No card pack is linked to the address {0}. Only designated beneficiaries, with their cards, can access a Vault.	Ningún pack de tarjetas está asociado a la dirección {0}. Solo los beneficiarios designados, con sus tarjetas, pueden acceder a un Cofre.	Cap pack de targetes no està associat a l'adreça {0}. Només els beneficiaris designats, amb les seves targetes, poden accedir a un Cofre.
 Votre demande pour {0}	Your request for {0}	Su solicitud para {0}	La vostra sol·licitud per a {0}
 Acte de décès déposé	Death certificate uploaded	Certificado de defunción aportado	Certificat de defunció aportat
 Vérification par notre équipe (INSEE, acte, identité)	Check by our team (INSEE, certificate, identity)	Verificación por nuestro equipo (INSEE, certificado, identidad)	Verificació pel nostre equip (INSEE, certificat, identitat)
 Délai d'annulation	Cancellation period	Plazo de anulación	Termini d'anul·lació
-Accès ouvert avec votre carte	Access open with your card	Acceso abierto con su tarjeta	Accés obert amb la vostra targeta
 Une correspondance a été trouvée dans le registre des décès. Pour la confirmer, notre équipe a besoin de l'acte de décès.	A match was found in the death register. To confirm it, our team needs the death certificate.	Se ha encontrado una coincidencia en el registro de defunciones. Para confirmarla, nuestro equipo necesita el certificado de defunción.	S'ha trobat una coincidència al registre de defuncions. Per confirmar-la, el nostre equip necessita el certificat de defunció.
 Ouverture dans	Opens in	Apertura en	Obertura en
 Ouvrir avec ma carte	Open with my card	Abrir con mi tarjeta	Obrir amb la meva targeta
 Déposer l'acte de décès	Upload the death certificate	Aportar el certificado de defunción	Aportar el certificat de defunció
-Commencer avec ma carte	Start with my card	Empezar con mi tarjeta	Començar amb la meva targeta
-Aucune carte de bénéficiaire active sur cet appareil.	No active beneficiary card on this device.	Ninguna tarjeta de beneficiario activa en este dispositivo.	Cap targeta de beneficiari activa en aquest dispositiu.
 Se faire aider par la conciergerie	Get help from the concierge	Pedir ayuda a la conserjería	Demanar ajuda a la consergeria
-Pas de carte ? Seuls les bénéficiaires désignés, avec leurs cartes, peuvent accéder au Coffre.	No card? Only designated beneficiaries, with their cards, can access the Vault.	¿No tiene tarjeta? Solo los beneficiarios designados, con sus tarjetas, pueden acceder al Cofre.	No teniu targeta? Només els beneficiaris designats, amb les seves targetes, poden accedir al Cofre.
-Votre carte	Your card	Su tarjeta	La vostra targeta
 Posez votre carte, puis tapez votre code.	Tap your card, then type your code.	Acerque su tarjeta y escriba su código.	Acosteu la targeta i escriviu el codi.
 Les documents	The documents	Los documentos	Els documents
-{0}, votre carte est reconnue.	{0}, your card is recognised.	{0}, su tarjeta ha sido reconocida.	{0}, la vostra targeta s'ha reconegut.
 Acte de décès	Death certificate	Certificado de defunción	Certificat de defunció
 Votre pièce d'identité	Your ID document	Su documento de identidad	El vostre document d'identitat
 Photo ou PDF	Photo or PDF	Foto o PDF	Foto o PDF
@@ -198,7 +184,6 @@ Envoyer pour vérification	Send for verification	Enviar para verificación	Envia
 Déconnexion	Sign out	Cerrar sesión	Tancar la sessió
 Mon espace de proche	My area as a relative	Mi espacio de allegado	El meu espai de familiar
 Ceux qui comptent sur vous	Those who count on you	Quienes cuentan con usted	Els qui compten amb vós
-Connecté avec {0}. Vous ne voyez ici aucun contenu de leur Coffre : seulement votre rôle et vos cartes.	Signed in as {0}. You see none of their Vault's content here: only your role and your cards.	Sesión iniciada con {0}. Aquí no ve ningún contenido de su Cofre: solo su papel y sus tarjetas.	Sessió iniciada amb {0}. Aquí no veieu cap contingut del seu Cofre: només el vostre paper i les vostres targetes.
 Personne ne vous a encore désigné avec cette adresse. Si un proche l'a fait avec une autre adresse, connectez-vous avec celle-là.	No one has chosen you with this address yet. If a loved one did so with another address, sign in with that one.	Nadie le ha designado todavía con esta dirección. Si un ser querido lo hizo con otra dirección, inicie sesión con esa.	Encara ningú no us ha designat amb aquesta adreça. Si un ésser estimat ho ha fet amb una altra adreça, inicieu la sessió amb aquella.
 Bénéficiaire	Beneficiary	Beneficiario	Beneficiari
 Votre rôle : « {0} »	Your role: "{0}"	Su papel: «{0}»	El vostre paper: «{0}»

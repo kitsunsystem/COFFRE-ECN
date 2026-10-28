@@ -6,7 +6,7 @@ import { PROD } from "./env";
 import { declare, type Moment, type ProcedureKind } from "./rules";
 import { envelopeRow, itemRow, personRow, profileRow, toAccount, toCard, toCase, toDevice, toDeviceRequest, toEnvelope, toItem, toPerson, toProcedure, toReminder, toRights, toTrust } from "./rows";
 import { sb, q, friendly } from "./supabase";
-import { now, personName, toast, uid, useApp, type Account, type Card, type ConciergeCase, type DeviceRequest, type Envelope, type Guarantor, type Person, type Trust, type TrustedDevice, type VaultItem } from "./store";
+import { isPhone, now, personName, toast, uid, useApp, type Account, type Card, type ConciergeCase, type DeviceRequest, type Envelope, type Guarantor, type Person, type Trust, type TrustedDevice, type VaultItem } from "./store";
 import type { Sealed } from "./crypto";
 
 const st = () => useApp.getState();
@@ -289,9 +289,35 @@ export const orderPack = (personId: string) =>
       const rows = await q<Record<string, unknown>[]>(sb().rpc("order_pack", { person: personId }) as never);
       return st().set((x) => ({ cards: [...x.cards, ...rows.map(toCard)] }));
     }
+    // Reserved: the pack is only shipped once the death is confirmed.
     const p = st().people.find((x) => x.id === personId)!;
-    st().set((x) => ({ cards: [...x.cards, ...Array.from({ length: OFFER.packCards }, () => newCard(personId))] }));
+    st().set((x) => ({ cards: [...x.cards, ...Array.from({ length: OFFER.packCards }, () => ({ ...newCard(personId), status: "reservee" as const }))] }));
     st().email(p.email || personName(st().people, personId), "invitation-porteur", { ownerName: ownerFullName() });
+  });
+
+// A beneficiary asks, from their phone, to open what is attributed to them; the owner answers from their Coffre.
+export async function requestAccess(personId: string, pk: string) {
+  if (PROD) {
+    await q(sb().rpc("request_access", { person: personId, pk }));
+    return void (await reloadTrusts());
+  }
+  const p = st().people.find((x) => x.id === personId)!;
+  const phone: Card = { id: uid(), holderId: personId, printedName: `${p.firstName} ${p.lastName}`, status: "demandee", kind: "telephone", boxPk: pk, orderedAt: now(), extra: false };
+  st().set((x) => ({ cards: [...x.cards.filter((c) => !(c.holderId === personId && isPhone(c) && c.status === "demandee")), phone] }));
+  st().email(st().account!.email, "demande-acces", { name: phone.printedName, date: new Date(now()).toISOString() });
+}
+
+export const refuseAccess = (phone: Card) =>
+  attempt(async () => {
+    if (PROD) await q(sb().rpc("refuse_access", { card: phone.id }));
+    st().set((x) => ({ cards: x.cards.filter((c) => c.id !== phone.id) }));
+  });
+
+// After the death: where the beneficiary receives their cards (erased once they are shipped).
+export const setPackAddress = (personId: string, address: string) =>
+  attempt(async () => {
+    await q(sb().rpc("set_pack_address", { person: personId, address: address.trim() }));
+    await reloadTrusts();
   });
 
 export const orderReplacement = (lost: Card) =>
@@ -602,8 +628,11 @@ export const remote = {
   async activateOwnerCard(cardId: string, kind: string, chipId: string, wrappedVmk: Sealed) {
     if (PROD) await q(sb().rpc("activate_owner_card", { card: cardId, card_kind: kind, chip: chipId, vmk: wrappedVmk }));
   },
-  async activateHolderCard(cardId: string, kind: string, chipId: string, boxPk: string, salt: string) {
-    if (PROD) await q(sb().rpc("activate_holder_card", { card: cardId, card_kind: kind, chip: chipId, pk: boxPk, card_salt: salt }));
+  async activatePackCard(cardId: string, kind: string, chipId: string, wrapped: Sealed, salt: string, phone: string) {
+    if (PROD) await q(sb().rpc("activate_pack_card", { card: cardId, card_kind: kind, chip: chipId, wrapped, card_salt: salt, phone }));
+  },
+  async approveAccess(phone: string, added: Envelope[]) {
+    if (PROD) await q(sb().rpc("approve_access", { card: phone, envs: added.map((e) => ({ subsection_id: e.subsectionId, moment: e.moment, sealed: e.sealed })) }));
   },
   async shareConcierge(caseId: string, itemId: string, sealed: string) {
     if (PROD) await q(sb().from("concierge_shares").upsert({ case_id: caseId, item_id: itemId, sealed }, { ignoreDuplicates: true }));
@@ -621,7 +650,7 @@ export const remote = {
   },
 };
 
-// A beneficiary card opened someone else's Coffre: fetch only what the database releases to that card.
+// A relative's phone (or one of their cards) opened someone else's Coffre: only what the database releases to it.
 export async function loadHolderView(trust: Trust, card: Card) {
   const c = sb();
   const [envelopes, items, procedures] = await Promise.all([
@@ -641,5 +670,5 @@ export async function loadHolderView(trust: Trust, card: Card) {
   });
 }
 
-export const activeTrustCards = () => st().trusts.flatMap((t) => t.cards.filter((c) => c.status === "active"));
+export const activeTrustCards = () => st().trusts.flatMap((t) => t.cards.filter((c) => c.status === "active" && !isPhone(c)));
 export const trustOfCard = (cardId: string) => st().trusts.find((t) => t.cards.some((c) => c.id === cardId));

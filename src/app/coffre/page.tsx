@@ -4,6 +4,7 @@ import { ArrowLeft, Monitor, Nfc, ScanFace, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AccessUnlock, type AccessCandidate } from "@/components/access";
 import { openableCards, useCardOpen } from "@/components/card-flow";
 import { InstallApp, PhoneInbox, PhoneOpen } from "@/components/phone-open";
 import { PinPad } from "@/components/pinpad";
@@ -12,14 +13,21 @@ import { Loader } from "@/components/shell";
 import { Button, Sheet } from "@/components/ui";
 import { Aurora, Logo, NfcCard, TapReader, VaultReveal } from "@/components/visuals";
 import { driver } from "@/lib/cards";
+import { DEMO_PIN } from "@/lib/demo";
 import { PROD } from "@/lib/env";
 import { isNative, isPhoneBrowser } from "@/lib/native";
-import { personName, useApp, useSession, type OpenSession } from "@/lib/store";
+import { isPhone, personName, useApp, useSession, type OpenSession } from "@/lib/store";
 import { openSession } from "@/lib/vault";
+
+// Where the Coffre goes once open: a page of the Coffre asked for in "?suite=" (e.g. a request to answer), else the sections.
+const opened = () => {
+  const next = new URLSearchParams(location.search).get("suite");
+  return next?.startsWith("/coffre/") ? next : "/coffre/rubriques";
+};
 
 export default function Verrou() {
   const hydrated = useHydrated();
-  useApp((s) => s.cards); // re-render when a card is activated or lost
+  const cards = useApp((s) => s.cards); // re-render when a card is activated or lost
   const trusts = useApp((s) => s.trusts);
   const people = useApp((s) => s.people);
   const account = useApp((s) => s.account);
@@ -28,15 +36,22 @@ export default function Verrou() {
   const router = useRouter();
   const [faceId, setFaceId] = useState(false);
   const [viaPhone, setViaPhone] = useState(false);
+  const [relative, setRelative] = useState(false);
   const [revealing, setRevealing] = useState(false);
   const active = hydrated ? openableCards() : [];
+  // A relative's approved phone opens their part of someone else's Coffre (demo: Claire's relatives, in this browser).
+  const accesses: AccessCandidate[] = !hydrated
+    ? []
+    : PROD
+      ? trusts.flatMap((t) => t.cards.filter((c) => isPhone(c) && c.status === "active").map((c) => ({ personId: t.personId, phone: c, label: t.ownerName })))
+      : cards.filter((c) => isPhone(c) && c.status === "active").map((c) => ({ personId: c.holderId, phone: c, label: personName(people, c.holderId) }));
   const f = useCardOpen(active, () => {});
   const home = account ? "/espace" : PROD && me ? "/proche" : "/";
   // The website cannot read the cards: a computer asks the phone, a phone's browser sends to the app.
   const where = !hydrated ? null : !PROD ? "demo" : isNative() ? "app" : isPhoneBrowser() ? "phone-browser" : "computer";
 
   useEffect(() => {
-    if (session.mode !== "locked" && !f.opening && !revealing) router.replace("/coffre/rubriques");
+    if (session.mode !== "locked" && !f.opening && !revealing) router.replace(opened());
   }, [session.mode, f.opening, revealing, router]);
 
   if (!hydrated) return <Loader dark />;
@@ -77,7 +92,7 @@ export default function Verrou() {
               </p>
               <TapReader state={f.reading} light />
               {f.error && <p className="mb-3 font-semibold text-coral-soft">{f.error}</p>}
-              {active.length === 0 ? (
+              {active.length === 0 && accesses.length === 0 ? (
                 <div className="w-full space-y-3">
                   <p className="text-paper/70">Aucune carte n&apos;est encore active.</p>
                   <Button full variant="gold" href={account ? "/espace/cartes" : PROD && me ? "/proche" : "/connexion"}>
@@ -85,8 +100,15 @@ export default function Verrou() {
                   </Button>
                 </div>
               ) : (
-                <Button full variant="gold" icon={<Nfc className="h-5 w-5" />} disabled={f.reading === "reading" || f.opening} onClick={() => f.start()}>
-                  {f.reading === "reading" ? "Lecture de la carte…" : "Poser ma carte"}
+                active.length > 0 && (
+                  <Button full variant="gold" icon={<Nfc className="h-5 w-5" />} disabled={f.reading === "reading" || f.opening} onClick={() => f.start()}>
+                    {f.reading === "reading" ? "Lecture de la carte…" : "Poser ma carte"}
+                  </Button>
+                )
+              )}
+              {accesses.length > 0 && (
+                <Button className="mt-3" full variant={active.length ? "light" : "gold"} icon={<ScanFace className="h-5 w-5" />} onClick={() => setRelative(true)}>
+                  {where === "demo" ? "Démo : ouvrir comme un proche" : "Ouvrir avec Face ID et mon code"}
                 </Button>
               )}
               {where === "app" && (
@@ -139,7 +161,20 @@ export default function Verrou() {
         </div>
       </Sheet>
 
-      {(f.opening || revealing) && session.mode !== "locked" && <VaultReveal onDone={() => router.replace("/coffre/rubriques")} />}
+      <Sheet open={relative} onClose={() => setRelative(false)} title={where === "demo" ? "Démo : quel proche êtes-vous ?" : "Mon accès de proche"} dark>
+        <AccessUnlock
+          dark
+          candidates={accesses}
+          intro={where === "demo" ? `Son téléphone, Face ID, puis son code : ${DEMO_PIN}.` : "Face ID, puis votre code d'accès."}
+          onKeys={async (keys) => {
+            setRelative(false);
+            setRevealing(true);
+            await openSession(keys);
+          }}
+        />
+      </Sheet>
+
+      {(f.opening || revealing) && session.mode !== "locked" && <VaultReveal onDone={() => router.replace(opened())} />}
     </div>
   );
 }

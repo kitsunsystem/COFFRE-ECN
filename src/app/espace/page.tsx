@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { ArrowRight, Bell, CalendarClock, Check, ChevronRight, Compass, ConciergeBell, CreditCard, HeartPulse, LifeBuoy, Lock, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight, Bell, CalendarClock, Check, ChevronRight, Compass, ConciergeBell, CreditCard, HeartPulse, LifeBuoy, Lock, ShieldCheck, Smartphone, Users } from "lucide-react";
 import Link from "next/link";
 import { useShallow } from "zustand/react/shallow";
 import { NamedIcon, TONES } from "@/components/icons";
@@ -10,7 +10,7 @@ import { rise, ScoreRing, stagger, Tilt } from "@/components/visuals";
 import { RUBRICS } from "@/lib/aide";
 import { PROD } from "@/lib/env";
 import { progress } from "@/lib/score";
-import { useApp } from "@/lib/store";
+import { isPhone, personName, useApp } from "@/lib/store";
 
 export default function Accueil() {
   const s = useApp(useShallow((x) => ({ account: x.account!, cards: x.cards, guarantors: x.guarantors, vault: x.vault, people: x.people, reminders: x.reminders, set: x.set })));
@@ -22,6 +22,7 @@ export default function Accueil() {
     return d > t && d - t < 90 * 86_400_000;
   });
   const hour = new Date(t).getHours();
+  const asking = s.cards.filter((c) => isPhone(c) && c.status === "demandee");
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
@@ -90,6 +91,23 @@ export default function Accueil() {
             </span>
             <ChevronRight className="h-5 w-5 text-mist" />
           </Link>
+        </motion.div>
+      )}
+
+      {asking.length > 0 && (
+        <motion.div variants={rise}>
+          <Notice tone="gold">
+            <div className="flex items-start gap-3">
+              <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-gold-deep" />
+              <div>
+                <div className="font-semibold">{asking.length === 1 ? `${personName(s.people, asking[0].holderId)} demande l'accès à ce que vous lui confiez` : `${asking.length} demandes d'accès vous attendent`}</div>
+                <div className="text-ink-soft">Répondez depuis votre Coffre, dans « Qui voit quoi ». Rien ne s&apos;ouvre sans votre accord.</div>
+                <Link href="/coffre?suite=/coffre/droits" className="mt-1 inline-block font-semibold text-gold-deep underline">
+                  Ouvrir le Coffre
+                </Link>
+              </div>
+            </div>
+          </Notice>
         </motion.div>
       )}
 

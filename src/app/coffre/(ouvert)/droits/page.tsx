@@ -3,11 +3,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, CreditCard, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AccessRequests } from "@/components/access";
 import { NamedIcon } from "@/components/icons";
 import { Segmented } from "@/components/ui";
 import { moment, MOMENTS, type Moment } from "@/lib/rules";
 import { SECTIONS } from "@/lib/sections";
-import { packOf, useApp, useSession } from "@/lib/store";
+import { packOf, phoneOf, useApp, useSession } from "@/lib/store";
 import { setRight, setSectionRight } from "@/lib/vault";
 
 const OPTIONS = MOMENTS.map((m) => ({ id: m.id, label: m.short }));
@@ -19,14 +20,15 @@ export default function Droits() {
   const account = useApp((s) => s.account);
   const mode = useSession((s) => s.session.mode);
   const router = useRouter();
-  // Every beneficiary has a 2-card pack; rights belong to the person and open with either card.
+  // Every beneficiary has a 2-card pack; rights belong to the person and open with their phone (their cards, after the death).
   const beneficiaries = people.filter((p) => packOf({ cards }, p.id).length > 0);
   const [personId, setPersonId] = useState<string | undefined>(beneficiaries[0]?.id);
   const [open, setOpen] = useState<string | null>("urgence");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const r = (personId && rights[personId]) || {};
-  const activeCards = personId ? packOf({ cards }, personId).filter((c) => c.status === "active").length : 0;
+  const phone = personId ? phoneOf({ cards }, personId) : undefined;
+  const firstName = people.find((p) => p.id === personId)?.firstName ?? "";
 
   useEffect(() => {
     if (mode === "holder") router.replace("/coffre/rubriques");
@@ -49,7 +51,9 @@ export default function Droits() {
     <div>
       <div className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-gold-soft">Qui voit quoi</div>
       <h1 className="mt-2 text-[2rem] font-semibold leading-tight">Pour chacun, au bon moment</h1>
-      <p className="mt-2 text-paper/65">Pour chaque bénéficiaire et chaque rubrique, choisissez quand il pourra l&apos;ouvrir avec ses cartes. Par défaut : jamais.</p>
+      <p className="mt-2 text-paper/65">Pour chaque bénéficiaire et chaque rubrique, choisissez quand il pourra l&apos;ouvrir : depuis son téléphone, avec Face ID et son code, puis avec ses cartes après votre décès. Par défaut : jamais.</p>
+
+      <AccessRequests />
 
       <div className="mt-4 space-y-1.5 text-[0.82rem] text-paper/70">
         {MOMENTS.map((m) => (
@@ -62,7 +66,7 @@ export default function Droits() {
       {beneficiaries.length === 0 ? (
         <div className="mt-8 rounded-[1.6rem] bg-paper/5 p-6 text-center ring-1 ring-paper/10">
           <CreditCard className="mx-auto h-8 w-8 text-gold-soft" />
-          <p className="mt-3 text-paper/75">Désignez d&apos;abord un bénéficiaire : il reçoit un pack de 2 cartes à son nom.</p>
+          <p className="mt-3 text-paper/75">Désignez d&apos;abord un bénéficiaire : un pack de 2 cartes est réservé à son nom.</p>
           <p className="mt-2 text-[0.88rem] text-paper/55">Fermez le Coffre, puis allez dans Espace › Mes cartes.</p>
         </div>
       ) : (
@@ -75,7 +79,11 @@ export default function Droits() {
               </button>
             ))}
           </div>
-          {activeCards === 0 && <p className="mt-3 text-[0.88rem] text-gold-soft">Ses cartes ne sont pas encore activées : vos choix s&apos;appliqueront dès leur activation.</p>}
+          {phone?.status !== "active" && (
+            <p className="mt-3 text-[0.88rem] text-gold-soft">
+              {phone ? `${firstName} attend votre accord, plus haut : vos choix s'appliqueront dès que vous l'aurez accepté.` : `${firstName} n'a pas encore demandé son accès depuis son téléphone : vos choix s'appliqueront dès que vous l'aurez accepté.`}
+            </p>
+          )}
           {error && <p className="mt-3 font-semibold text-coral-soft">{error}</p>}
 
           <div className="mt-5 space-y-3">

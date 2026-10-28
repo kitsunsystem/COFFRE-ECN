@@ -1,9 +1,9 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, Check, ConciergeBell, FileUp, Hourglass, Lock, LogIn, Nfc, SearchCheck, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, ConciergeBell, FileUp, Hourglass, Lock, LogIn, ScanFace, SearchCheck, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { CardUnlock } from "@/components/card-flow";
+import { AccessUnlock } from "@/components/access";
 import { useHydrated, useNow } from "@/components/providers";
 import { Loader } from "@/components/shell";
 import { Button, Card, Notice, Sheet } from "@/components/ui";
@@ -12,20 +12,19 @@ import { declareDeath } from "@/lib/api";
 import { DELAYS, POST_DEATH_ACCESS_DAYS } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { procedureStatus, type Procedure } from "@/lib/rules";
-import { holderCards, personName, useApp, useSession } from "@/lib/store";
-import { lock } from "@/lib/vault";
+import { isPhone, personName, useApp } from "@/lib/store";
 
 const STEPS = [
-  { icon: Nfc, t: PROD ? "Connectez-vous avec l'adresse e-mail où vous avez reçu vos cartes" : "Identifiez-vous avec votre carte et votre code" },
+  { icon: ScanFace, t: PROD ? "Connectez-vous avec l'adresse e-mail à laquelle vous avez été désigné" : "Identifiez-vous avec votre téléphone : Face ID et votre code" },
   { icon: FileUp, t: "Déposez l'acte de décès et votre pièce d'identité" },
   { icon: SearchCheck, t: "Notre équipe vérifie : registre INSEE, acte de décès, votre identité" },
   { icon: Hourglass, t: `Un délai de ${Math.round(DELAYS.deces / 86_400_000)} jours s'écoule, avec des alertes, pour éviter toute erreur` },
-  { icon: Lock, t: `Vous ouvrez ce qui vous a été confié avec votre carte, pendant ${Math.round(POST_DEATH_ACCESS_DAYS / 30)} mois` },
+  { icon: Lock, t: `Vous ouvrez ce qui vous a été confié avec votre téléphone, ou vos cartes reçues pendant le délai, pendant ${Math.round(POST_DEATH_ACCESS_DAYS / 30)} mois` },
 ];
 const ACCEPT = ["image/", "application/pdf"];
 const MAX = 20 * 1024 * 1024;
 
-// The beneficiary's side of a death: certificate, verification, delay, then opening with their own card.
+// The beneficiary's side of a death: certificate, verification, delay (their cards arrive), then opening their part.
 export default function Beneficiaire() {
   const hydrated = useHydrated();
   const cards = useApp((s) => s.cards);
@@ -35,7 +34,7 @@ export default function Beneficiaire() {
   const trusts = useApp((s) => s.trusts);
   const ownProcedures = useApp((s) => s.procedures);
   const t = useNow(1000);
-  const [step, setStep] = useState<"intro" | "card" | "docs">("intro");
+  const [step, setStep] = useState<"intro" | "phone" | "docs">("intro");
   const [who, setWho] = useState("");
   const [acte, setActe] = useState<File | null>(null);
   const [idDoc, setIdDoc] = useState<File | null>(null);
@@ -50,11 +49,12 @@ export default function Beneficiaire() {
   const trust = PROD ? (mine.find((x) => x.ownerId === ownerId) ?? mine[0]) : undefined;
   const owner = PROD ? (trust?.ownerName ?? "votre proche") : account ? `${account.firstName} ${account.lastName}` : "votre proche";
   const procedures: Procedure[] = PROD ? (trust?.procedures ?? []) : ownProcedures;
-  const active = PROD ? (trust?.cards.filter((c) => c.status === "active") ?? []) : holderCards({ cards }).filter((c) => c.status === "active");
+  // Demo: the beneficiaries' approved phones, in this browser, prove who is speaking.
+  const phones = cards.filter((c) => isPhone(c) && c.status === "active");
   const current = procedures.find((p) => p.kind === "deces" && ["verification", "delai", "terminee"].includes(procedureStatus(p, t)) && !p.erasedAt);
   const status = current && procedureStatus(current, t);
   const hasActe = current && (PROD ? (current as { hasActe?: boolean }).hasActe : !!current.acte);
-  const canStart = PROD ? !!trust : active.length > 0;
+  const canStart = PROD ? !!trust : phones.length > 0;
 
   async function submit() {
     setBusy(true);
@@ -94,7 +94,7 @@ export default function Beneficiaire() {
 
         {PROD && !me && (
           <Card className="mt-6">
-            <p className="text-ink-soft">Connectez-vous avec l&apos;adresse e-mail à laquelle vous avez été prévenu de l&apos;envoi de vos cartes. Première fois ? Créez votre accès : un code de confirmation vous est envoyé.</p>
+            <p className="text-ink-soft">Connectez-vous avec l&apos;adresse e-mail à laquelle vous avez été désigné comme bénéficiaire. Première fois ? Créez votre accès : un code de confirmation vous est envoyé.</p>
             <Button className="mt-4" full variant="gold" href="/connexion?suite=/beneficiaire" icon={<LogIn className="h-5 w-5" />}>
               Me connecter
             </Button>
@@ -102,7 +102,7 @@ export default function Beneficiaire() {
         )}
         {PROD && me && mine.length === 0 && (
           <div className="mt-6">
-            <Notice tone="gold">Aucun pack de cartes n&apos;est associé à l&apos;adresse {me.email}. Seuls les bénéficiaires désignés, avec leurs cartes, peuvent accéder à un Coffre.</Notice>
+            <Notice tone="gold">Aucun Coffre ne vous désigne comme bénéficiaire avec l&apos;adresse {me.email}. Seuls les bénéficiaires désignés peuvent y accéder.</Notice>
           </div>
         )}
         {PROD && mine.length > 1 && (
@@ -123,7 +123,7 @@ export default function Beneficiaire() {
                 { t: "Acte de décès déposé", done: !!hasActe },
                 { t: "Vérification par notre équipe (INSEE, acte, identité)", done: status !== "verification" },
                 { t: "Délai d'annulation", done: status === "terminee" },
-                { t: "Accès ouvert avec votre carte", done: status === "terminee" },
+                { t: "Accès ouvert : votre téléphone ou vos cartes", done: status === "terminee" },
               ].map((x) => (
                 <li key={x.t} className="flex items-center gap-3">
                   <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${x.done ? "bg-sage text-paper" : "bg-ink/[0.07]"}`}>{x.done && <Check className="h-4 w-4" strokeWidth={3} />}</span>
@@ -146,11 +146,11 @@ export default function Beneficiaire() {
             )}
             {status === "terminee" && (
               <Button className="mt-5" full variant="gold" href="/coffre" icon={<Lock className="h-5 w-5" />}>
-                Ouvrir avec ma carte
+                Ouvrir le Coffre
               </Button>
             )}
             {status === "verification" && !hasActe && (
-              <Button className="mt-4" full onClick={() => setStep(PROD ? "docs" : "card")} icon={<FileUp className="h-5 w-5" />}>
+              <Button className="mt-4" full onClick={() => setStep(PROD ? "docs" : "phone")} icon={<FileUp className="h-5 w-5" />}>
                 Déposer l&apos;acte de décès
               </Button>
             )}
@@ -168,10 +168,10 @@ export default function Beneficiaire() {
                   </motion.div>
                 ))}
               </div>
-              <Button className="mt-6" full variant="gold" icon={<FileUp className="h-5 w-5" />} onClick={() => setStep(PROD ? "docs" : "card")} disabled={!canStart}>
-                {PROD ? "Déposer l'acte de décès" : "Commencer avec ma carte"}
+              <Button className="mt-6" full variant="gold" icon={<FileUp className="h-5 w-5" />} onClick={() => setStep(PROD ? "docs" : "phone")} disabled={!canStart}>
+                {PROD ? "Déposer l'acte de décès" : "Commencer avec mon téléphone"}
               </Button>
-              {!PROD && active.length === 0 && <p className="mt-2 text-center text-[0.88rem] text-mist">Aucune carte de bénéficiaire active sur cet appareil.</p>}
+              {!PROD && phones.length === 0 && <p className="mt-2 text-center text-[0.88rem] text-mist">Aucun accès de bénéficiaire validé sur cet appareil.</p>}
             </>
           )
         )}
@@ -182,20 +182,17 @@ export default function Beneficiaire() {
               Se faire aider par la conciergerie
             </Button>
           )}
-          <p className="text-center text-[0.85rem] text-mist">Pas de carte ? Seuls les bénéficiaires désignés, avec leurs cartes, peuvent accéder au Coffre.</p>
+          <p className="text-center text-[0.85rem] text-mist">Seuls les bénéficiaires désignés peuvent accéder au Coffre, avec leur téléphone validé ou leurs cartes.</p>
         </div>
       </div>
 
-      {/* Demo: the card and its code prove who you are. Production: your account (code by e-mail) does, then the team checks your ID. */}
-      <Sheet open={step === "card"} onClose={() => setStep("intro")} title="Votre carte">
-        <CardUnlock
-          candidates={active}
-          intro="Posez votre carte, puis tapez votre code."
-          onOpened={() => {
-            const ses = useSession.getState().session;
-            const card = ses.mode === "holder" ? cards.find((c) => c.id === ses.cardId) : undefined;
-            setWho(card ? personName(people, card.holderId) : "");
-            lock(); // only proves who you are; nothing opens before the verification and the delay
+      {/* Demo: the approved phone and its code prove who you are (nothing opens here). Production: your account does, then the team checks your ID. */}
+      <Sheet open={step === "phone"} onClose={() => setStep("intro")} title="Votre accès">
+        <AccessUnlock
+          candidates={phones.map((c) => ({ personId: c.holderId, phone: c, label: personName(people, c.holderId) }))}
+          intro="Votre téléphone, Face ID, puis votre code."
+          onKeys={(keys) => {
+            setWho(personName(people, cards.find((c) => c.id === keys.cardId)?.holderId ?? ""));
             setStep("docs");
           }}
         />
@@ -206,7 +203,7 @@ export default function Beneficiaire() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
             {!PROD && (
               <p className="flex items-center gap-2 font-semibold text-sage">
-                <ShieldCheck className="h-5 w-5" /> {who}, votre carte est reconnue.
+                <ShieldCheck className="h-5 w-5" /> {who}, votre accès est reconnu.
               </p>
             )}
             {[

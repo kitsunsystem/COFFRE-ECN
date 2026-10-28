@@ -1,18 +1,20 @@
 "use client";
 import { motion } from "motion/react";
-import { CircleAlert, Gift, Plus, RefreshCw, Truck } from "lucide-react";
+import { CircleAlert, Gift, Plus, RefreshCw, Smartphone, Truck } from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { Activation, PACK_WARNING, type ActivationMode } from "@/components/activation";
+import { Activation, PACK_INFO, type ActivationMode } from "@/components/activation";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { NfcCard } from "@/components/visuals";
 import { declareLost, orderOwnerCards, orderPack, orderReplacement, saveAccount } from "@/lib/api";
 import { OFFER } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { isNative } from "@/lib/native";
-import { ownerCards, packOf, personName, useApp, type Card as CardT, type CardStatus } from "@/lib/store";
+import { isPhone, ownerCards, phoneOf, personName, useApp, type Card as CardT, type CardStatus } from "@/lib/store";
 
 const STATUS: Record<CardStatus, { label: string; tone: "ink" | "gold" | "sage" | "coral" | "mist" }> = {
+  reservee: { label: "Réservée", tone: "mist" },
+  demandee: { label: "En attente", tone: "gold" },
   commandee: { label: "En fabrication", tone: "gold" },
   en_route: { label: "En livraison", tone: "gold" },
   recue: { label: "À activer", tone: "coral" },
@@ -54,8 +56,8 @@ export default function Cartes() {
           Carte perdue
         </button>
       )}
-      {/* A replacement only while the set is short of a card (3 for the owner, 2 in a pack). */}
-      {c.status === "perdue" && s.cards.filter((x) => x.holderId === c.holderId && x.status !== "perdue").length < (c.holderId === "owner" ? OFFER.ownerCards : OFFER.packCards) && (
+      {/* A replacement only while the owner is short of a card (a pack only leaves at the death). */}
+      {c.status === "perdue" && c.holderId === "owner" && mine.filter((x) => x.status !== "perdue").length < OFFER.ownerCards && (
         <button disabled={busy} onClick={() => order(() => orderReplacement(c))} className="flex items-center gap-1 rounded-full px-3 py-1.5 text-[0.8rem] font-semibold ring-1 ring-line">
           <RefreshCw className="h-3.5 w-3.5" /> Remplacer
         </button>
@@ -119,13 +121,16 @@ export default function Cartes() {
 
       <div className="mt-10">
         <h2 className="text-[1.5rem] font-semibold">Les cartes de vos bénéficiaires</h2>
-        <p className="mt-1 text-ink-soft">Chaque bénéficiaire reçoit obligatoirement un pack de {OFFER.packCards} cartes, à son nom. Elles n&apos;ouvrent que ce que vous lui attribuez, au moment que vous avez choisi.</p>
+        <p className="mt-1 text-ink-soft">
+          Chaque bénéficiaire a obligatoirement un pack de {OFFER.packCards} cartes à son nom. Il est réservé dès sa désignation et ne part qu&apos;à votre décès : rangées des années, des cartes se perdent, et leur puce vieillit. D&apos;ici là, chacun ouvre ce que vous lui confiez depuis son téléphone, avec Face ID et son code, une fois sa demande acceptée.
+        </p>
         <div className="mt-5 space-y-5">
           {beneficiaries.map((p) => {
-            const all = s.cards.filter((c) => c.holderId === p.id);
+            const all = s.cards.filter((c) => c.holderId === p.id && !isPhone(c));
             const received = all.filter(activatable);
             const shipping = all.filter((c) => NEXT[c.status]);
-            const activeCount = packOf(s, p.id).filter((c) => c.status === "active").length;
+            const activeCount = all.filter((c) => c.status === "active").length;
+            const phone = phoneOf(s, p.id);
             return (
               <Card key={p.id} layout className="!p-4">
                 <div className="flex items-center justify-between gap-3">
@@ -134,12 +139,13 @@ export default function Cartes() {
                       {p.firstName} {p.lastName}
                     </div>
                     <div className="text-[0.85rem] text-mist">
-                      Pack de {OFFER.packCards} cartes · {activeCount} active{activeCount > 1 ? "s" : ""}
+                      {all.every((c) => c.status === "reservee") ? `Pack de ${OFFER.packCards} cartes · réservé, envoyé au décès` : `Pack de ${OFFER.packCards} cartes · ${activeCount} active${activeCount > 1 ? "s" : ""}`}
                     </div>
                   </div>
-                  {received.length > 0 && (
-                    <Button className="!min-h-10 !px-4 !text-[0.9rem]" onClick={() => setMode({ kind: "holder", cards: received, who: `${p.firstName} ${p.lastName}` })}>
-                      Activer
+                  {/* Production: the beneficiary activates them in their own app, with their phone. */}
+                  {!PROD && received.length > 0 && phone?.status === "active" && (
+                    <Button className="!min-h-10 !px-4 !text-[0.9rem]" onClick={() => setMode({ kind: "holder", cards: received, who: `${p.firstName} ${p.lastName}`, phone })}>
+                      Démo : activer
                     </Button>
                   )}
                   {!PROD && shipping.length > 0 && (
@@ -148,7 +154,21 @@ export default function Cartes() {
                     </button>
                   )}
                 </div>
-                {PROD && received.length > 0 && <p className="mt-2 text-[0.85rem] text-mist">{p.firstName} peut aussi activer ses cartes depuis son propre compte, avec l&apos;adresse {p.email || "indiquée dans Famille"}.</p>}
+                <div className="mt-3 flex items-center gap-3 rounded-2xl bg-ink/[0.04] p-3">
+                  <Smartphone className={`h-5 w-5 shrink-0 ${phone?.status === "active" ? "text-sage" : "text-gold-deep"}`} />
+                  <span className="flex-1 text-[0.88rem]">
+                    {phone?.status === "active"
+                      ? `Accès validé sur son téléphone le ${new Date(phone.activatedAt ?? phone.orderedAt).toLocaleDateString("fr-FR", { dateStyle: "long" })}.`
+                      : phone
+                        ? "Demande d'accès en attente : répondez dans le Coffre, « Qui voit quoi »."
+                        : `Pas encore d'accès : ${p.firstName} installe l'application et le demande, avec l'adresse ${p.email || "indiquée dans Famille"}.`}
+                  </span>
+                  {phone?.status === "active" && (
+                    <button onClick={() => setLost(phone)} className="shrink-0 text-[0.85rem] font-semibold text-coral">
+                      Retirer
+                    </button>
+                  )}
+                </div>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   {all.map((c) => (
                     <div key={c.id} className="space-y-1.5">
@@ -168,7 +188,6 @@ export default function Cartes() {
           Désigner un bénéficiaire
         </Button>
         {s.people.length === 0 && <p className="mt-2 text-center text-[0.88rem] text-mist">Ajoutez d&apos;abord vos proches dans « Famille ».</p>}
-        <p className="mt-3 text-center text-[0.85rem] text-mist">Tous les 6 mois, nous demandons à chaque bénéficiaire si ses cartes sont toujours là.</p>
       </div>
 
       <Sheet open={!!mode} onClose={() => setMode(null)} title={mode?.kind === "holder" ? "Activer le pack" : "Activer vos cartes"}>
@@ -179,7 +198,7 @@ export default function Cartes() {
         <p className="mb-4 text-ink-soft">
           {/* No price in the apps (store rules). */}
           {!isNative() && <>Pack bénéficiaire : {OFFER.packPrice ? `${OFFER.packPrice} €` : "inclus ou payant, à décider"}. </>}
-          {PACK_WARNING}
+          {PACK_INFO}
         </p>
         <div className="space-y-2.5">
           {s.people
@@ -226,10 +245,13 @@ export default function Cartes() {
         </Button>
       </Sheet>
 
-      <Sheet open={!!lost} onClose={() => setLost(null)} title="Désactiver cette carte ?">
+      <Sheet open={!!lost} onClose={() => setLost(null)} title={lost && isPhone(lost) ? "Retirer ce téléphone ?" : "Désactiver cette carte ?"}>
         <p className="text-ink-soft">
-          Elle ne pourra plus rien ouvrir, même avec le code.{" "}
-          {lost?.holderId === "owner" ? "Vos autres cartes continuent de fonctionner." : "L'autre carte du pack continue de fonctionner, et une carte de remplacement peut être appairée."}
+          {lost && isPhone(lost)
+            ? "Il n'ouvrira plus rien, tout de suite. Votre proche pourra redemander l'accès depuis un autre téléphone."
+            : lost?.holderId === "owner"
+              ? "Elle ne pourra plus rien ouvrir, même avec le code. Vos autres cartes continuent de fonctionner."
+              : "Elle ne pourra plus rien ouvrir, même avec le code. L'autre carte et son téléphone continuent de fonctionner."}
         </p>
         {lost?.holderId === "owner" && mine.filter((c) => c.status === "active").length < 2 && <p className="mt-3 font-semibold text-coral">C&apos;est votre dernière carte active : commandez-en une autre avant de la désactiver.</p>}
         <Button
@@ -241,7 +263,7 @@ export default function Cartes() {
             if (lost && (await run(() => declareLost(lost)))) setLost(null);
           }}
         >
-          Désactiver la carte
+          {lost && isPhone(lost) ? "Retirer l'accès" : "Désactiver la carte"}
         </Button>
       </Sheet>
     </div>

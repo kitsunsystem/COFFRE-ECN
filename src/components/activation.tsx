@@ -1,19 +1,21 @@
 "use client";
-// Activating cards: the owner's own, or a beneficiary's pack (from the owner's phone, or from the beneficiary's account).
+// Activating cards: the owner's own, or a beneficiary's pack, received after the death (from their approved phone).
 import { AnimatePresence, motion } from "motion/react";
 import { Nfc } from "lucide-react";
 import { useState } from "react";
 import { driver, enroll, needsPin } from "@/lib/cards";
-import { ownerCards, useApp, useSession, type Card } from "@/lib/store";
-import { activateHolderCard, activateOwnerCard } from "@/lib/vault";
+import { ownerCards, useApp, useSession, type Card, type HolderSession } from "@/lib/store";
+import { activateOwnerCard, activatePackCard } from "@/lib/vault";
+import { AccessUnlock } from "./access";
 import { CardUnlock } from "./card-flow";
 import { PinPad } from "./pinpad";
 import { Button, Notice } from "./ui";
 import { TapReader, type TapState } from "./visuals";
 
-export const PACK_WARNING = "Rangez les 2 cartes dans deux endroits différents. Tant que le titulaire est en vie, une carte perdue se remplace. Après son décès, perdre les deux cartes fait perdre l'accès définitivement.";
+export const PACK_INFO = "Les 2 cartes sont réservées à son nom et lui sont envoyées à votre décès, pendant le délai de vérification. D'ici là, il ou elle ouvre ce que vous lui confiez depuis son téléphone, avec Face ID et son code, une fois sa demande acceptée.";
 
-export type ActivationMode = { kind: "owner" | "holder"; cards: Card[]; who: string };
+// holder: the beneficiary's own cards, activated with their approved phone (`phone`), whose key each card keeps.
+export type ActivationMode = { kind: "owner"; cards: Card[]; who: string } | { kind: "holder"; cards: Card[]; who: string; phone: Card };
 
 export function Activation({ mode, onClose }: { mode: ActivationMode; onClose: () => void }) {
   const newKind = driver();
@@ -21,8 +23,9 @@ export function Activation({ mode, onClose }: { mode: ActivationMode; onClose: (
   const st = useApp.getState();
   const openers = ownerCards(st).filter((c) => c.status === "active");
   const needOpen = mode.kind === "owner" && openers.length > 0 && useSession.getState().session.mode !== "owner";
-  const [phase, setPhase] = useState<"open" | "code" | "confirm" | "tap" | "done">(needOpen ? "open" : pinNeeded ? "code" : "tap");
+  const [phase, setPhase] = useState<"open" | "phone" | "code" | "confirm" | "tap" | "done">(mode.kind === "holder" ? "phone" : needOpen ? "open" : pinNeeded ? "code" : "tap");
   const [pin, setPin] = useState("");
+  const [phoneKeys, setPhoneKeys] = useState<HolderSession | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tap, setTap] = useState<TapState>("idle");
   const [i, setI] = useState(0);
@@ -35,7 +38,7 @@ export function Activation({ mode, onClose }: { mode: ActivationMode; onClose: (
     try {
       const enrolled = await enroll(current);
       if (mode.kind === "owner") await activateOwnerCard(current, enrolled, pinNeeded ? pin : undefined);
-      else await activateHolderCard(current, enrolled, pinNeeded ? pin : undefined);
+      else await activatePackCard(current, enrolled, pinNeeded ? pin : undefined, phoneKeys!);
       setTap("done");
       setTimeout(() => {
         setTap("idle");
@@ -60,6 +63,19 @@ export function Activation({ mode, onClose }: { mode: ActivationMode; onClose: (
               onOpened={(_m, typed) => {
                 if (typed) setPin(typed);
                 setPhase(pinNeeded && !typed ? "code" : "tap");
+              }}
+            />
+          </motion.div>
+        )}
+        {phase === "phone" && mode.kind === "holder" && (
+          <motion.div key="phone" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
+            <AccessUnlock
+              candidates={[{ personId: mode.phone.holderId, phone: mode.phone, label: mode.who }]}
+              intro="Confirmez d'abord votre accès : chaque carte gardera la clé de votre téléphone, protégée par votre code."
+              onKeys={(keys, typed) => {
+                setPhoneKeys(keys);
+                setPin(typed);
+                setPhase("tap");
               }}
             />
           </motion.div>
@@ -103,10 +119,10 @@ export function Activation({ mode, onClose }: { mode: ActivationMode; onClose: (
           <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
             <TapReader state="done" />
             <div className="text-[1.3rem] font-semibold">{list.length > 1 ? "Les cartes sont actives" : "La carte est active"}</div>
-            <p className="mt-2 text-ink-soft">{mode.kind === "owner" ? "Chacune ouvre votre Coffre, avec votre code." : `${mode.who} pourra ouvrir ce qui lui est attribué, avec l'une ou l'autre carte.`}</p>
+            <p className="mt-2 text-ink-soft">{mode.kind === "owner" ? "Chacune ouvre votre Coffre, avec votre code." : "Chacune ouvre votre part avec votre code, même sans ce téléphone."}</p>
             {mode.kind === "holder" && (
               <div className="mt-4 text-left">
-                <Notice tone="coral">{PACK_WARNING}</Notice>
+                <Notice tone="coral">Rangez les 2 cartes dans deux endroits différents : si vous perdez ou changez de téléphone, elles seules vous donnent encore accès.</Notice>
               </div>
             )}
             <Button full className="mt-6" variant="gold" onClick={onClose}>

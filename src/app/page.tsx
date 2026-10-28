@@ -124,7 +124,7 @@ function Hero() {
 
 // The three access levels, in the same colours as everywhere in the app (lib/rules.ts MOMENTS).
 const LEVELS = [
-  { icon: HeartPulse, tone: "bg-sage-soft text-sage", title: "Urgence", text: "Santé, personnes à prévenir : vos proches autorisés y accèdent tout de suite, à tout moment, avec leur carte. Et votre fiche médicale se copie dans votre téléphone." },
+  { icon: HeartPulse, tone: "bg-sage-soft text-sage", title: "Urgence", text: "Santé, personnes à prévenir : vos proches autorisés y accèdent tout de suite, à tout moment, depuis leur téléphone, avec Face ID et leur code. Et votre fiche médicale se copie dans votre téléphone." },
   { icon: Siren, tone: "bg-coral-soft text-coral", title: "Coup dur", text: "Banques, codes, contrats : un garant signale la situation, un court délai s'écoule, puis seuls les éléments prévus pour ce cas s'ouvrent." },
   { icon: HandHeart, tone: "bg-gold-soft/70 text-gold-deep", title: "Décès", text: "Veille du registre des décès, acte de décès, vérification par notre équipe : chaque bénéficiaire reçoit uniquement sa part." },
 ];
@@ -173,7 +173,7 @@ function CardSection() {
             {[
               ["1", "Recevez vos trois cartes", "Elles sont fabriquées pour vous et livrées chez vous."],
               ["2", "Activez-les avec votre téléphone", "La carte crée son secret dans sa puce : il n'en sort jamais."],
-              ["3", "Chaque bénéficiaire reçoit 2 cartes", "À ranger dans deux endroits. Elles n'ouvrent que ce que vous lui avez attribué."],
+              ["3", "Chaque bénéficiaire a 2 cartes à son nom", "Réservées dès sa désignation, envoyées à votre décès. D'ici là, il accède à sa part depuis son téléphone, avec votre accord."],
             ].map(([n, t, d], i) => (
               <Reveal key={n} delay={i * 0.1}>
                 <div className="flex gap-4 rounded-3xl bg-paper/5 p-5 ring-1 ring-paper/10">
@@ -353,7 +353,7 @@ const FAQ = [
   ["Dois-je retenir un mot de passe ou une phrase secrète ?", "Pas pour le Coffre : il s'ouvre avec votre carte et Face ID, la carte est toujours nécessaire. Un mot de passe protège seulement l'Espace (vos rappels, votre famille)."],
   ["Puis-je ouvrir mon Coffre sur un ordinateur ?", "Oui. La première fois, votre téléphone scanne le code QR affiché sur l'ordinateur ; ensuite, une notification suffit. Chaque ouverture se confirme sur le téléphone, carte posée et Face ID."],
   ["Que se passe-t-il si je perds une carte ?", "Vos deux autres cartes ouvrent toujours votre Coffre. La carte perdue est désactivée en un geste, et une nouvelle peut être appairée."],
-  ["Et mes bénéficiaires ?", "Chacun reçoit un pack de 2 cartes à son nom, à ranger dans deux endroits différents. Après votre décès, un bénéficiaire qui aurait perdu ses deux cartes perdrait son accès : nous le lui expliquons à la réception, et nous lui demandons régulièrement si ses cartes sont toujours là."],
+  ["Et mes bénéficiaires ?", "Chacun demande son accès depuis son téléphone, avec Face ID et un code à 6 chiffres : vous recevez un e-mail et vous acceptez depuis votre Coffre. Il ouvre alors ce que vous lui confiez, au moment prévu (urgence, coup dur ou décès). Ses 2 cartes, réservées à son nom, ne lui sont envoyées qu'à votre décès : rangées des années, des cartes se perdent et leur puce vieillit."],
   ["Est-ce un testament ?", "Non. Le Coffre ne remplace ni un notaire ni un testament : il indique où se trouve l'original et aide vos proches à tout retrouver."],
   ["Qui décide qu'il y a un coup dur ou un décès ?", "Pour un coup dur, vos garants, que vous choisissez. Pour un décès : veille du registre des décès, acte de décès fourni par un bénéficiaire et vérification par notre équipe, puis un délai pendant lequel tout peut être annulé."],
   ["Combien de temps mes proches ont-ils accès ?", "Après la confirmation du décès et le délai, vos bénéficiaires ont un temps limité pour tout récupérer. Ensuite, le Coffre est effacé définitivement."],

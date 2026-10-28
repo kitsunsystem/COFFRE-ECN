@@ -43,12 +43,6 @@ export async function keyFrom(secret: Uint8Array, kind: CardKind | undefined, pi
   return combine(secret, await pinKey(pin, salt));
 }
 
-export async function holderKeys(secret: Uint8Array, kind: CardKind | undefined, pin: string | undefined, salt: string) {
-  const s = await na();
-  const kp = s.crypto_box_seed_keypair(await keyFrom(secret, kind, pin, salt));
-  return { publicKey: kp.publicKey, privateKey: kp.privateKey, publicKeyB64: toB64(s, kp.publicKey) };
-}
-
 /* ---------- demo ---------- */
 
 // shortcut: the seed sits in IndexedDB to stand in for the card's secure element; demo and tests only.

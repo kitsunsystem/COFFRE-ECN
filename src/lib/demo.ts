@@ -1,7 +1,8 @@
-// Demo family, so the whole service can be shown before Supabase is connected. Code for every card: 123456.
+// Demo family, so the whole service can be shown before Supabase is connected. Code for every card and phone: 123456.
+import { newAccessKey } from "./access";
 import { enroll } from "./cards";
 import { uid, useApp, useSession, type Card, type Person } from "./store";
-import { activateHolderCard, activateOwnerCard, lock, saveItem, setRight, setSectionRight } from "./vault";
+import { activateOwnerCard, lock, saveItem, setRight, setSectionRight } from "./vault";
 
 export const DEMO_PIN = "123456";
 
@@ -14,14 +15,17 @@ export async function seedDemo() {
   const paul: Person = { id: uid(), firstName: "Paul", lastName: "Durand", relation: "Enfant", email: "paul.durand@exemple.fr" };
   const sophie: Person = { id: uid(), firstName: "Sophie", lastName: "Martin", relation: "Ami", email: "sophie.martin@exemple.fr" };
   const t = Date.now();
-  const card = (holderId: string, printedName: string, extra = false): Card => ({ id: uid(), holderId, printedName, status: "recue", orderedAt: t - 9 * 86_400_000, extra });
-  const owner = [card("owner", "Claire Durand"), card("owner", "Claire Durand"), card("owner", "Claire Durand")];
-  // Every beneficiary has a pack of 2 cards.
-  const packs = [marc, lea, paul].flatMap((p) => [card(p.id, `${p.firstName} ${p.lastName}`, true), card(p.id, `${p.firstName} ${p.lastName}`, true)]);
+  const card = (holderId: string, printedName: string, status: Card["status"], extra = false): Card => ({ id: uid(), holderId, printedName, status, orderedAt: t - 9 * 86_400_000, extra });
+  const owner = [card("owner", "Claire Durand", "recue"), card("owner", "Claire Durand", "recue"), card("owner", "Claire Durand", "recue")];
+  // Every beneficiary has a pack of 2 cards, reserved until the death.
+  const packs = [marc, lea, paul].flatMap((p) => [card(p.id, `${p.firstName} ${p.lastName}`, "reservee", true), card(p.id, `${p.firstName} ${p.lastName}`, "reservee", true)]);
+  // Their phones (keys kept in this browser): Marc's and Léa's are approved, Paul's request waits for Claire.
+  const phone = async (p: Person, status: Card["status"]): Promise<Card> => ({ ...card(p.id, `${p.firstName} ${p.lastName}`, status), kind: "telephone", boxPk: await newAccessKey(p.id, DEMO_PIN), activatedAt: status === "active" ? t - 8 * 86_400_000 : undefined });
+  const phones = [await phone(marc, "active"), await phone(lea, "active"), { ...(await phone(paul, "demandee")), orderedAt: t - 3_600_000 }];
   st.set({
     account: { firstName: "Claire", lastName: "Durand", email: "claire.durand@exemple.fr", phone: "06 98 76 54 32", birthDate: "1972-03-14", birthCity: "Lyon", birthCountry: "France", address: "12 rue des Lilas\n69003 Lyon", isBusinessOwner: true, kyc: "verifie", createdAt: t - 12 * 86_400_000 },
     people: [marc, lea, paul, sophie],
-    cards: [...owner, ...packs],
+    cards: [...owner, ...packs, ...phones],
     guarantors: [
       { personId: marc.id, role: "Prévenir les enfants et déclarer un coup dur si je suis hospitalisée." },
       { personId: sophie.id, role: "Confirmer, avec Marc, s'il m'arrive quelque chose." },
@@ -31,7 +35,6 @@ export async function seedDemo() {
     reminders: [{ id: uid(), label: "Passeport", date: new Date(t + 40 * 86_400_000).toISOString().slice(0, 10) }],
   });
   for (const c of owner) await activateOwnerCard(c, await enroll(c), DEMO_PIN);
-  for (const c of packs) await activateHolderCard(c, await enroll(c), DEMO_PIN);
 
   const items: [string, string, Record<string, string>][] = [
     ["a-prevenir", "Marc, mon mari", { name: "Marc Durand", phone: "06 12 34 56 78", note: "À appeler en premier, à toute heure." }],

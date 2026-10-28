@@ -8,7 +8,7 @@ import { faceIdThenCode, forgetCode, rememberCode } from "@/lib/biometric";
 import { driver, needsPin, read, type Tap } from "@/lib/cards";
 import { PROD } from "@/lib/env";
 import { isNative } from "@/lib/native";
-import { useApp, type Card, type OpenSession } from "@/lib/store";
+import { isPhone, useApp, type Card, type OpenSession } from "@/lib/store";
 import { cardKeys, openSession } from "@/lib/vault";
 import { PinPad } from "./pinpad";
 import { Button } from "./ui";
@@ -17,9 +17,10 @@ import { NfcCard, TapReader, type TapState } from "./visuals";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Every card that may open a Coffre on this device: demo, all the local ones; production, my own and the packs I hold.
+// A relative's phone is no card to tap: it opens with Face ID and its code (components/access).
 export function openableCards(): Card[] {
   const st = useApp.getState();
-  const own = st.cards.filter((c) => c.status === "active" && (PROD ? c.holderId === "owner" : true));
+  const own = st.cards.filter((c) => c.status === "active" && !isPhone(c) && (PROD ? c.holderId === "owner" : true));
   return PROD ? [...own, ...activeTrustCards()] : own;
 }
 
