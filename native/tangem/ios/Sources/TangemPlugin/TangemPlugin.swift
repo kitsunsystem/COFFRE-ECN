@@ -25,13 +25,13 @@ public class TangemPlugin: CAPPlugin, CAPBridgedPlugin {
                 Self.fail(call, error)
             case .success(let card):
                 if let wallet = card.wallets.first(where: { $0.curve == .ed25519 }) {
-                    call.resolve(["cardId": card.cardId, "publicKey": Self.hex(wallet.publicKey)])
+                    Self.resolveKey(call, card.cardId, wallet.publicKey)
                     return
                 }
                 self?.sdk.createWallet(curve: .ed25519, cardId: card.cardId, initialMessage: nil) { created in
                     switch created {
                     case .failure(let error): Self.fail(call, error)
-                    case .success(let response): call.resolve(["cardId": card.cardId, "publicKey": Self.hex(response.wallet.publicKey)])
+                    case .success(let response): Self.resolveKey(call, card.cardId, response.wallet.publicKey)
                     }
                 }
             }
@@ -60,7 +60,10 @@ public class TangemPlugin: CAPPlugin, CAPBridgedPlugin {
         call.reject(error.localizedDescription, String(error.code))
     }
 
-    private static func hex(_ data: Data) -> String { data.map { String(format: "%02x", $0) }.joined() }
+    private static func resolveKey(_ call: CAPPluginCall, _ cardId: String, _ publicKey: Data?) {
+        guard let publicKey else { return call.reject("La clé de la carte est illisible.") }
+        call.resolve(["cardId": cardId, "publicKey": publicKey.map { String(format: "%02x", $0) }.joined()])
+    }
 
     private static func bytes(_ hex: String) -> Data? {
         guard hex.count % 2 == 0 else { return nil }
