@@ -377,7 +377,7 @@ Impayé : des relances chaque semaine pendant un délai de grâce de 30 jours, p
 
 === 22. COMPTE ET RÉGLAGES (ESPACE › COMPTE) ===
 
-On y trouve : vérification d'identité ; téléphone, adresse, adresse e-mail ; mot de passe ; rubrique Entreprise (chef d'entreprise) ; langue (français, anglais, espagnol, catalan : les e-mails suivent la langue choisie) ; couleurs de l'application (Noir et or ou Sillage) ; voix de l'assistante (lecture à voix haute des réponses) ; appareils de confiance ; Coup dur et décès (signalements en cours, annulation) ; abonnement ; adresse du support ; suppression du compte.
+On y trouve : vérification d'identité ; téléphone, adresse, adresse e-mail ; mot de passe ; rubrique Entreprise (chef d'entreprise) ; langue (français, anglais, espagnol, catalan : les e-mails suivent la langue choisie) ; couleurs de l'application (Noir et or ou Sillage) ; appareils de confiance ; Coup dur et décès (signalements en cours, annulation) ; abonnement ; adresse du support ; suppression du compte.
 
 Q : Comment supprimer mon compte ?
 R : Espace › Compte › supprimer, puis tapez SUPPRIMER pour confirmer. Votre Espace, votre Coffre, ses documents et les accès de vos proches sont effacés définitivement : personne, pas même l'équipe, ne pourra les récupérer.

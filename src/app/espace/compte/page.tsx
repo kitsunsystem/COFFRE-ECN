@@ -12,7 +12,7 @@ import { tr } from "@/lib/i18n";
 import { ThemePicker } from "@/components/theme-picker";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
-import { deleteAccount, openBillingPortal, openCheckout, saveAccount, setAssistantVoice, signOut, submitKyc } from "@/lib/api";
+import { deleteAccount, openBillingPortal, openCheckout, saveAccount, signOut, submitKyc } from "@/lib/api";
 import { LAUNCH, OFFER, SUPPORT_EMAIL } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { isNative } from "@/lib/native";
@@ -21,7 +21,7 @@ import { toast, useApp, type Account } from "@/lib/store";
 import { lock } from "@/lib/vault";
 
 export default function Compte() {
-  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, assistantVoice: x.assistantVoice, billing: x.billing, phase: x.phase, staffRole: x.staffRole, set: x.set })));
+  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, billing: x.billing, phase: x.phase, staffRole: x.staffRole, set: x.set })));
   const router = useRouter();
   const [edit, setEdit] = useState(false);
   const [erase, setErase] = useState(false);
@@ -180,7 +180,6 @@ export default function Compte() {
       )}
 
       <motion.div variants={rise} className="space-y-2.5">
-        <Toggle checked={s.assistantVoice} onChange={(v) => void setAssistantVoice(v)} label="L'assistante parle à voix haute" hint="Les réponses sont lues automatiquement" />
         <Link href="/espace/cartes" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
           <CreditCard className="h-6 w-6 text-gold-deep" />
           <span className="flex-1 font-semibold">Mes cartes</span>

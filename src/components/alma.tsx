@@ -1,12 +1,11 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { Mic, Play, Send, Volume2, VolumeX } from "lucide-react";
+import { Mic, Play, Send } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ask, DISCLAIMER, SUGGESTIONS } from "@/lib/assistant";
 import { ASSISTANT_NAME } from "@/lib/config";
 import { locale, tr } from "@/lib/i18n";
-import { useApp } from "@/lib/store";
 import { Sheet } from "./ui";
 
 export function AlmaFace({ speaking, size = 64 }: { speaking?: boolean; size?: number }) {
@@ -52,28 +51,14 @@ export function Alma({ dark }: { dark?: boolean }) {
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState("");
-  const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
   const [thinking, setThinking] = useState(false);
-  const voice = useApp((s) => s.assistantVoice);
-  const setApp = useApp((s) => s.set);
   const end = useRef<HTMLDivElement>(null);
 
   // Braces matter: recent browsers return a Promise from scrollIntoView, which React would take for a cleanup.
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs, thinking]);
-
-  function speak(t: string) {
-    if (!voice || typeof speechSynthesis === "undefined") return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(tr(t));
-    u.lang = locale();
-    u.rate = 0.95;
-    u.onstart = () => setSpeaking(true);
-    u.onend = () => setSpeaking(false);
-    speechSynthesis.speak(u);
-  }
 
   async function send(q: string) {
     if (!q.trim()) return;
@@ -83,7 +68,6 @@ export function Alma({ dark }: { dark?: boolean }) {
     const a = await ask(q, place);
     setThinking(false);
     setMsgs((m) => [...m, { from: "alma", text: a }]);
-    speak(a);
   }
 
   function listen() {
@@ -114,13 +98,10 @@ export function Alma({ dark }: { dark?: boolean }) {
         <span className="hidden text-[0.85rem] font-semibold sm:inline">{ASSISTANT_NAME}</span>
       </motion.button>
 
-      <Sheet open={open} onClose={() => { setOpen(false); speechSynthesis?.cancel(); }} title={`Bonjour, je suis ${ASSISTANT_NAME}`}>
+      <Sheet open={open} onClose={() => setOpen(false)} title={`Bonjour, je suis ${ASSISTANT_NAME}`}>
         <div className="flex items-center gap-4">
-          <AlmaFace speaking={speaking} size={84} />
+          <AlmaFace size={84} />
           <p className="flex-1 text-[0.95rem] text-ink-soft">Je vous guide pas à pas. Je ne vois jamais ce que vous écrivez dans votre Coffre.</p>
-          <button onClick={() => setApp({ assistantVoice: !voice })} aria-label={voice ? "Couper la voix" : "Activer la voix"} className="rounded-full p-2.5 ring-1 ring-line">
-            {voice ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
-          </button>
         </div>
 
         {msgs.length === 0 && (

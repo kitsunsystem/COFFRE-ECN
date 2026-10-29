@@ -145,7 +145,6 @@ export async function loadAll() {
   st().set({
     ...base,
     account: toAccount(p),
-    assistantVoice: p.assistant_voice as boolean,
     reminderConsent: p.reminder_consent as boolean,
     billing: { status: p.billing_status as "a_jour", since: p.billing_since ? new Date(p.billing_since as string).getTime() : undefined },
     people: people.map(toPerson),
@@ -211,12 +210,6 @@ export async function saveLang(lang: string) {
   await sb().auth.updateUser({ data: { lang } }).catch(console.error);
   if (st().account) await sb().from("profiles").update({ lang }).eq("id", me());
 }
-
-export const setAssistantVoice = (assistantVoice: boolean) =>
-  attempt(async () => {
-    if (PROD) await q(sb().from("profiles").update({ assistant_voice: assistantVoice }).eq("id", me()));
-    st().set({ assistantVoice });
-  });
 
 /* ---------- Famille ---------- */
 

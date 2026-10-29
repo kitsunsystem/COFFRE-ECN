@@ -173,7 +173,6 @@ interface State {
   concierge: ConciergeCase[];
   outbox: OutboxEmail[];
   clockOffset: number; // demo only: lets the demo panel fast-forward the cancellation windows
-  assistantVoice: boolean;
   tourPending: boolean; // guided tour shown at the next entry in the Espace
 }
 
@@ -200,7 +199,6 @@ const initial: State = {
   concierge: [],
   outbox: [],
   clockOffset: 0,
-  assistantVoice: true,
   tourPending: false,
 };
 
