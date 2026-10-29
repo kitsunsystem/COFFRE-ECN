@@ -1,0 +1,514 @@
+BASE DE CONNAISSANCE D'ALMA, L'ASSISTANTE DE SILLAGE
+Les durées et délais ci-dessous sont les réglages actuels du service.
+
+
+=== 1. LE SERVICE EN BREF ===
+
+Sillage aide les familles à tout retrouver et tout régler, de leur vivant comme après : la vie quotidienne, une hospitalisation, un accident, une perte d'autonomie, un décès.
+Chaque titulaire prépare un Coffre chiffré : ses papiers, ses comptes, ses contrats, ses codes, ses volontés et ses messages. Il choisit, pour chaque proche, ce que ce proche pourra ouvrir, et à quel moment : tout de suite, en cas de coup dur, au décès, ou jamais.
+Rien n'est à retenir : le Coffre s'ouvre avec une carte sans contact et un code (ou Face ID dans l'application).
+Personne d'autre ne peut lire le Coffre, pas même l'équipe de Sillage : tout est chiffré sur le téléphone avant d'être envoyé.
+En plus du Coffre : des listes de démarches et des modèles de courriers pour les moments difficiles, des rappels d'échéances, une fiche d'urgence, l'assistante Alma, et une conciergerie (facultative et payante) qui peut faire les démarches à la place de la famille.
+L'accès au service se fait sur invitation d'un conseiller.
+
+Ce que comprend la formule : le Coffre, trois cartes pour le titulaire, un pack de 2 cartes pour chaque bénéficiaire, les listes de démarches et les modèles de courriers, l'assistante, les rappels et la fiche d'urgence. Les tarifs sont communiqués au lancement, ou par votre conseiller.
+
+
+=== 2. L'ESPACE ET LE COFFRE : DEUX MONDES SÉPARÉS ===
+
+L'Espace : la vie de tous les jours avec le service. On y trouve l'accueil et le score de préparation, la famille et les garants, les cartes, les échéances, la fiche d'urgence, la conciergerie, les démarches (aide) et le compte. On n'y dépose jamais rien de personnel. L'Espace s'ouvre avec une adresse e-mail et un mot de passe.
+Le Coffre : tout ce qui est personnel. Il s'ouvre uniquement avec une carte et son code (ou Face ID dans l'application). Son contenu est chiffré : illisible pour l'équipe, pour Alma, pour la conciergerie.
+Les deux sont séparés : pour revenir à l'Espace, il faut fermer le Coffre (bouton « Fermer le Coffre »), et ouvrir l'Espace referme le Coffre. Le Coffre se referme aussi tout seul après un moment sans activité.
+
+Q : Où mettre mes documents ?
+R : Dans le Coffre, et seulement dans le Coffre. C'est le seul endroit où l'on dépose des documents. Dans l'Espace, on télécharge seulement des modèles de courriers vierges.
+
+Q : Pourquoi deux mots de passe différents ?
+R : Il n'y en a qu'un : le mot de passe de l'Espace. Le Coffre, lui, ne dépend d'aucun mot de passe : il s'ouvre avec votre carte et votre code, ou Face ID dans l'application.
+
+
+=== 3. CRÉER SON COMPTE, SE CONNECTER ===
+
+Création : page de connexion › Créer un compte. Adresse e-mail, mot de passe (10 caractères au moins, avec une majuscule, une minuscule et un chiffre), puis un code à 6 chiffres envoyé par e-mail pour confirmer l'adresse.
+L'inscription demande ensuite : nom, prénom, date et lieu de naissance, téléphone, chef d'entreprise ou non, puis la vérification d'identité.
+Nous recommandons, sans obligation, une adresse e-mail chiffrée comme Proton.
+
+Q : J'ai oublié mon mot de passe.
+R : Page de connexion › Mot de passe oublié. Un code à 6 chiffres vous est envoyé par e-mail ; tapez-le, puis choisissez un nouveau mot de passe. Votre Coffre n'est pas concerné : il s'ouvre toujours avec votre carte.
+
+Q : Je ne reçois pas le code par e-mail.
+R : Regardez dans les courriers indésirables, vérifiez l'adresse tapée, puis attendez une minute avant d'en redemander un. Si rien n'arrive, écrivez au support (adresse dans Espace › Compte).
+
+Q : Pourquoi vérifier mon identité ?
+R : Pour que personne ne puisse se faire passer pour vous, et pour la veille mensuelle du fichier public des décès. La vérification se fait avec le système utilisé par votre conseiller, ou en déposant une photo de votre carte d'identité ou de votre passeport : notre équipe la vérifie, puis la pièce est supprimée. Vous pouvez le faire plus tard depuis Espace › Compte.
+
+Q : Comment corriger mon nom ou ma date de naissance ?
+R : Ils sont vérifiés avec votre pièce d'identité : pour les corriger, écrivez au support (adresse dans Espace › Compte). Le téléphone et l'adresse se modifient directement dans Compte.
+
+Q : Comment changer mon adresse e-mail ?
+R : Espace › Compte : tapez la nouvelle adresse, puis confirmez avec le lien reçu sur celle-ci.
+
+Q : Je suis un proche, pas un titulaire : comment me connecter ?
+R : Connectez-vous (ou créez votre accès la première fois) avec l'adresse e-mail que le titulaire a indiquée pour vous. Vous arrivez dans votre espace de proche : votre rôle (garant, bénéficiaire), votre accès depuis votre téléphone et vos cartes. Si on vous répond que personne ne vous a désigné, c'est que le titulaire a utilisé une autre adresse : connectez-vous avec celle-là, ou demandez-lui de la corriger.
+
+
+=== 4. LES CARTES DU TITULAIRE ===
+
+Le titulaire reçoit trois cartes sans contact, fabriquées à son nom. Chacune ouvre tout son Coffre, avec le même code. Si l'une se perd, les deux autres suffisent.
+La carte crée son secret dans sa puce : il n'en sort jamais. Sans la carte, le code seul n'ouvre rien ; sans le code, la carte seule n'ouvre rien.
+
+Commander : Espace › Mes cartes › Commander mes cartes. L'adresse de livraison est demandée à ce moment-là, puis effacée dès que les cartes sont parties.
+Suivi : En fabrication, puis En livraison, puis À activer, puis Active.
+Activer : Espace › Mes cartes › Activer. Dans l'application, posez la carte au dos du téléphone. La première fois, vous choisissez votre code à 6 chiffres (tapé deux fois) : la première carte activée crée votre Coffre. Pour activer les cartes suivantes, ouvrez d'abord le Coffre avec une carte déjà active : elles reçoivent le même code.
+
+Q : Comment ouvrir mon Coffre ?
+R : Dans l'application : Coffre › Poser ma carte, posez la carte au dos du téléphone, confirmez avec Face ID (ou l'empreinte, ou le code du téléphone), puis tapez votre code la première fois. Ensuite, sur ce téléphone, Face ID suffit : la carte reste toujours nécessaire.
+
+Q : Où poser la carte sur le téléphone ?
+R : À plat contre le dos du téléphone, sans bouger pendant la lecture : vers le haut sur un iPhone, au centre sur la plupart des Android. Retirez une coque épaisse ou métallique. Sur Android, vérifiez que le NFC est activé dans les réglages.
+
+Q : J'ai perdu une carte (ou on me l'a volée).
+R : Pas d'inquiétude : vos autres cartes ouvrent toujours votre Coffre. Espace › Mes cartes › Carte perdue › Désactiver la carte : elle n'ouvrira plus jamais rien, même avec le code. Vous pouvez ensuite commander une carte de remplacement (bouton Remplacer). Votre dernière carte active ne peut pas être désactivée : commandez-en une autre d'abord.
+
+Q : Puis-je avoir plus de trois cartes ?
+R : Les trois cartes sont incluses. Une carte supplémentaire se commande comme remplacement d'une carte perdue.
+
+Q : Mon téléphone ne lit pas la carte.
+R : Posez la carte à plat, au bon endroit, sans coque épaisse, et gardez-la immobile jusqu'à la fin de la lecture. Si le message dit que la lecture NFC n'est pas disponible, ce téléphone n'a pas de lecteur sans contact : utilisez un autre téléphone, ou ouvrez le Coffre sur un ordinateur avec l'accord d'un téléphone équipé.
+
+Q : Qu'est-ce que l'écran « Tester une carte » ?
+R : Dans l'application, sur la page de connexion : il vérifie en trois lectures qu'une carte fonctionne avec l'application. Rien n'est enregistré.
+
+
+=== 5. LE CODE, FACE ID ET LA SÉCURITÉ DES ACCÈS ===
+
+Le code du titulaire : 6 chiffres, choisi à l'activation de la première carte, le même pour ses trois cartes. Personne d'autre ne le connaît, pas même l'équipe : c'est ce qui protège le Coffre si une carte est volée.
+Face ID (ou l'empreinte, ou le code du téléphone) est obligatoire à chaque ouverture dans l'application. Le code de la carte n'est tapé qu'une fois par téléphone : ensuite, Face ID le redonne, toujours avec la carte posée.
+Après 5 codes faux, il faut patienter quelques minutes avant de réessayer.
+
+Q : J'ai oublié mon code.
+R : Personne ne peut le retrouver, pas même l'équipe : c'est la garantie que personne d'autre n'ouvre votre Coffre. Si vous avez déjà ouvert le Coffre dans l'application sur votre téléphone, Face ID l'utilise encore pour vous : posez votre carte et confirmez avec Face ID. Sinon, écrivez au support (adresse dans Espace › Compte) : sans le code, le contenu actuel ne peut plus être ouvert, et l'équipe vous guidera pour repartir d'un Coffre neuf.
+
+Q : Puis-je changer mon code ?
+R : Pas depuis l'application pour l'instant. Si vous pensez que quelqu'un le connaît, gardez vos cartes en lieu sûr : le code seul n'ouvre rien sans une carte. En cas de doute, écrivez au support.
+
+Q : Mon téléphone n'a pas Face ID.
+R : L'empreinte digitale ou le code de verrouillage du téléphone conviennent pour le titulaire. Le téléphone doit être protégé par l'un d'eux : c'est obligatoire pour ouvrir le Coffre dans l'application.
+
+Q : Quelqu'un me demande mon code par téléphone ou par e-mail.
+R : Ne le donnez jamais. L'équipe, le support, la conciergerie et Alma ne vous demanderont jamais un code ni un mot de passe : c'est une tentative de fraude.
+
+
+=== 6. LE COFFRE SUR UN ORDINATEUR OU SUR LE NAVIGATEUR DU TÉLÉPHONE ===
+
+Sur un téléphone, le Coffre s'ouvre dans l'application (App Store, Google Play) : le navigateur du téléphone ne sait pas lire la carte. Installez l'application et connectez-vous avec la même adresse.
+Sur un ordinateur, le Coffre s'ouvre avec l'accord du téléphone :
+1. La première fois, l'ordinateur affiche un code QR et un nombre. Dans l'application : Coffre › Scanner un ordinateur, visez le code QR, choisissez le même nombre parmi les trois proposés, posez votre carte et confirmez avec Face ID. Le Coffre s'ouvre sur l'ordinateur.
+2. L'ordinateur devient un appareil de confiance pendant 90 jours : les fois suivantes, « Ouvrir avec mon téléphone » envoie une notification au téléphone. Touchez-la, choisissez le nombre affiché sur l'ordinateur, posez la carte.
+3. Pas de notification ? Ouvrez l'application : la demande vous attend sur l'écran du Coffre.
+Les clés passent du téléphone à l'ordinateur chiffrées pour cet ordinateur seul : le serveur ne peut pas les lire.
+Un e-mail vous prévient à chaque nouvel ordinateur approuvé. Liste et retrait : Espace › Compte › Appareils de confiance.
+
+Q : L'ordinateur me redemande le code QR.
+R : Au bout de 90 jours, un appareil de confiance doit être revalidé avec le code QR et la carte. C'est normal.
+
+Q : J'ai choisi le mauvais nombre.
+R : La demande est refusée, par sécurité. Recommencez depuis l'ordinateur : un nouveau nombre s'affiche.
+
+Q : J'ai reçu un e-mail « nouvel appareil de confiance » mais ce n'est pas moi.
+R : Retirez tout de suite cet appareil dans Espace › Compte › Appareils de confiance, puis changez votre mot de passe. Il ne pourra plus rien demander.
+
+
+=== 7. CE QU'ON RANGE DANS LE COFFRE : LES RUBRIQUES ===
+
+Chaque élément a un titre, des champs à remplir, des précisions libres, et des documents joints (photos ou PDF). Les codes et mots de passe sont masqués à l'écran et jamais mis dans les PDF. Chaque information a un bouton « copier ».
+
+Urgence et santé : groupe sanguin et allergies ; traitements ; médecins ; personnes à prévenir.
+Documents : identité et famille (pièce d'identité, passeport, livret de famille) ; logement et baux ; véhicules (carte grise, assurance, où sont les clés) ; papiers juridiques (lieu de l'original du testament, donations, procurations, notaire ou avocat).
+Argent et contrats : banques (établissement, conseiller, comptes) ; assurances et assurance-vie (assureur, numéro de contrat, bénéficiaires) ; placements (épargne, comptes-titres, retraite, autres comptes et avoirs) ; crédits ; abonnements (téléphone, internet, énergie, presse, plateformes).
+Vie numérique : téléphone (code de déverrouillage, opérateur) ; messageries ; réseaux sociaux (supprimer, commémorer ou transmettre) ; photos et cloud ; mots de passe.
+Volontés et messages : obsèques (contrat obsèques, souhaits) ; lettres (un mot pour chacun) ; où se trouvent mes vidéos ; animaux (qui les recueille, vétérinaire).
+À effacer : ce qui doit disparaître avec vous. Jamais remis à personne : au décès, cette rubrique est détruite sans avoir été lue.
+Entreprise (pour les chefs d'entreprise, à activer dans Espace › Compte) : société, banques professionnelles, baux commerciaux, clients, équipe, accès et procédures.
+
+Q : Où ranger un placement ou un avoir particulier ?
+R : Dans Argent et contrats › Placements, quel qu'il soit : indiquez l'établissement ou l'endroit où il se trouve, et tout ce qui permettra à vos proches de le retrouver.
+
+Q : Puis-je mettre des vidéos ?
+R : Pas pour l'instant. Gardez-les sur un disque dur ou une clé, chez vous ou chez votre notaire, et indiquez où elles se trouvent dans Volontés et messages › Où se trouvent mes vidéos.
+
+Q : Je n'arrive pas à ajouter un document.
+R : Pendant la phase découverte, avant le lancement officiel, l'ajout de documents dans le Coffre n'est pas encore ouvert : tout le reste fonctionne. Les documents doivent être des photos ou des PDF.
+
+Q : Puis-je mettre mon testament dans le Coffre ?
+R : Le Coffre n'est pas un testament et ne le remplace pas. Indiquez dans Documents › Papiers juridiques où se trouve l'original et le nom de votre notaire : vos proches le retrouveront.
+
+
+=== 8. COMMENCER PAR L'ESSENTIEL ===
+
+Dans le Coffre, « L'essentiel » guide le titulaire sur dix éléments, à remplir à son rythme :
+1. Une personne à prévenir (le premier réflexe en cas d'accident)
+2. Groupe sanguin et allergies (utile aux secours)
+3. Votre pièce d'identité (demandée dans presque toutes les démarches)
+4. Votre banque principale (la première démarche de vos proches)
+5. Votre assurance-vie (pour que vos bénéficiaires soient trouvés)
+6. Le code de votre téléphone (tout passe par lui aujourd'hui)
+7. Votre messagerie (contrats et factures y arrivent)
+8. Le lieu de votre testament (pour que l'original soit retrouvé)
+9. Vos souhaits pour les obsèques (épargner des choix difficiles)
+10. Un mot pour vos proches (ce qui compte le plus)
+
+Le score de l'accueil (« Votre famille est préparée à … % ») suit le parcours : vérifier son identité, commander puis activer ses cartes, choisir ses garants, remplir l'essentiel, choisir qui voit quoi. Il est calculé sans jamais lire le Coffre.
+
+Q : Par où commencer ?
+R : Commandez vos cartes, ajoutez vos proches et vos garants dans Ma famille, désignez vos bénéficiaires dans Mes cartes, puis ouvrez votre Coffre et touchez « Commencer par l'essentiel » : dix éléments, à votre rythme. Enfin, choisissez qui voit quoi.
+
+
+=== 9. LA FICHE D'URGENCE ===
+
+La rubrique Urgence et santé rassemble groupe sanguin, allergies, traitements, médecins et personnes à prévenir. Donnez-lui le niveau « Urgence » pour vos proches : ils l'ouvrent à tout moment, depuis leur téléphone.
+Le bouton « Copier dans la fiche médicale de mon téléphone » prépare le texte à coller dans la fiche médicale du téléphone, lisible par les secours depuis l'écran verrouillé, sans carte :
+- iPhone : app Santé › votre photo › Fiche médicale › Modifier, collez le texte, puis activez « Afficher en mode verrouillé ».
+- Android : Paramètres › Sécurité et urgence › Informations médicales, collez le texte.
+On y met l'utile aux secours, sans rien de confidentiel.
+
+
+=== 10. LA FAMILLE : PROCHES, GARANTS, BÉNÉFICIAIRES ===
+
+Proches : Espace › Ma famille › Ajouter : prénom, nom, lien, adresse e-mail. L'adresse sert à le prévenir et à le reconnaître quand il se connecte : sans elle, il ne pourra ni demander son accès ni signaler quoi que ce soit.
+Garants : les personnes qui signalent un coup dur ou un décès. Autant que vous voulez ; vous écrivez vous-même le rôle de chacun (par exemple « Prévenir les enfants et appeler le notaire »). Ils sont prévenus par e-mail. Être garant ne donne accès à rien dans le Coffre.
+Bénéficiaires : les proches qui pourront ouvrir une partie du Coffre. Les désigner : Espace › Mes cartes › Désigner un bénéficiaire. Un pack de 2 cartes est alors réservé à leur nom (voir partie 13), et ils sont invités par e-mail à valider leur accès depuis leur téléphone (partie 12).
+Un même proche peut être garant et bénéficiaire.
+
+Q : Comment retirer un proche ?
+R : Espace › Ma famille › touchez le proche › Retirer ce proche. Son téléphone et ses cartes n'ouvrent plus rien, tout de suite.
+
+Q : Un garant peut-il lire mon Coffre ?
+R : Non. Être garant donne seulement le droit de signaler un coup dur ou un décès. Il ne voit quelque chose que s'il est aussi bénéficiaire et que vous lui avez attribué des rubriques.
+
+Q : Combien de garants choisir ?
+R : Autant que vous voulez. Deux personnes de confiance, qui ne vivent pas forcément ensemble, c'est un bon début.
+
+
+=== 11. QUI VOIT QUOI : LES QUATRE MOMENTS ===
+
+Dans le Coffre › Qui voit quoi, pour chaque bénéficiaire et chaque rubrique (ou toute une section d'un coup), le titulaire choisit un moment :
+- Urgence : tout de suite, à tout moment.
+- Coup dur : seulement après un coup dur signalé par un garant et le délai d'annulation.
+- Décès : seulement après la confirmation du décès et le délai d'annulation.
+- Jamais : le réglage par défaut.
+Celui qui a un accès « Coup dur » l'a aussi après un décès. La rubrique « À effacer » n'est jamais attribuable.
+Retirer un droit (repasser à « Jamais ») change aussitôt la clé de la rubrique : le proche ne peut plus rien lire, y compris ce qui sera écrit ensuite.
+
+Q : Mon conjoint peut-il voir tout mon Coffre ?
+R : Seulement ce que vous lui attribuez. Vous pouvez tout lui ouvrir section par section, au moment de votre choix, sauf « À effacer ».
+
+Q : Mes choix ne s'appliquent pas à un proche.
+R : Ils s'appliquent dès que vous avez accepté sa demande d'accès depuis son téléphone. Tant qu'il ne l'a pas faite, « Qui voit quoi » vous l'indique.
+
+
+=== 12. L'ACCÈS DES PROCHES DEPUIS LEUR TÉLÉPHONE ===
+
+Pour l'urgence et un coup dur (hospitalisation, banque, procuration…), un proche n'a pas besoin de cartes : il ouvre sa part depuis son propre téléphone, avec Face ID et un code à 6 chiffres.
+Côté proche :
+1. Installer l'application, se connecter avec l'adresse e-mail indiquée par le titulaire.
+2. Espace de proche › Mon accès depuis ce téléphone › Demander mon accès.
+3. Choisir un code à 6 chiffres (tapé deux fois). Face ID ou l'empreinte doit être activé sur le téléphone.
+4. Un code de contrôle s'affiche. Le titulaire reçoit un e-mail.
+5. Quand le titulaire accepte, un e-mail prévient le proche. Il ouvre alors sa part : Coffre › Ouvrir avec Face ID et mon code.
+Côté titulaire :
+1. Un e-mail et l'accueil de l'Espace annoncent la demande.
+2. Ouvrir le Coffre › Qui voit quoi : la demande s'affiche avec la date et un code de contrôle.
+3. En cas de doute, appeler le proche : son téléphone affiche le même code de contrôle. Si ce n'est pas lui, refuser.
+4. Accepter : son téléphone reçoit, chiffré pour lui seul, ce que vous lui avez attribué. Rien ne s'ouvre sans votre accord.
+
+La demande doit être faite à l'avance, tant que le titulaire peut répondre : pendant une hospitalisation, le titulaire n'est peut-être plus en état d'accepter. C'est le prix d'un Coffre que personne d'autre ne peut ouvrir.
+Un seul téléphone par proche : accepter un nouveau téléphone retire l'ancien. Le titulaire peut retirer l'accès d'un téléphone à tout moment : Espace › Mes cartes › le bénéficiaire › Retirer.
+Ce que le proche voit, et quand, dépend uniquement de « Qui voit quoi ».
+
+Q : J'ai changé de téléphone (je suis un proche).
+R : Depuis le nouveau téléphone, refaites la demande : Espace de proche › Demander mon accès. Le titulaire doit l'accepter ; l'ancien téléphone n'ouvre alors plus rien. Après un décès, ce sont vos cartes qui vous donnent accès.
+
+Q : Je suis un proche et j'ai oublié mon code d'accès.
+R : Personne ne peut le retrouver. Du vivant du titulaire, refaites une demande d'accès avec un nouveau code : il devra l'accepter. Après un décès, ce même code sert avec vos cartes : il ne peut pas être remplacé.
+
+Q : Que veut dire « Votre accès a été validé sur un autre téléphone » ?
+R : Le titulaire a accepté un autre de vos téléphones. Pour utiliser celui-ci, refaites la demande depuis ce téléphone.
+
+Q : Pourquoi pas une liste de mots secrets à garder, comme dans d'autres services ?
+R : Des mots se notent, se perdent et se volent. Ici, l'accès est lié à votre téléphone, protégé par Face ID et votre code, et c'est le titulaire lui-même qui l'accepte.
+
+Q : Le titulaire est hospitalisé et je n'ai pas encore d'accès.
+R : Il ne pourra pas accepter une nouvelle demande s'il n'est pas en état de le faire. Contactez les garants : ils peuvent signaler le coup dur. Pour les démarches pratiques, la rubrique Hospitalisation (Espace › Démarches) et la conciergerie peuvent vous aider.
+
+
+=== 13. LES CARTES DES BÉNÉFICIAIRES ===
+
+Chaque bénéficiaire a obligatoirement un pack de 2 cartes à son nom. Il est commandé et réglé à sa désignation, mais gardé en réserve : rangées des années, des cartes se perdent, et une puce vieillit (10 à 15 ans).
+Le pack part quand l'équipe confirme le décès du titulaire, pendant le délai d'annulation. Il ne part pas sur un simple signalement du registre des décès : un homonyme recevrait des cartes.
+À ce moment-là, le bénéficiaire reçoit un e-mail et indique dans l'application l'adresse où recevoir ses cartes. L'adresse est effacée dès leur envoi.
+Le bénéficiaire active ses cartes depuis le téléphone où son accès est validé : Espace de proche › Activer mes cartes, Face ID et son code, puis il pose chaque carte. Chaque carte garde la clé de son téléphone, protégée par son code : s'il perd ou change de téléphone, ses cartes ouvrent toujours sa part.
+Conseil : ranger les 2 cartes dans deux endroits différents.
+
+Q : Pourquoi mes cartes de bénéficiaire ne sont-elles pas arrivées ?
+R : C'est normal : elles sont réservées à votre nom et ne vous sont envoyées qu'au décès du titulaire, une fois celui-ci confirmé. D'ici là, vous accédez à votre part depuis votre téléphone, si le titulaire a accepté votre demande.
+
+Q : J'ai perdu une de mes cartes de bénéficiaire.
+R : Espace de proche › la carte › Perdue : elle n'ouvre plus rien. Votre autre carte et votre téléphone continuent de fonctionner.
+
+Q : Je n'arrive pas à activer mes cartes de bénéficiaire.
+R : Elles s'activent uniquement depuis le téléphone où votre accès est validé, avec Face ID et votre code d'accès. Si votre accès n'a jamais été validé du vivant du titulaire, il ne peut plus l'être : écrivez au support, qui vous expliquera ce qui reste possible.
+
+
+=== 14. COUP DUR ===
+
+Un coup dur, c'est une situation où le titulaire ne peut plus gérer ses affaires lui-même pendant un temps : hospitalisation, accident…
+1. Un garant le signale depuis son propre compte : espace de proche › Signaler un coup dur ou un décès › Coup dur, avec quelques mots.
+2. Le titulaire est prévenu aussitôt par e-mail, puis à nouveau 24 heures avant la fin du délai.
+3. Délai d'annulation : 48 heures. Si tout va bien, le titulaire annule : lien « Tout va bien, j'annule » de l'e-mail, ou Espace › Compte › Coup dur et décès, avec sa carte et son code.
+4. Après le délai, les proches dont l'accès est validé ouvrent uniquement ce qui est prévu pour un coup dur (et l'urgence), jamais tout le Coffre.
+5. Quand le titulaire va mieux, il reprend la main (Espace › Compte › Coup dur et décès) : les accès « Coup dur » se referment et leurs clés sont changées.
+
+Q : Puis-je déclarer un coup dur pour mon parent ?
+R : Seulement si vous êtes son garant : connectez-vous avec l'adresse qu'il a indiquée pour vous, puis Signaler un coup dur. Sinon, contactez l'un de ses garants.
+
+Q : Un coup dur a été signalé à mon nom par erreur.
+R : Annulez avant la fin du délai de 48 heures : lien de l'e-mail reçu, ou Espace › Compte › Coup dur et décès, avec votre carte et votre code. Si vous n'avez plus aucune carte active, écrivez tout de suite au support.
+
+
+=== 15. DÉCÈS : DE LA VEILLE À L'EFFACEMENT ===
+
+Un décès est toujours vérifié par l'équipe avant toute ouverture. Pas de notaire nécessaire.
+1. Signalement, de trois façons : la veille mensuelle compare les membres dont l'identité est vérifiée au fichier public des décès de l'INSEE ; ou un garant signale le décès ; ou un bénéficiaire dépose directement l'acte de décès.
+2. Concordance : un bénéficiaire dépose l'acte de décès et sa pièce d'identité dans l'Espace bénéficiaire. L'équipe vérifie le registre, l'acte et l'identité du bénéficiaire.
+3. Décès confirmé : un délai d'annulation de 15 jours s'ouvre. Le titulaire est alerté (« Si vous lisez ce message, annulez »), puis à nouveau 24 heures avant la fin : en cas d'erreur, une seule action suffit pour annuler. Pendant ce délai, les packs de cartes partent vers les bénéficiaires.
+4. Fin du délai : chaque bénéficiaire ouvre uniquement ce qui lui était destiné (décès, coup dur et urgence), avec son téléphone ou ses cartes. La rubrique « À effacer » est détruite sans avoir été lue. Un e-mail prévient chaque bénéficiaire.
+5. Accès limité : le Coffre reste ouvert 6 mois. Un e-mail prévient 30 jours avant la fin.
+6. Ensuite, tout le Coffre est effacé définitivement. Pensez à exporter ce qui vous est utile (bouton PDF).
+Si une personne ne figure pas dans le fichier public des décès (par exemple décédée hors de France), le décès est signalé par un garant ou un bénéficiaire, avec l'acte, puis vérifié de la même façon.
+
+Q : Mon proche est décédé, que dois-je faire ?
+R : Toutes nos condoléances. Si vous êtes bénéficiaire : connectez-vous avec l'adresse e-mail à laquelle vous avez été désigné, puis ouvrez l'Espace bénéficiaire (lien « Un proche est décédé ? » sur l'écran du Coffre, ou depuis votre espace de proche) et déposez l'acte de décès et votre pièce d'identité. L'équipe vérifie, puis un délai de 15 jours s'écoule avant l'ouverture. Pour les démarches, Espace › Démarches › Après un décès vous guide pas à pas.
+
+Q : Où trouver l'acte de décès ?
+R : À la mairie du lieu du décès (ou de la dernière résidence). Demandez plusieurs exemplaires : banques, assurances et organismes en réclament chacun un.
+
+Q : Je ne suis pas bénéficiaire, puis-je accéder au Coffre ?
+R : Non. Seuls les bénéficiaires désignés ouvrent ce qui leur a été attribué. Un garant peut signaler le décès ; les démarches, elles, sont expliquées dans Espace › Démarches, et la conciergerie peut aider.
+
+Q : Que deviennent l'acte et ma pièce d'identité ?
+R : Ils servent uniquement à la vérification par l'équipe et ne vont jamais dans le Coffre. La pièce d'identité est supprimée après la vérification, l'acte à la fin de la procédure.
+
+Q : Combien de temps ai-je pour récupérer ce qui m'a été confié ?
+R : 6 mois après l'ouverture. Un e-mail vous prévient 30 jours avant la fin. Ensuite, le Coffre est effacé définitivement : téléchargez votre part en PDF.
+
+Q : Le titulaire est vivant mais un décès a été signalé à son nom.
+R : Le titulaire est alerté par e-mail : il annule avec sa carte et son code (Espace › Compte › Coup dur et décès), avant la fin du délai. Rien ne s'ouvre pendant la vérification ni pendant le délai.
+
+
+=== 16. L'ESPACE DE PROCHE ET L'ESPACE BÉNÉFICIAIRE ===
+
+Espace de proche (après connexion) : pour chaque titulaire qui vous a désigné, votre rôle (garant, bénéficiaire), un éventuel signalement en cours avec son compte à rebours, votre accès depuis ce téléphone, vos cartes et leur état (Réservée, En fabrication, En livraison, À activer, Active), l'adresse d'envoi à indiquer au décès, et les boutons utiles : Signaler un coup dur ou un décès (garants), Déposer l'acte (bénéficiaires).
+Il ne montre jamais le contenu du Coffre : le Coffre s'ouvre à part, avec Face ID et votre code, ou avec votre carte.
+Espace bénéficiaire : la démarche après un décès, étape par étape : acte de décès déposé, vérification par l'équipe, délai d'annulation, accès ouvert. Le PDF « Télécharger ce qui m'est confié » ne contient que votre part, sans codes ni mots de passe.
+
+
+=== 17. ÉCHÉANCES ET RAPPELS ===
+
+Espace › Mes échéances : avec votre accord, indiquez le type de document (passeport, bail, contrat…) et sa date de fin. Nous vous écrivons 30 jours, puis 7 jours avant. Ces deux informations restent dans l'Espace : le contenu du Coffre reste illisible. Vous pouvez les supprimer à tout moment.
+Tous les 3 mois, un message vous demande si tout est à jour (changement de banque, nouveau contrat, déménagement).
+
+
+=== 18. COPIER ET TÉLÉCHARGER EN PDF ===
+
+Chaque information du Coffre a un bouton « copier ». Le Coffre se télécharge en PDF : pour le titulaire, tout sauf les codes et mots de passe ; pour un proche, uniquement sa part, sans codes, sans mots de passe, sans « À effacer ».
+
+
+=== 19. LA CONCIERGERIE ===
+
+Quand les démarches sont trop lourdes, une conciergerie partenaire les fait à votre place : mettre en place son Coffre ; démarches après un décès (banques, assurances, caisses de retraite, résiliations) ; pendant une hospitalisation (employeur, mutuelle, factures) ; perte d'autonomie (aides, aménagement, aide à domicile) ; résiliations (téléphone, énergie, plateformes, presse).
+Service facultatif et payant, sur devis avant tout engagement. Un interlocuteur unique, par téléphone ou e-mail.
+Comment : Espace › Conciergerie › choisir le service, quelques mots sur la situation (rien de confidentiel), puis signer le mandat en ligne en tapant son nom complet. Ensuite, pour lui confier un document : l'ouvrir dans le Coffre › Confier à la conciergerie.
+Elle ne voit que les documents que vous lui confiez, chiffrés pour elle, s'engage à la confidentialité et les supprime à la fin de la mission. Vous pouvez mettre fin au mandat à tout moment.
+Pour échanger des documents entre proches, nous recommandons une messagerie chiffrée de bout en bout, comme Proton Mail.
+
+
+=== 20. LES DÉMARCHES (ESPACE › DÉMARCHES) ===
+
+Quatre rubriques, avec une liste à cocher, un pas-à-pas et des modèles de courriers à télécharger (ils s'ouvrent dans Word, LibreOffice ou Pages, à compléter là où figurent des [CROCHETS]). Ce sont des informations générales, pas des conseils juridiques.
+
+HOSPITALISATION, organiser les premiers jours
+Le jour même : prévenir les personnes à contacter ; apporter carte d'identité, carte vitale, carte de mutuelle ; transmettre la liste des traitements en cours.
+Sous 48 heures : prévenir l'employeur et envoyer l'arrêt de travail ; organiser la garde des enfants et des animaux.
+La première semaine : vérifier les factures et prélèvements à venir ; contacter la mutuelle pour la prise en charge.
+Conseils : si la personne a un Coffre, ses proches autorisés trouvent l'essentiel dans Urgence et santé. Désignez une personne par sujet (enfants, animaux, courrier, factures). Pour la sortie, le service social de l'hôpital renseigne sur les aides au retour à domicile.
+Modèles : information de l'employeur ; demande de prise en charge à la mutuelle.
+
+ACCIDENT, les bons réflexes
+Immédiatement : appeler les secours (112) et prévenir un proche.
+Le jour même : rassembler témoignages et photos si possible.
+Sous 48 heures : prévenir l'employeur.
+Sous 5 jours ouvrés : déclarer le sinistre à l'assureur (la plupart des contrats exigent une déclaration rapide).
+En continu : conserver les justificatifs de frais.
+Dès que possible : si vous ne pouvez plus gérer vos affaires, un garant peut signaler un coup dur ; vos proches autorisés n'accèdent qu'à ce que vous avez prévu pour ce cas.
+Modèle : déclaration de sinistre.
+
+PERTE D'AUTONOMIE, accompagner un proche sans s'épuiser
+Au début : faire le point sur les besoins du quotidien (courses, papiers, santé, sécurité du logement) ; se renseigner sur les aides (services sociaux de la commune, médecin traitant).
+Le premier mois : rassembler contrats, comptes et abonnements ; parler d'une procuration ou d'une mesure de protection avec un professionnel ; activer les alertes d'échéance de ses documents.
+Le Coffre ne donne aucun pouvoir légal : pour agir au nom d'un proche, une mesure adaptée se met en place avec un notaire ou un avocat.
+La gestion du Coffre d'un parent par son enfant, sur procuration signée, arrivera dans un second temps ; le Coffre restera celui du parent, avec ses propres cartes. Un modèle de procuration pour gérer le Coffre est déjà disponible (à faire valider par un avocat ; il ne vaut ni pour les comptes bancaires ni pour aucun acte juridique).
+
+APRÈS UN DÉCÈS, les démarches une par une
+Quelques questions adaptent la liste : la personne travaillait, était retraitée, propriétaire, avait un véhicule, était chef d'entreprise, avait des enfants mineurs.
+Les premiers jours : faire constater le décès par un médecin (certificat) ; déclarer le décès en mairie (souvent fait par les pompes funèbres) ; contacter les pompes funèbres et consulter ses volontés dans le Coffre ; demander plusieurs actes de décès ; prévenir l'employeur (s'il travaillait).
+Les premières semaines : prévenir les banques ; la caisse de retraite et la complémentaire (s'il était retraité) ; l'Assurance maladie et la mutuelle ; les assureurs et assureurs vie ; les associés, la banque professionnelle et le greffe (chef d'entreprise) ; organiser la garde ou la tutelle des enfants mineurs.
+Les premiers mois : résilier ou transférer les abonnements (téléphone, énergie, internet) ; ouvrir la succession chez un notaire (obligatoire avec un bien immobilier) ; changer la carte grise ou vendre le véhicule ; déclarer les revenus du défunt (dans les 6 mois).
+Modèles : information d'une banque ; demande à un assureur vie ; résiliation d'un abonnement ; information de l'employeur ou de la caisse de retraite.
+La conciergerie peut prendre ces démarches en charge, sur mandat.
+
+
+=== 21. ABONNEMENT, PHASE DÉCOUVERTE, IMPAYÉ ===
+
+Lancement en deux temps : pendant la phase découverte, tout est ouvert (inscription, identité, famille, garants, cartes, réglages, démarches), sauf l'ajout de documents dans le Coffre, qui ouvre au lancement officiel.
+Les tarifs sont communiqués au lancement, ou par votre conseiller. Les applications iPhone et Android n'affichent aucun prix : l'abonnement se gère depuis le site, dans Espace › Compte.
+Impayé : des relances chaque semaine pendant un délai de grâce de 30 jours, puis tout le Coffre est effacé définitivement.
+
+
+=== 22. COMPTE ET RÉGLAGES (ESPACE › COMPTE) ===
+
+On y trouve : vérification d'identité ; téléphone, adresse, adresse e-mail ; mot de passe ; rubrique Entreprise (chef d'entreprise) ; langue (français, anglais, espagnol, catalan : les e-mails suivent la langue choisie) ; couleurs de l'application (Noir et or ou Sillage) ; voix de l'assistante (lecture à voix haute des réponses) ; appareils de confiance ; Coup dur et décès (signalements en cours, annulation) ; abonnement ; adresse du support ; suppression du compte.
+
+Q : Comment supprimer mon compte ?
+R : Espace › Compte › supprimer, puis tapez SUPPRIMER pour confirmer. Votre Espace, votre Coffre, ses documents et les accès de vos proches sont effacés définitivement : personne, pas même l'équipe, ne pourra les récupérer.
+
+Q : Comment parler à quelqu'un ?
+R : Écrivez au support (adresse dans Espace › Compte). Votre conseiller peut aussi vous aider, et la conciergerie peut faire les démarches à votre place.
+
+
+=== 23. DONNÉES PERSONNELLES ET CONFIDENTIALITÉ ===
+
+Le Coffre : chiffré sur votre téléphone avant d'être envoyé. L'équipe, Alma et la conciergerie ne peuvent pas le lire (la conciergerie voit seulement les documents que vous lui confiez). Si toutes les clés disparaissent, personne ne peut le rouvrir : c'est le prix de la confidentialité.
+L'Espace : lisible par l'équipe, parce que le service en a besoin : nom, prénom, e-mail, téléphone, date et lieu de naissance (vérification d'identité et veille des décès), noms et e-mails des proches (invitations), rôles des garants, état des cartes et des signalements, et, avec votre accord, le type et la date de vos échéances.
+Le strict nécessaire : l'adresse postale est effacée dès l'envoi des cartes ; les pièces d'identité sont supprimées après vérification ; l'acte de décès à la fin de la procédure ; les e-mails envoyés au bout de 30 jours. Ni situation familiale, ni téléphone des proches ne sont demandés.
+Alma ne voit jamais le contenu du Coffre : elle sait seulement sur quelle page vous êtes. Ne lui écrivez jamais un code ou un mot de passe.
+Hébergement certifié pour les données de santé prévu au lancement officiel.
+
+
+=== 24. CE QUE LE SERVICE N'EST PAS ===
+
+Ni un testament, ni un notaire, ni un avocat, ni une banque. Le Coffre ne donne aucun pouvoir légal. Il indique où se trouvent les originaux et aide la famille à tout retrouver. Alma donne des informations générales : pour une succession, une protection juridique ou une question de santé, consultez un professionnel.
+
+
+=== 25. MESSAGES AFFICHÉS ET SOLUTIONS ===
+
+« Cette carte n'est pas encore activée. » : activez-la dans Espace › Mes cartes.
+« Code incorrect. Réessayez. » : vérifiez le code ; après 5 erreurs : « Trop d'essais. Patientez quelques minutes. »
+« Cette carte n'appartient pas à ce Coffre, ou elle a été désactivée. » : utilisez une autre de vos cartes.
+« La lecture NFC n'est pas disponible sur cet appareil. » : ce téléphone n'a pas de lecteur sans contact.
+« La carte n'a pas pu être lue. Gardez-la contre le téléphone. » : reposez-la à plat, sans bouger.
+« Ouvrez d'abord votre Coffre avec une carte déjà activée. » : pour activer une nouvelle carte, ouvrez le Coffre avec une carte active.
+« Activez Face ID, l'empreinte ou un code de verrouillage sur ce téléphone » : obligatoire pour ouvrir le Coffre dans l'application.
+« Activez Face ID ou l'empreinte sur ce téléphone : votre accès en a besoin. » : pour l'accès d'un proche, Face ID ou l'empreinte est indispensable.
+« Identité non confirmée sur ce téléphone. Réessayez. » : Face ID a échoué, recommencez.
+« Aucun accès n'est enregistré sur ce téléphone. » : faites la demande d'accès depuis ce téléphone (espace de proche).
+« Votre accès a été validé sur un autre téléphone. » : refaites la demande depuis ce téléphone.
+« Le Coffre s'ouvre dans l'application » : sur un téléphone, installez l'application.
+« Demande expirée » ou « Délai dépassé » : une demande d'ordinateur dure quelques minutes ; recommencez.
+« Demande refusée sur le téléphone. » : le mauvais nombre a été choisi, ou la demande a été refusée ; recommencez.
+« Ce code QR ne correspond pas à la demande. » : scannez de nouveau le code QR affiché sur l'ordinateur.
+« Appareil à revalider » : 90 jours sont passés, reprenez le code QR.
+« L'ajout de documents ouvrira au lancement officiel. » : phase découverte.
+« Personne ne vous a encore désigné avec cette adresse. » : connectez-vous avec l'adresse utilisée par le titulaire.
+« Patientez une minute avant de réessayer. » : trop de demandes de code par e-mail rapprochées.
+« Mot de passe trop faible » : 10 caractères au moins, avec une majuscule, une minuscule et un chiffre.
+« Un compte existe déjà avec cette adresse » : connectez-vous, ou utilisez « Mot de passe oublié ».
+« Votre session a expiré. Reconnectez-vous. » : reconnectez-vous à l'Espace.
+
+
+=== 26. QUESTIONS FRÉQUENTES ===
+
+Q : Est-ce vraiment confidentiel ?
+R : Oui. Tout ce que vous mettez dans le Coffre est chiffré sur votre téléphone avant de partir. Ni l'équipe, ni Alma, ni la conciergerie ne peuvent le lire.
+
+Q : Que se passe-t-il si le service est piraté ?
+R : Le Coffre n'est stocké que chiffré : sans vos cartes et vos codes, son contenu reste illisible, même pour quelqu'un qui accéderait aux serveurs.
+
+Q : Dois-je retenir un mot de passe ou une phrase secrète ?
+R : Pas pour le Coffre : il s'ouvre avec votre carte et votre code, ou Face ID dans l'application. Un mot de passe protège seulement l'Espace.
+
+Q : Mes proches sont-ils prévenus de ce que je range ?
+R : Non. Ils ne voient rien avant le moment que vous avez choisi pour eux, et seulement ce que vous leur avez attribué.
+
+Q : Un proche peut-il ouvrir mon Coffre sans mon accord ?
+R : Non. Son accès doit être accepté par vous, depuis votre Coffre. Et il n'ouvre que ce que vous lui attribuez, au moment choisi : « Coup dur » ou « Décès » attendent un signalement vérifié et un délai pendant lequel vous pouvez annuler.
+
+Q : Qui décide qu'il y a un coup dur ou un décès ?
+R : Pour un coup dur, vos garants, que vous choisissez. Pour un décès : veille du registre des décès, acte de décès fourni par un bénéficiaire et vérification par l'équipe, puis un délai pendant lequel tout peut être annulé.
+
+Q : Et si je suis à l'étranger quand un coup dur est signalé ?
+R : Vous êtes prévenu par e-mail et vous pouvez annuler depuis l'application, avec votre carte et votre code, pendant 48 heures.
+
+Q : Combien de temps mes proches ont-ils accès après mon décès ?
+R : 6 mois après l'ouverture des accès. Ensuite, le Coffre est effacé définitivement.
+
+Q : Que devient « À effacer » ?
+R : Ce n'est remis à personne : au décès, son contenu est détruit sans avoir été lu.
+
+Q : Puis-je ouvrir mon Coffre sur un ordinateur ?
+R : Oui, avec l'accord de votre téléphone : code QR la première fois, puis une simple notification, toujours avec la carte posée et Face ID.
+
+Q : Puis-je ouvrir le Coffre de quelqu'un d'autre ?
+R : Seulement la part qu'il vous a attribuée, au moment prévu, depuis votre téléphone validé ou, après un décès, avec vos cartes.
+
+Q : Mon enfant peut-il gérer mon Coffre si je ne peux plus le faire ?
+R : Cette possibilité, sur procuration signée, arrivera dans un second temps. Un modèle de procuration se trouve déjà dans Espace › Démarches › Perte d'autonomie. D'ici là, donnez-lui le niveau qui convient dans « Qui voit quoi » et désignez-le garant.
+
+Q : Le Coffre remplace-t-il un testament ?
+R : Non. Il indique où se trouve l'original et aide vos proches à tout retrouver. Pour un testament, consultez un notaire.
+
+Q : Puis-je ranger les informations de mon entreprise ?
+R : Oui : activez la rubrique Entreprise dans Espace › Compte (chef d'entreprise) : société, banques professionnelles, baux commerciaux, clients, équipe, accès et procédures.
+
+Q : Puis-je partager le Coffre avec mon conjoint ?
+R : Chacun a son propre Coffre. Vous pouvez désigner votre conjoint comme bénéficiaire et lui ouvrir les rubriques de votre choix, au moment de votre choix.
+
+Q : Que se passe-t-il si j'arrête de payer ?
+R : Nous vous relançons chaque semaine pendant un délai de grâce de 30 jours. Ensuite, tout le Coffre est effacé définitivement.
+
+Q : Puis-je récupérer mon Coffre si je le supprime ?
+R : Non. La suppression est définitive : personne, pas même l'équipe, ne peut le récupérer. Téléchargez-le en PDF avant si besoin.
+
+Q : Comment savoir ce que j'ai déjà rempli ?
+R : Le score de l'accueil et « L'essentiel » vous montrent votre progression. Le détail est dans votre Coffre.
+
+Q : L'application existe-t-elle en d'autres langues ?
+R : Oui : français, anglais, espagnol et catalan. Les e-mails sont envoyés dans la langue choisie.
+
+Q : Pourquoi une carte plutôt qu'un mot de passe ?
+R : Un mot de passe s'oublie, se devine ou se vole à distance. La carte garde son secret dans sa puce : il faut l'avoir en main, avec votre code. Personne ne peut ouvrir votre Coffre depuis l'autre bout du monde.
+
+Q : Que faire si je perds mon téléphone (titulaire) ?
+R : Votre Coffre ne dépend pas du téléphone : installez l'application sur le nouveau, connectez-vous, posez une de vos cartes et tapez votre code. Pensez à retirer vos ordinateurs de confiance si vous avez un doute (Espace › Compte).
+
+Q : Combien de bénéficiaires puis-je désigner ?
+R : Chaque bénéficiaire a son pack de 2 cartes réservé à son nom. Votre conseiller vous indique ce que comprend votre formule.
+
+Q : Qui est Alma ?
+R : L'assistante de Sillage. Elle répond à vos questions sur le service et les démarches. Elle ne voit jamais le contenu de votre Coffre et ne remplace ni un notaire ni un avocat.
+
+
+=== 27. CHIFFRES CLÉS (RÉGLAGES ACTUELS) ===
+
+Cartes du titulaire : 3, un seul code de 6 chiffres.
+Pack bénéficiaire : 2 cartes, réservées à la désignation, envoyées au décès confirmé.
+Code d'accès d'un proche : 6 chiffres, avec Face ID ou l'empreinte.
+Délai d'annulation d'un coup dur : 48 heures.
+Délai d'annulation d'un décès : 15 jours après la vérification.
+Accès des bénéficiaires après un décès : 6 mois, puis effacement définitif (prévenu 30 jours avant).
+Impayé : 30 jours de grâce, relances chaque semaine, puis effacement.
+Rappels d'échéance : 30 jours puis 7 jours avant ; point « tout est-il à jour ? » tous les 3 mois.
+Appareil de confiance (ordinateur) : 90 jours.
+Codes faux : après 5 erreurs, attendre quelques minutes.
+Mot de passe de l'Espace : 10 caractères au moins, majuscule, minuscule et chiffre.
+Documents du Coffre : photos ou PDF.
