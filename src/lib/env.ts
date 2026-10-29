@@ -15,3 +15,5 @@ export const PUSH = process.env.NEXT_PUBLIC_PUSH === "1";
 // Store pages, shown on a phone's browser (the Coffre opens in the app). Empty until the apps are published.
 export const STORE_IOS = process.env.NEXT_PUBLIC_STORE_IOS ?? "";
 export const STORE_ANDROID = process.env.NEXT_PUBLIC_STORE_ANDROID ?? "";
+// Alma's Botpress bot (webchat client id: public by design, it is in every page that embeds the bot). Empty: local answers only.
+export const BOTPRESS_CLIENT_ID = process.env.NEXT_PUBLIC_BOTPRESS_CLIENT_ID ?? "823e2188-b3d6-4f84-86fa-c2e34d246f65";

@@ -2,7 +2,7 @@
 // Every match opens a "décès" procedure in "vérification": a person always checks before any delay starts.
 import { findMatches, type Match, type Member } from "../_shared/insee.ts";
 import { admin, internalOnly, json } from "../_shared/server.ts";
-import { checkDoubtful } from "../assistant/check.ts";
+import { checkDoubtful } from "./check.ts";
 
 const DATASET = "https://www.data.gouv.fr/api/1/datasets/fichier-des-personnes-decedees/";
 

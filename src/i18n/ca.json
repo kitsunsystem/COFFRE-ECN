@@ -1351,7 +1351,7 @@
 "{0} demande, depuis son téléphone, à pouvoir ouvrir ce que vous lui confiez. Demande faite le {1}.":"{0} sol·licita, des del seu telèfon, poder obrir el que li confieu. Sol·licitud feta el {1}.",
 "{0} demandes d'accès vous attendent":"{0} sol·licituds d'accés us esperen",
 "{0} document{1} partagé{2} depuis le Coffre":"{0} document{1} compartit{2} des del Cofre",
-"{0} donne des informations générales et ne remplace ni un notaire ni un avocat. {1} ne voit jamais le contenu de votre Coffre.":"{0} ofereix informació general i no substitueix ni un notari ni un advocat. {1} no veu mai el contingut del vostre Cofre.",
+"{0} donne des informations générales et ne remplace ni un notaire ni un avocat. {1} ne voit jamais le contenu de votre Coffre : n'écrivez ici aucun code ni mot de passe.":"{0} ofereix informació general i no substitueix ni un notari ni un advocat. {1} no veu mai el contingut del vostre Cofre: no hi escriviu cap codi ni contrasenya.",
 "{0} est décédé(e) : déposer l'acte":"{0} ha mort: aportar el certificat",
 "{0} est prévenu(e) partout et peut annuler pendant {1}. Ensuite, seuls les éléments prévus pour un coup dur s'ouvrent.":"{0} rep alertes arreu i pot anul·lar durant {1}. Després, només s'obren els elements previstos per a un imprevist greu.",
 "{0} h pour annuler":"{0} h per anul·lar",

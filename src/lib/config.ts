@@ -1,6 +1,6 @@
 // Everything the client still has to decide ("À décider" in the brief and the project follow-up) lives here, in one place.
 export const APP_NAME = "Sillage"; // nom de travail : Sillage, Védora ou Laréo (après vérification INPI / EUIPO et domaines)
-export const ASSISTANT_NAME = "Alma"; // avatar fictif de l'assistant (prestataire IA texte, voix puis vidéo : à décider)
+export const ASSISTANT_NAME = "Alma"; // avatar fictif de l'assistant ; réponses par le bot Botpress (deploy/alma/), vidéo : à décider
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;

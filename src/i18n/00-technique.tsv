@@ -92,3 +92,6 @@ Ordinateur
 {0}{1}/appareil/?r={2}{3}
 pushNotificationActionPerformed
 id, name, created_at, expires_at, last_used_at
+POST
+GET
+?nextToken={0}

@@ -76,11 +76,11 @@ Parcours à montrer :
 | `src/lib/crypto.ts`, `cards.ts`, `vault.ts` | Chiffrement, cartes (FIDO2, Tangem, démo), Coffre |
 | `src/lib/rules.ts` | Niveaux d'accès et procédures (même logique qu'en SQL) |
 | `supabase/migrations/` | Schéma, droits, RLS, fonctions métier, fichiers, tâches planifiées |
-| `supabase/functions/` | `mailer` (Brevo), `procedures-tick`, `relances`, `insee-watch`, `assistant`, `billing` + `stripe-webhook` (Stripe), `account-delete` (RGPD), `kyc-webhook` |
+| `supabase/functions/` | `mailer` (Brevo), `procedures-tick`, `relances`, `insee-watch`, `billing` + `stripe-webhook` (Stripe), `account-delete` (RGPD), `kyc-webhook` |
 | `supabase/tests/`, `tests/e2e/` | Tests des règles d'accès et parcours de bout en bout |
 | `android/`, `ios/` | Applications natives (Capacitor) |
 | `.github/workflows/` | CI, applications mobiles, déploiement, analyse de sécurité |
 | `deploy/README.md` | Les actions à faire pour la mise en production |
 
 ## Points encore « à décider »
-Nom (Sillage, Védora ou Laréo) · délai du coup dur et délai d'annulation du décès · durée d'accès après décès (4, 6 ou 12 mois) · délai de grâce · prix de la formule simple et de la phase découverte · date de lancement officiel · pack bénéficiaire (inclus ou payant) · cartes FIDO2 ou Tangem · prestataire d'Alma · système KYC du groupe · registres de décès en Espagne et en Andorre.
+Nom (Sillage, Védora ou Laréo) · délai du coup dur et délai d'annulation du décès · durée d'accès après décès (4, 6 ou 12 mois) · délai de grâce · prix de la formule simple et de la phase découverte · date de lancement officiel · pack bénéficiaire (inclus ou payant) · cartes FIDO2 ou Tangem · système KYC du groupe · registres de décès en Espagne et en Andorre.

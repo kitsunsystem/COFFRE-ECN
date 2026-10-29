@@ -1,10 +1,9 @@
 // Alma, the assistant (brief §10). It only knows WHERE the user is (the page), never what they type in the Coffre.
-// Answers from the "assistant" function when connected, otherwise (demo, offline, provider down) from a local knowledge base.
+// Answers from the Botpress bot (its instructions and knowledge base: deploy/alma/), reached through Botpress's webchat
+// API from Alma's own window, so no Botpress widget is shown. Offline, or without an answer: the local knowledge base below.
 import { ASSISTANT_NAME } from "./config";
-import { PROD } from "./env";
+import { BOTPRESS_CLIENT_ID } from "./env";
 import { currentLang } from "./i18n";
-import { useApp } from "./store";
-import { sb } from "./supabase";
 
 const KB: { keys: string[]; answer: string }[] = [
   { keys: ["commencer", "debut", "par ou", "quoi faire"], answer: "Commencez par vos cartes et vos bénéficiaires, puis par l'essentiel : dix éléments, à votre rythme. Ouvrez votre Coffre avec votre carte, puis touchez « Commencer par l'essentiel »." },
@@ -34,7 +33,7 @@ const KB: { keys: string[]; answer: string }[] = [
 
 const norm = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-export const DISCLAIMER = `${ASSISTANT_NAME} donne des informations générales et ne remplace ni un notaire ni un avocat. ${ASSISTANT_NAME} ne voit jamais le contenu de votre Coffre.`;
+export const DISCLAIMER = `${ASSISTANT_NAME} donne des informations générales et ne remplace ni un notaire ni un avocat. ${ASSISTANT_NAME} ne voit jamais le contenu de votre Coffre : n'écrivez ici aucun code ni mot de passe.`;
 
 export const SUGGESTIONS: Record<string, string[]> = {
   default: ["Par où commencer ?", "Comment marche ma carte ?", "Qui verra mes documents ?"],
@@ -43,13 +42,74 @@ export const SUGGESTIONS: Record<string, string[]> = {
   cartes: ["J'ai perdu une carte", "J'ai oublié mon code", "Les 2 cartes d'un bénéficiaire"],
 };
 
+/* ---------- Botpress ---------- */
+
+type Payload = { text?: string; markdown?: string; items?: { payload?: { text?: string; markdown?: string } }[] };
+type Chat = { key: string; userId: string; conversationId: string };
+
+const API = `https://webchat.botpress.cloud/${BOTPRESS_CLIENT_ID}`;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function api<T>(path: string, key?: string, body?: unknown): Promise<T> {
+  const r = await fetch(API + path, {
+    method: body ? "POST" : "GET",
+    headers: { "content-type": "application/json", ...(key ? { "x-user-key": key } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!r.ok) throw new Error(String(r.status));
+  return r.json() as Promise<T>;
+}
+
+// One anonymous Botpress user and conversation per visit, made at the first question, so the bot keeps the thread.
+let chat: Promise<Chat> | undefined;
+const session = () =>
+  (chat ??= (async () => {
+    const { user, key } = await api<{ user: { id: string }; key: string }>("/users", undefined, {});
+    const { conversation } = await api<{ conversation: { id: string } }>("/conversations", key, {});
+    return { key, userId: user.id, conversationId: conversation.id };
+  })().catch((e) => {
+    chat = undefined;
+    throw e;
+  }));
+
+async function messages(c: Chat) {
+  const all: { userId: string; createdAt: string; payload: Payload }[] = [];
+  let next: string | undefined;
+  do {
+    const r = await api<{ messages: typeof all; meta: { nextToken?: string } }>(`/conversations/${c.conversationId}/messages${next ? `?nextToken=${encodeURIComponent(next)}` : ""}`, c.key);
+    all.push(...r.messages);
+    next = r.meta.nextToken;
+  } while (next);
+  return all;
+}
+
+// Alma's bubbles show plain text: the bot's markdown signs go.
+const textOf = (p: Payload) => [p.text, p.markdown, ...(p.items ?? []).map((i) => i.payload?.text ?? i.payload?.markdown)].filter(Boolean).join("\n");
+const plain = (t: string) => t.replace(/\*\*|__|^#+\s*/gm, "").trim();
+
+async function botpress(question: string, place: string) {
+  const c = await session();
+  const { message } = await api<{ message: { createdAt: string } }>("/messages", c.key, { conversationId: c.conversationId, payload: { type: "text", text: question }, metadata: { page: place, lang: currentLang() } });
+  // The answer comes a few seconds later, sometimes in several messages: taken once it has stopped changing.
+  let last = "";
+  for (let i = 0; i < 45; i++) {
+    await sleep(1000);
+    const replies = (await messages(c)).filter((m) => m.userId !== c.userId && m.createdAt > message.createdAt).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    const text = replies.map((m) => textOf(m.payload)).filter(Boolean).join("\n\n");
+    if (text && text === last) return plain(text);
+    last = text;
+  }
+  if (last) return plain(last);
+  throw new Error("timeout");
+}
+
 export async function ask(question: string, place: string): Promise<string> {
-  // Production, signed in: the "assistant" function. Only the question and the page name leave the device, never Coffre content.
-  if (PROD && useApp.getState().me) {
-    const { data } = await sb()
-      .functions.invoke("assistant", { body: { question, place, lang: currentLang() } })
-      .catch(() => ({ data: null }));
-    if (data?.answer) return data.answer as string;
+  if (BOTPRESS_CLIENT_ID) {
+    try {
+      return await botpress(question, place);
+    } catch (e) {
+      console.error(e);
+    }
   }
   const q = norm(question);
   const best = KB.map((e) => ({ e, hits: e.keys.filter((k) => q.includes(k)).length })).sort((a, b) => b.hits - a.hits)[0];

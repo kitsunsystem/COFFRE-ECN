@@ -1351,7 +1351,7 @@
 "{0} demande, depuis son téléphone, à pouvoir ouvrir ce que vous lui confiez. Demande faite le {1}.":"{0} is asking, from their phone, to be able to open what you entrust to them. Request made on {1}.",
 "{0} demandes d'accès vous attendent":"{0} access requests are waiting for you",
 "{0} document{1} partagé{2} depuis le Coffre":"{0} document{1} shared from the Vault",
-"{0} donne des informations générales et ne remplace ni un notaire ni un avocat. {1} ne voit jamais le contenu de votre Coffre.":"{0} gives general information and replaces neither a notary nor a lawyer. {1} never sees your Vault's content.",
+"{0} donne des informations générales et ne remplace ni un notaire ni un avocat. {1} ne voit jamais le contenu de votre Coffre : n'écrivez ici aucun code ni mot de passe.":"{0} gives general information and replaces neither a notary nor a lawyer. {1} never sees your Vault's content: never type a code or a password here.",
 "{0} est décédé(e) : déposer l'acte":"{0} has passed away: upload the certificate",
 "{0} est prévenu(e) partout et peut annuler pendant {1}. Ensuite, seuls les éléments prévus pour un coup dur s'ouvrent.":"{0} is alerted everywhere and can cancel within {1}. After that, only the items planned for a crisis open.",
 "{0} h pour annuler":"{0} h to cancel",

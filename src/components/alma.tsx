@@ -54,6 +54,7 @@ export function Alma({ dark }: { dark?: boolean }) {
   const [text, setText] = useState("");
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
+  const [thinking, setThinking] = useState(false);
   const voice = useApp((s) => s.assistantVoice);
   const setApp = useApp((s) => s.set);
   const end = useRef<HTMLDivElement>(null);
@@ -61,7 +62,7 @@ export function Alma({ dark }: { dark?: boolean }) {
   // Braces matter: recent browsers return a Promise from scrollIntoView, which React would take for a cleanup.
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: "smooth" });
-  }, [msgs]);
+  }, [msgs, thinking]);
 
   function speak(t: string) {
     if (!voice || typeof speechSynthesis === "undefined") return;
@@ -78,7 +79,9 @@ export function Alma({ dark }: { dark?: boolean }) {
     if (!q.trim()) return;
     setMsgs((m) => [...m, { from: "me", text: q }]);
     setText("");
+    setThinking(true);
     const a = await ask(q, place);
+    setThinking(false);
     setMsgs((m) => [...m, { from: "alma", text: a }]);
     speak(a);
   }
@@ -135,17 +138,25 @@ export function Alma({ dark }: { dark?: boolean }) {
         <div className="mt-5 space-y-3" aria-live="polite">
           <AnimatePresence initial={false}>
             {msgs.map((m, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`max-w-[88%] rounded-3xl px-4 py-3 text-[0.98rem] ${m.from === "me" ? "ml-auto rounded-br-md bg-ink text-paper" : "rounded-bl-md bg-paper ring-1 ring-line"}`}>
+              <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`max-w-[88%] whitespace-pre-line rounded-3xl px-4 py-3 text-[0.98rem] ${m.from === "me" ? "ml-auto rounded-br-md bg-ink text-paper" : "rounded-bl-md bg-paper ring-1 ring-line"}`}>
                 {m.text}
               </motion.div>
             ))}
           </AnimatePresence>
+          {thinking && (
+            <div aria-hidden className="flex w-fit gap-1.5 rounded-3xl rounded-bl-md bg-paper px-4 py-4 ring-1 ring-line">
+              {[0, 1, 2].map((i) => (
+                <motion.span key={i} className="h-2 w-2 rounded-full bg-mist" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
+              ))}
+            </div>
+          )}
           <div ref={end} />
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {(SUGGESTIONS[place] ?? SUGGESTIONS.default).map((s) => (
-            <button key={s} onClick={() => void send(s)} className="rounded-full bg-gold-soft/60 px-3.5 py-2 text-[0.85rem] font-semibold text-ink ring-1 ring-gold/30">
+            // Sent in the language shown, so Alma answers in it.
+            <button key={s} onClick={() => void send(tr(s))} className="rounded-full bg-gold-soft/60 px-3.5 py-2 text-[0.85rem] font-semibold text-ink ring-1 ring-gold/30">
               {s}
             </button>
           ))}
