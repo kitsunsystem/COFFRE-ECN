@@ -10,9 +10,10 @@ export async function seedDemo() {
   const st = useApp.getState();
   st.reset();
   lock();
-  const marc: Person = { id: uid(), firstName: "Marc", lastName: "Durand", relation: "Conjoint", email: "marc.durand@exemple.fr" };
-  const lea: Person = { id: uid(), firstName: "Léa", lastName: "Durand", relation: "Enfant", email: "lea.durand@exemple.fr" };
-  const paul: Person = { id: uid(), firstName: "Paul", lastName: "Durand", relation: "Enfant", email: "paul.durand@exemple.fr" };
+  // Marc, Léa and Paul have created their account; Sophie has not yet.
+  const marc: Person = { id: uid(), firstName: "Marc", lastName: "Durand", relation: "Conjoint", email: "marc.durand@exemple.fr", linked: true };
+  const lea: Person = { id: uid(), firstName: "Léa", lastName: "Durand", relation: "Enfant", email: "lea.durand@exemple.fr", linked: true };
+  const paul: Person = { id: uid(), firstName: "Paul", lastName: "Durand", relation: "Enfant", email: "paul.durand@exemple.fr", linked: true };
   const sophie: Person = { id: uid(), firstName: "Sophie", lastName: "Martin", relation: "Ami", email: "sophie.martin@exemple.fr" };
   const t = Date.now();
   const card = (holderId: string, printedName: string, status: Card["status"], extra = false): Card => ({ id: uid(), holderId, printedName, status, orderedAt: t - 9 * 86_400_000, extra });
@@ -27,7 +28,7 @@ export async function seedDemo() {
     people: [marc, lea, paul, sophie],
     cards: [...owner, ...packs, ...phones],
     guarantors: [
-      { personId: marc.id, role: "Prévenir les enfants et déclarer un coup dur si je suis hospitalisée." },
+      { personId: marc.id, role: "Prévenir les enfants et signaler un décès." },
       { personId: sophie.id, role: "Confirmer, avec Marc, s'il m'arrive quelque chose." },
     ],
     phase: "lancement", // the demo shows the product as it will be after the official launch
@@ -44,7 +45,7 @@ export async function seedDemo() {
     ["banques", "Banque principale", { bank: "Banque du Rhône", advisor: "M. Petit", phone: "04 72 00 00 00", note: "Compte joint et livret A" }],
     ["assurances", "Assurance-vie", { insurer: "Assurances Avenir", contract: "AV-778899", beneficiaries: "Léa et Paul, à parts égales", expiry: "", note: "" }],
     ["telephone", "Mon iPhone", { device: "iPhone", code: "4 8 1 5 1 6", note: "Le code du téléphone de secours est le même." }],
-    ["juridique", "Testament", { doc: "Testament olographe", where: "Chez Maître Roux, notaire à Lyon", pro: "Maître Roux", note: "" }],
+    ["juridique", "Testament", { doc: "Testament olographe", where: "Dans le secrétaire du salon, enveloppe kraft", pro: "Moi, et une copie chez Marc", note: "" }],
     ["obseques", "Mes souhaits", { contract: "Contrat obsèques Sérénité", wishes: "Une cérémonie simple, avec de la musique.", note: "" }],
     ["lettres", "Pour Léa", { to: "Léa", text: "Ma chérie, je suis si fière de toi…" }],
     ["prive", "Journal", { title: "Mon journal", note: "À détruire sans le lire." }],

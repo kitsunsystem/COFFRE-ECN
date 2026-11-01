@@ -17,6 +17,7 @@ export interface Person {
   relation: string;
   email?: string;
   managesMe?: boolean; // child who manages this account under a signed power of attorney
+  linked?: boolean; // they created their account with this address (every relative must have one)
 }
 
 export interface Account {
@@ -123,6 +124,7 @@ export interface HolderView {
   ownerId: string;
   ownerName: string;
   holderName: string;
+  personId: string; // the relative reading: a coup dur opens only for the one who asked
   items: VaultItem[];
   envelopes: Envelope[];
   procedures: Procedure[];
@@ -167,7 +169,8 @@ interface State {
   procedures: Procedure[];
   reminders: Reminder[];
   reminderConsent: boolean;
-  phase: "decouverte" | "lancement"; // discovery: no document can be stored in the Coffre yet
+  phase: "decouverte" | "lancement"; // pre-launch: everything but the Coffre, which opens with the cards at the launch
+  plannedLaunch?: string; // production: announced launch date (app_settings.planned_launch)
   billing: { status: "a_jour" | "impaye" | "efface"; since?: number };
   checklist: Record<string, boolean>;
   concierge: ConciergeCase[];
@@ -217,7 +220,7 @@ export const useApp = create<State & Actions>()(
     }),
     {
       // Bumped whenever the stored shape changes; older demo data is simply ignored.
-      name: "sillage-demo-6",
+      name: "sillage-demo-7",
       skipHydration: true,
       // Production keeps nothing on the device (shared phones): the server is the only copy.
       partialize: (s) => {

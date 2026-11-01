@@ -112,15 +112,22 @@ Pour générer la paire, sur le poste du partenaire : `node scripts/concierge-ke
 3. SMTP Brevo → réglages SMTP de Supabase Auth (codes de connexion).
 Sans clé Brevo, la fonction `mailer` marque les e-mails comme envoyés sans les envoyer (utile en test).
 
-## 5. Paiement (Stripe)
+## 5. Paiement (Paddle)
 
-1. Créer le produit « Formule simple » et son prix annuel → secret `STRIPE_PRICE_ID`.
-2. Clé secrète → `STRIPE_SECRET_KEY`.
-3. Webhook vers `https://api.<domaine>/functions/v1/stripe-webhook`, événements : `checkout.session.completed`,
-   `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`,
-   `invoice.paid`, `invoice.payment_failed` → secret `STRIPE_WEBHOOK_SECRET`.
-4. Activer le portail client Stripe (factures, moyen de paiement).
-5. Renseigner le prix dans `src/lib/config.ts` (`OFFER.price`) : le bouton « Souscrire » apparaît.
+Paddle encaisse et reverse la TVA de chaque pays ; les données de carte ne passent jamais par nos serveurs.
+Tout se règle d'abord dans le **bac à sable** (sandbox-vendors.paddle.com), puis à l'identique en production.
+1. Catalogue : produit « Formule simple », prix annuel → secret `PADDLE_PRICE_ID` (`pri_…`).
+2. Developer tools › Authentication : clé d'API → secret `PADDLE_API_KEY` ; jeton côté client (`test_…` puis `live_…`)
+   → variable de build `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN` (public par conception).
+3. Developer tools › Notifications : destination `https://api.<domaine>/functions/v1/paddle-webhook`, événements
+   `subscription.created`, `subscription.updated`, `subscription.canceled`, `subscription.past_due`,
+   `transaction.completed` → sa clé (`pdl_ntfset_…`) dans le secret `PADDLE_WEBHOOK_SECRET`.
+4. Checkout › Checkout settings : domaine approuvé `app.<domaine>` (le paiement s'ouvre par-dessus la page, Paddle.js).
+5. Pendant les essais : `PADDLE_ENV=sandbox` (fonctions) et `NEXT_PUBLIC_PADDLE_ENV=sandbox` (site) ; vides en production.
+6. Renseigner le prix dans `src/lib/config.ts` (`OFFER.price`) : le bouton « Souscrire » apparaît.
+À vérifier dans le bac à sable avant la production : un paiement complet, un renouvellement refusé (`past_due` →
+relances puis effacement), l'ouverture du portail client (factures, carte, résiliation) et la politique de sécurité
+du site (hôtes Paddle autorisés dans `scripts/headers.mjs`).
 
 ## 6. Site web (Cloudflare Pages)
 
@@ -194,6 +201,7 @@ l'application ; avec elles, le téléphone sonne :
 ## 10. Points juridiques à traiter (hors code)
 
 - Déclaration du moyen de cryptologie auprès de l'ANSSI (fourniture d'un service de chiffrement en France).
-- Contrat de sous-traitance RGPD avec chaque prestataire (hébergeur HDS, Brevo, Stripe, Cloudflare).
+- Contrat de sous-traitance RGPD avec chaque prestataire (hébergeur HDS, Brevo, Paddle, Cloudflare, Botpress, prestataire IA).
+- Avis de l'IA sur les justificatifs de coup dur (documents de santé) : contrat de traitement avec le prestataire IA, sans conservation ni entraînement, à faire valider avec le DPO.
 - Export de chiffrement pour l'App Store (questionnaire d'export à remplir dans App Store Connect).
 - Éviter le terme « coffre-fort numérique » (encadré) dans les textes publics.

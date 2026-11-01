@@ -21,7 +21,7 @@ import { toast, useApp, type Account } from "@/lib/store";
 import { lock } from "@/lib/vault";
 
 export default function Compte() {
-  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, billing: x.billing, phase: x.phase, staffRole: x.staffRole, set: x.set })));
+  const s = useApp(useShallow((x) => ({ account: x.account!, outbox: x.outbox, reminders: x.reminders, cards: x.cards, people: x.people, billing: x.billing, phase: x.phase, plannedLaunch: x.plannedLaunch ?? LAUNCH.plannedDate ?? undefined, staffRole: x.staffRole, set: x.set })));
   const router = useRouter();
   const [edit, setEdit] = useState(false);
   const [erase, setErase] = useState(false);
@@ -123,7 +123,7 @@ export default function Compte() {
               <div className="text-[0.8rem] text-mist">pack{packs > 1 ? "s" : ""} bénéficiaire{packs > 1 ? "s" : ""}</div>
             </div>
           </div>
-          {s.phase === "decouverte" && <p className="mt-3 text-[0.85rem] text-mist">Phase découverte{LAUNCH.discoveryPrice && !app ? ` (${LAUNCH.discoveryPrice} €)` : ""} : tout est ouvert sauf l&apos;ajout de documents. Lancement officiel prévu {LAUNCH.plannedDate ?? "à une date communiquée prochainement"}.</p>}
+          {s.phase === "decouverte" && <p className="mt-3 text-[0.85rem] text-mist">{`Pré-lancement${LAUNCH.discoveryPrice && !app ? ` (${LAUNCH.discoveryPrice} €)` : ""} : tout est ouvert sauf le Coffre, qui s'active avec vos cartes au lancement${s.plannedLaunch ? `, prévu le ${new Date(s.plannedLaunch).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : ", dont la date vous sera annoncée"}. Si elle est repoussée, vous choisissez : reporter, ou être remboursé.`}</p>}
           {!OFFER.price && !app && <p className="mt-2 text-[0.85rem] text-mist">Tarifs communiqués au lancement.</p>}
           {s.billing.status === "impaye" && s.billing.since && (
             <div className="mt-4">

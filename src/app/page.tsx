@@ -58,7 +58,7 @@ function Hero() {
         <motion.div variants={stagger} initial="hidden" animate="show" className="min-w-0">
           <motion.div variants={rise}>
             <span className="inline-flex items-center gap-2 rounded-full bg-paper/80 px-4 py-2 text-[0.85rem] font-semibold ring-1 ring-line backdrop-blur">
-              <Sparkles className="h-4 w-4 text-gold-deep" /> De son vivant comme après
+              <Sparkles className="h-4 w-4 text-gold-deep" /> Coffre de vie et de succession, personnel ou familial
             </span>
           </motion.div>
           {/* Sized so "au même endroit" (kept on one line for its underline) fits a 360 px phone. */}
@@ -124,9 +124,9 @@ function Hero() {
 
 // The three access levels, in the same colours as everywhere in the app (lib/rules.ts MOMENTS).
 const LEVELS = [
-  { icon: HeartPulse, tone: "bg-sage-soft text-sage", title: "Urgence", text: "Santé, personnes à prévenir : vos proches autorisés y accèdent tout de suite, à tout moment, depuis leur téléphone, avec Face ID et leur code. Et votre fiche médicale se copie dans votre téléphone." },
-  { icon: Siren, tone: "bg-coral-soft text-coral", title: "Coup dur", text: "Banques, codes, contrats : un garant signale la situation, un court délai s'écoule, puis seuls les éléments prévus pour ce cas s'ouvrent." },
-  { icon: HandHeart, tone: "bg-gold-soft/70 text-gold-deep", title: "Décès", text: "Veille du registre des décès, acte de décès, vérification par notre équipe : chaque bénéficiaire reçoit uniquement sa part." },
+  { icon: HeartPulse, tone: "bg-sage-soft text-sage", title: "Maintenant", text: "Santé, volontés médicales, contacts clés : vos proches autorisés y accèdent tout de suite, depuis leur compte, avec leur visage et leur code. Et votre fiche médicale se copie dans votre téléphone." },
+  { icon: Siren, tone: "bg-coral-soft text-coral", title: "Coup dur", text: "Hospitalisation, coma, incapacité : le proche fait sa demande avec un justificatif. Notre équipe vérifie le document et son identité, puis sa part s'ouvre pour lui seul, un temps limité. Vous êtes prévenu et pouvez tout fermer." },
+  { icon: HandHeart, tone: "bg-gold-soft/70 text-gold-deep", title: "Décès", text: "Acte de décès, vérification par notre équipe, registres officiels là où c'est possible, délai d'annulation : chaque bénéficiaire reçoit uniquement sa part." },
 ];
 
 function Moments() {
@@ -173,7 +173,7 @@ function CardSection() {
             {[
               ["1", "Recevez vos trois cartes", "Elles sont fabriquées pour vous et livrées chez vous."],
               ["2", "Activez-les avec votre téléphone", "La carte crée son secret dans sa puce : il n'en sort jamais."],
-              ["3", "Chaque bénéficiaire a 2 cartes à son nom", "Réservées dès sa désignation, envoyées à votre décès. D'ici là, il accède à sa part depuis son téléphone, avec votre accord."],
+              ["3", "Chaque bénéficiaire a 2 cartes à son nom", "Prépayées et gardées en solde, envoyées à votre décès. D'ici là, vos proches accèdent à leur part depuis leur compte, avec votre accord."],
             ].map(([n, t, d], i) => (
               <Reveal key={n} delay={i * 0.1}>
                 <div className="flex gap-4 rounded-3xl bg-paper/5 p-5 ring-1 ring-paper/10">
@@ -212,7 +212,7 @@ function Rights() {
         <Reveal>
           <Eyebrow>Qui voit quoi, et quand</Eyebrow>
           <h2 className="mt-3 text-[2.3rem] font-semibold leading-tight sm:text-[3rem]">Chacun voit ce que vous avez choisi. Rien de plus.</h2>
-          <p className="mt-5 text-[1.1rem] text-ink-soft">Pour chaque bénéficiaire et chaque rubrique, vous choisissez le niveau : urgence, coup dur, décès, ou jamais. Vous pouvez changer d&apos;avis quand vous voulez.</p>
+          <p className="mt-5 text-[1.1rem] text-ink-soft">Pour chaque proche et chaque sous-rubrique, vous choisissez le niveau : maintenant, coup dur, décès, ou jamais. L&apos;accès conseillé vous est proposé, et vous pouvez changer d&apos;avis quand vous voulez.</p>
         </Reveal>
         <Reveal delay={0.1}>
           <div className="rounded-[2rem] bg-paper p-6 shadow-lift ring-1 ring-line">
@@ -312,7 +312,7 @@ function Offer() {
           <Eyebrow>Formule simple</Eyebrow>
           <h2 className="mt-3 text-[2.2rem] font-semibold leading-tight">Tout compris, sans surprise.</h2>
           <ul className="mt-7 space-y-3.5">
-            {[`Votre Coffre et vos ${OFFER.ownerCards} cartes`, `Un pack de ${OFFER.packCards} cartes pour chaque bénéficiaire`, "Les listes, démarches et courriers pour vos proches", "L'assistante, les relances et la fiche d'urgence"].map((x) => (
+            {[`Votre Coffre et vos ${OFFER.ownerCards} cartes`, `Un pack de ${OFFER.packCards} cartes pour chaque bénéficiaire`, "Vos démarches de protection, pas à pas", "Les listes, démarches et courriers pour vos proches", "L'assistante, les relances et la fiche d'urgence"].map((x) => (
               <li key={x} className="flex items-start gap-3 text-[1.02rem]">
                 <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-sage" /> {x}
               </li>
@@ -320,11 +320,11 @@ function Offer() {
           </ul>
           {/* Pre-sale terms: to be validated by the lawyer before going live. */}
           <div className="mt-7 rounded-2xl bg-gold-soft/40 p-4 ring-1 ring-gold/30">
-            <div className="font-semibold">Phase découverte{LAUNCH.discoveryPrice ? ` · ${LAUNCH.discoveryPrice} €` : ""}</div>
+            <div className="font-semibold">Pré-lancement{LAUNCH.discoveryPrice ? ` · ${LAUNCH.discoveryPrice} €` : ""}</div>
             <ul className="mt-2 space-y-1.5 text-[0.92rem] text-ink-soft">
-              <li>Inclus dès maintenant : inscription, vérification d&apos;identité, famille, garants, réglages « qui voit quoi », fabrication et livraison des cartes.</li>
-              <li>Au lancement officiel{LAUNCH.plannedDate ? `, prévu le ${LAUNCH.plannedDate}` : " (date annoncée prochainement)"} : ouverture de l&apos;ajout de documents. Rien n&apos;est stocké avant.</li>
-              <li>Remboursé si le lancement n&apos;a pas lieu à la date annoncée.</li>
+              <li>Ouvert dès maintenant : votre Espace, la vérification d&apos;identité, vos proches, vos garants, « qui voit quoi » et vos démarches de protection.</li>
+              <li>{`Au lancement${LAUNCH.plannedDate ? `, prévu le ${new Date(LAUNCH.plannedDate).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : ", dont la date est annoncée par e-mail"} : vos cartes arrivent et le Coffre s'active. Rien n'est stocké avant.`}</li>
+              <li>Si la date est repoussée, vous choisissez : reporter, ou être remboursé.</li>
             </ul>
           </div>
           <div className="mt-7">
@@ -353,9 +353,9 @@ const FAQ = [
   ["Dois-je retenir un mot de passe ou une phrase secrète ?", "Pas pour le Coffre : il s'ouvre avec votre carte et Face ID, la carte est toujours nécessaire. Un mot de passe protège seulement l'Espace (vos rappels, votre famille)."],
   ["Puis-je ouvrir mon Coffre sur un ordinateur ?", "Oui. La première fois, votre téléphone scanne le code QR affiché sur l'ordinateur ; ensuite, une notification suffit. Chaque ouverture se confirme sur le téléphone, carte posée et Face ID."],
   ["Que se passe-t-il si je perds une carte ?", "Vos deux autres cartes ouvrent toujours votre Coffre. La carte perdue est désactivée en un geste, et une nouvelle peut être appairée."],
-  ["Et mes bénéficiaires ?", "Chacun demande son accès depuis son téléphone, avec Face ID et un code à 6 chiffres : vous recevez un e-mail et vous acceptez depuis votre Coffre. Il ouvre alors ce que vous lui confiez, au moment prévu (urgence, coup dur ou décès). Ses 2 cartes, réservées à son nom, ne lui sont envoyées qu'à votre décès : rangées des années, des cartes se perdent et leur puce vieillit."],
-  ["Est-ce un testament ?", "Non. Le Coffre ne remplace ni un notaire ni un testament : il indique où se trouve l'original et aide vos proches à tout retrouver."],
-  ["Qui décide qu'il y a un coup dur ou un décès ?", "Pour un coup dur, vos garants, que vous choisissez. Pour un décès : veille du registre des décès, acte de décès fourni par un bénéficiaire et vérification par notre équipe, puis un délai pendant lequel tout peut être annulé."],
+  ["Et mes proches ?", "Chacun a obligatoirement son propre compte : vous lui envoyez vous-même l'invitation, un message prêt à partir. Depuis l'application, il demande son accès, avec son visage et un code à 6 chiffres, et vous l'acceptez. Il ouvre alors ce que vous lui confiez, au moment prévu (maintenant, coup dur ou décès). Les 2 cartes d'un bénéficiaire, prépayées, ne lui sont envoyées qu'à votre décès."],
+  ["Est-ce un testament ?", "Non. Le Coffre n'est pas un testament : il indique où se trouve l'original et aide vos proches à tout retrouver. Vos démarches de protection vous guident pour le faire."],
+  ["Qui décide qu'il y a un coup dur ou un décès ?", "Pour un coup dur, le proche concerné fait une demande avec un justificatif : l'IA donne un premier avis, puis notre équipe vérifie le document et son identité (pièce et visage). Pour un décès : acte de décès fourni par un bénéficiaire, vérification par notre équipe, registres officiels là où c'est possible, puis un délai pendant lequel tout peut être annulé."],
   ["Combien de temps mes proches ont-ils accès ?", "Après la confirmation du décès et le délai, vos bénéficiaires ont un temps limité pour tout récupérer. Ensuite, le Coffre est effacé définitivement."],
 ];
 
@@ -412,7 +412,7 @@ export default function Landing() {
           <span className="flex items-center gap-2">
             <Emblem /> <span className="font-display text-[1.2rem] font-semibold">{APP_NAME}</span>
           </span>
-          <p className="text-center text-[0.85rem] text-mist">Ce service ne remplace ni un notaire ni un avocat. © {new Date().getFullYear()} {APP_NAME}</p>
+          <p className="text-center text-[0.85rem] text-mist">Coffre de vie et de succession, personnel ou familial. © {new Date().getFullYear()} {APP_NAME}</p>
           <Link href="/beneficiaire" className="text-[0.85rem] font-semibold text-ink-soft hover:text-ink">
             Un proche est décédé ? Espace bénéficiaire
           </Link>

@@ -60,7 +60,7 @@ export function SectionView({ id }: { id: string }) {
       ...f("groupe-allergies").flatMap((x) => [...line("Groupe sanguin", x.blood), ...line("Allergies", x.allergies)]),
       ...f("traitements").flatMap((x) => line("Traitement", [x.drug, x.dose].filter(Boolean).join(", "))),
       ...f("medecins").flatMap((x) => line("Médecin", [x.name, x.phone].filter(Boolean).join(" — "))),
-      ...f("a-prevenir").flatMap((x) => line("À prévenir", [x.name, x.phone].filter(Boolean).join(" — "))),
+      ...f("a-prevenir").flatMap((x) => line("À prévenir", [x.name, x.role, x.phone].filter(Boolean).join(" — "))),
     ].join("\n");
     await copyText(text);
     setCopied(true);
@@ -103,7 +103,7 @@ export function SectionView({ id }: { id: string }) {
       {owner && !launched && (
         <motion.div variants={rise} className="flex items-start gap-3 rounded-2xl bg-gold/15 p-4 ring-1 ring-gold/30">
           <Lock className="mt-0.5 h-5 w-5 shrink-0 text-gold-soft" />
-          <p className="text-[0.92rem] text-paper/80">Phase découverte : l&apos;ajout de documents ouvrira au lancement officiel. Rien n&apos;est stocké avant que l&apos;hébergement certifié et le chiffrement définitif soient en place.</p>
+          <p className="text-[0.92rem] text-paper/80">Pré-lancement : l&apos;ajout de documents ouvrira au lancement officiel. Rien n&apos;est stocké avant que l&apos;hébergement certifié et le chiffrement définitif soient en place.</p>
         </motion.div>
       )}
 
@@ -122,6 +122,7 @@ export function SectionView({ id }: { id: string }) {
               <div className="flex-1">
                 <h2 className="text-[1.15rem] font-semibold">{sub.title}</h2>
                 <p className="text-[0.85rem] text-paper/55">{sub.hint}</p>
+                {owner && sub.notice && <p className="mt-1.5 text-[0.82rem] text-gold-soft">{sub.notice}</p>}
               </div>
               {owner && launched && (
                 <motion.button whileTap={{ scale: 0.9 }} onClick={() => setOpen({ subId: sub.id })} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold text-night" aria-label={`Ajouter dans ${sub.title}`}>

@@ -9,6 +9,7 @@ import { Badge, Button, Card, Field, Segmented, Toggle } from "@/components/ui";
 import { Logo } from "@/components/visuals";
 import { na, openFrom, fromB64 } from "@/lib/crypto";
 import { sb, q } from "@/lib/supabase";
+import { MOTIFS } from "@/lib/rules";
 import { toast, useApp } from "@/lib/store";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows straight from supabase-js */
@@ -39,15 +40,15 @@ async function openDoc(bucket: string, path?: string) {
   if (w) w.location.href = data.signedUrl;
 }
 
-async function fetchTab(tab: Tab): Promise<{ rows: Row[]; launched?: boolean }> {
+async function fetchTab(tab: Tab): Promise<{ rows: Row[]; launched?: boolean; planned?: string }> {
   const c = sb();
   if (tab === "deces")
     return { rows: await q<Row[]>(c.from("procedures").select("*, profiles!inner(first_name,last_name,birth_date,birth_city,email), acteur:people!acte_by(first_name,last_name,email)").is("verified_at", null).is("rejected_at", null).is("cancelled_at", null).eq("needs_verification", true).order("declared_at") as never) };
   if (tab === "kyc") return { rows: await q<Row[]>(c.from("profiles").select("id,first_name,last_name,birth_date,birth_city,email,kyc,kyc_doc_path,created_at").eq("kyc", "en_cours").order("created_at") as never) };
   if (tab === "cartes") return { rows: await q<Row[]>(c.from("cards").select("id,printed_name,status,ordered_at,holder_person_id,ship_to,profiles!inner(first_name,last_name,address)").in("status", ["commandee", "en_route"]).order("ordered_at") as never) };
   if (tab === "conciergerie") return { rows: await q<Row[]>(c.from("concierge_cases").select("*, profiles!inner(first_name,last_name,email,phone), concierge_shares(item_id,sealed)").order("created_at", { ascending: false }) as never) };
-  const s = await q<Row>(c.from("app_settings").select("launched").single() as never);
-  return { rows: [], launched: s.launched };
+  const s = await q<Row>(c.from("app_settings").select("launched, planned_launch").single() as never);
+  return { rows: [], launched: s.launched, planned: s.planned_launch ?? "" };
 }
 
 export function ProdAdmin() {
@@ -55,6 +56,7 @@ export function ProdAdmin() {
   const [tab, setTab] = useState<Tab>("deces");
   const [rows, setRows] = useState<Row[] | null>(null);
   const [launched, setLaunched] = useState(false);
+  const [planned, setPlanned] = useState("");
 
   const [version, setVersion] = useState(0);
   const load = useCallback(() => {
@@ -69,6 +71,7 @@ export function ProdAdmin() {
         if (!live) return;
         setRows(r.rows);
         if (r.launched !== undefined) setLaunched(r.launched);
+        if (r.planned !== undefined) setPlanned(r.planned);
       })
       .catch((e) => {
         toast((e as Error).message);
@@ -119,7 +122,7 @@ export function ProdAdmin() {
                 setTab(x);
               }}
               options={[
-                { id: "deces", label: "Décès" },
+                { id: "deces", label: "Vérifications" },
                 { id: "kyc", label: "Identités" },
                 { id: "cartes", label: "Cartes" },
                 { id: "conciergerie", label: "Conciergerie" },
@@ -134,7 +137,10 @@ export function ProdAdmin() {
           {rows?.length === 0 && tab !== "reglages" && <Card className="text-center text-mist">Rien à traiter.</Card>}
 
           {tab === "deces" &&
-            rows?.map((p) => (
+            rows?.map((p) =>
+              p.kind === "coup_dur" ? (
+                <CoupDurCheck key={p.id} p={p} reload={load} />
+              ) : (
               <Card key={p.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -180,6 +186,14 @@ export function ProdAdmin() {
                         <button className="font-semibold underline" onClick={() => openDoc("verification", p.acte_id_path)}>
                           Pièce d&apos;identité du bénéficiaire
                         </button>{" "}
+                        {p.selfie_path && (
+                          <>
+                            ·{" "}
+                            <button className="font-semibold underline" onClick={() => openDoc("verification", p.selfie_path)}>
+                              son visage
+                            </button>{" "}
+                          </>
+                        )}
                         ·{" "}
                         <button className="font-semibold text-gold-deep underline" onClick={async () => (await rpc("staff_check_identity", { proc: p.id, ok: !p.acte_id_checked })) && load()}>
                           {p.acte_id_checked ? "vérifiée (annuler)" : "marquer vérifiée"}
@@ -199,7 +213,8 @@ export function ProdAdmin() {
                   </Button>
                 </div>
               </Card>
-            ))}
+              ),
+            )}
 
           {tab === "kyc" &&
             rows?.map((p) => (
@@ -258,14 +273,87 @@ export function ProdAdmin() {
                 checked={launched}
                 onChange={async (v) => (await rpc("staff_set_launched", { on_off: v })) && setLaunched(v)}
                 label="Lancement officiel"
-                hint="Désactivé : phase découverte, aucun document ne peut être déposé dans les Coffres."
+                hint="Désactivé : pré-lancement, les Coffres ne s'ouvrent pas et aucun document ne peut y être déposé."
               />
+              <div className="mt-4 flex items-end gap-2">
+                <div className="flex-1">
+                  <Field label="Date de lancement annoncée" type="date" value={planned} onChange={setPlanned} />
+                </div>
+                <Button variant="outline" onClick={async () => (await rpc("staff_set_planned_launch", { d: planned || null })) && toast("Date enregistrée.")}>
+                  Enregistrer
+                </Button>
+              </div>
+              <p className="mt-2 text-[0.85rem] text-mist">Affichée à tous les abonnés. Si elle est repoussée, prévenez-les : chacun choisit de reporter ou d&apos;être remboursé.</p>
               <p className="mt-3 text-[0.85rem] text-mist">Réservé au rôle « admin ». Chaque changement est inscrit au journal.</p>
             </Card>
           )}
         </div>
       </main>
     </div>
+  );
+}
+
+// A relative's coup dur request: proof, ID and face; the AI's opinion helps, the person of the team decides.
+function CoupDurCheck({ p, reload }: { p: Row; reload: () => void }) {
+  const who = p.acteur ? `${p.acteur.first_name} ${p.acteur.last_name}` : p.declared_by;
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-[1.15rem] font-semibold">
+            Coup dur : {p.profiles.first_name} {p.profiles.last_name}
+          </div>
+          <div className="text-[0.88rem] text-mist">
+            Demande de {who} · {fmt(p.declared_at)}
+          </div>
+        </div>
+        <Badge tone="coral">{MOTIFS.find((m) => m.id === p.note)?.label ?? p.note}</Badge>
+      </div>
+      <div className="mt-3 rounded-2xl bg-ink/[0.04] p-3 text-[0.9rem]">
+        {p.match ? (
+          <>
+            <span className={p.match.doubtful ? "font-semibold text-coral" : "font-semibold text-sage"}>
+              Avis de l&apos;IA : {p.match.doubtful ? "à examiner de près" : "cohérent"} ({Math.round(p.match.score * 100)} %)
+            </span>
+            {p.match.reasons?.length ? <span className="block text-ink-soft">{p.match.reasons.join(" · ")}</span> : null}
+          </>
+        ) : (
+          <span className="text-mist">Avis de l&apos;IA en cours (quelques minutes).</span>
+        )}
+      </div>
+      <ul className="mt-3 space-y-1.5 text-[0.9rem]">
+        <li className="flex items-center gap-2">
+          <Dot ok={!!p.acte_path} />
+          <button className="font-semibold underline" onClick={() => openDoc("verification", p.acte_path)}>
+            Justificatif
+          </button>
+        </li>
+        <li className="flex items-center gap-2">
+          <Dot ok={p.acte_id_checked} />
+          <span>
+            <button className="font-semibold underline" onClick={() => openDoc("verification", p.acte_id_path)}>
+              Pièce d&apos;identité
+            </button>{" "}
+            ·{" "}
+            <button className="font-semibold underline" onClick={() => openDoc("verification", p.selfie_path)}>
+              visage
+            </button>{" "}
+            ·{" "}
+            <button className="font-semibold text-gold-deep underline" onClick={async () => (await rpc("staff_check_identity", { proc: p.id, ok: !p.acte_id_checked })) && reload()}>
+              {p.acte_id_checked ? "vérifiés (annuler)" : "marquer vérifiés"}
+            </button>
+          </span>
+        </li>
+      </ul>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Button variant="danger" disabled={!p.acte_path || !p.acte_id_checked} onClick={async () => (await rpc("staff_open_coup_dur", { proc: p.id })) && reload()}>
+          Ouvrir l&apos;accès
+        </Button>
+        <Button variant="outline" onClick={async () => (await rpc("staff_reject_procedure", { proc: p.id })) && reload()}>
+          Rejeter
+        </Button>
+      </div>
+    </Card>
   );
 }
 

@@ -13,8 +13,8 @@ const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display: 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap", preload: false });
 
 export const metadata: Metadata = {
-  title: { default: `${APP_NAME} — tout retrouver, tout régler`, template: `%s · ${APP_NAME}` },
-  description: "Le service qui aide les familles à tout retrouver et à tout régler, de son vivant comme après.",
+  title: { default: `${APP_NAME} — coffre de vie et de succession`, template: `%s · ${APP_NAME}` },
+  description: "Le coffre de vie et de succession, personnel ou familial : tout retrouver et tout régler, de son vivant comme après.",
   applicationName: APP_NAME,
 };
 

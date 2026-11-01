@@ -85,7 +85,7 @@ verify_jwt = false
 [functions.relances]
 verify_jwt = false
 
-[functions.stripe-webhook]
+[functions.paddle-webhook]
 verify_jwt = false
 
 [functions.kyc-webhook]

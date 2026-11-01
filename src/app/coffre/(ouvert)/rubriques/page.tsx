@@ -95,7 +95,7 @@ export default function Rubriques() {
               setExporting(false);
             }}
           >
-            {exporting ? "Préparation du PDF…" : owner ? "Télécharger en PDF (notaire, hôpital)" : "Télécharger ce qui m'est confié (PDF)"}
+            {exporting ? "Préparation du PDF…" : owner ? "Télécharger en PDF" : "Télécharger ce qui m'est confié (PDF)"}
           </Button>
           <p className="mt-2 text-center text-[0.8rem] text-paper/50">
             {owner ? "Tout votre Coffre" : "Uniquement ce que vous avez le droit de voir"}, sans les codes ni les mots de passe, ni la rubrique « À effacer ».

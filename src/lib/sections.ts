@@ -1,18 +1,22 @@
-﻿// Coffre structure from the client brief (section 6): few sections, one level of sub-sections.
-// The final list of sub-sections is still "à décider": edit it here only.
+﻿// Coffre structure from the client brief (section 6) and the developer sheet v2 (October 2026): few sections, one level
+// of sub-sections. Ids never change (they name the keys, the rights and the stored files): titles and fields can.
+import type { Moment } from "./rules";
 
-export type FieldKind = "text" | "long" | "date" | "secret" | "phone";
+export type FieldKind = "text" | "long" | "date" | "secret" | "phone" | "choice";
 export interface Field {
   key: string;
   label: string;
   kind?: FieldKind;
   placeholder?: string;
+  options?: string[]; // kind "choice"
 }
 export interface Subsection {
   id: string;
   title: string;
   hint: string;
   fields: Field[];
+  advised?: Moment; // the access proposed in « Qui voit quoi »: the owner confirms or changes it
+  notice?: string; // a warning shown above the entries
 }
 export interface Section {
   id: string;
@@ -30,6 +34,8 @@ const contact = (who: string): Field[] => [
   { key: "phone", label: "Téléphone", kind: "phone" },
   note,
 ];
+// Direct debits: what keeps running during a coup dur, what stops at the death.
+const tag: Field = { key: "tag", label: "En cas de coup dur ou de décès", kind: "choice", options: ["À maintenir en cas de coup dur", "À résilier au décès"] };
 
 export const SECTIONS: Section[] = [
   {
@@ -39,65 +45,148 @@ export const SECTIONS: Section[] = [
     icon: "HeartPulse",
     tone: "coral",
     subsections: [
-      { id: "groupe-allergies", title: "Groupe sanguin et allergies", hint: "Groupe sanguin, allergies, contre-indications", fields: [{ key: "blood", label: "Groupe sanguin", placeholder: "Ex. A+" }, { key: "allergies", label: "Allergies", kind: "long" }, note] },
-      { id: "traitements", title: "Traitements", hint: "Médicaments, posologie, appareillage", fields: [{ key: "drug", label: "Traitement" }, { key: "dose", label: "Posologie" }, note] },
-      { id: "medecins", title: "Médecins", hint: "Médecin traitant, spécialistes", fields: contact("Médecin") },
-      { id: "a-prevenir", title: "Personnes à prévenir", hint: "Qui appeler en premier", fields: contact("Personne à prévenir") },
+      { id: "groupe-allergies", title: "Groupe sanguin et allergies", hint: "Groupe sanguin, allergies, contre-indications", advised: "now", fields: [{ key: "blood", label: "Groupe sanguin", placeholder: "Ex. A+" }, { key: "allergies", label: "Allergies", kind: "long" }, note] },
+      { id: "traitements", title: "Traitements", hint: "Médicaments, posologie, appareillage", advised: "now", fields: [{ key: "drug", label: "Traitement" }, { key: "dose", label: "Posologie" }, note] },
+      { id: "medecins", title: "Médecins", hint: "Médecin traitant, spécialistes", advised: "now", fields: contact("Médecin") },
+      {
+        id: "volontes-medicales",
+        title: "Volontés médicales",
+        hint: "Directives anticipées, personne de confiance, souhaits en cas de coma ou de fin de vie",
+        advised: "now",
+        fields: [
+          { key: "trusted", label: "Personne de confiance médicale" },
+          { key: "phone", label: "Téléphone", kind: "phone" },
+          { key: "directives", label: "Mes directives anticipées", placeholder: "Où est l'original ; ajoutez le document scanné plus bas" },
+          { key: "wishes", label: "Mes souhaits en cas de coma ou de fin de vie", kind: "long" },
+          note,
+        ],
+      },
+      {
+        id: "animaux",
+        title: "Personnes et animaux à charge",
+        hint: "Enfants, parents dépendants, animaux : qui s'en occupe, où, habitudes",
+        advised: "now",
+        fields: [
+          { key: "animal", label: "Personne ou animal", placeholder: "Ex. Ma mère, Lou le chat" },
+          { key: "keeper", label: "Qui s'en occupe" },
+          { key: "where", label: "Où" },
+          { key: "contacts", label: "Contacts", kind: "long", placeholder: "École, aide à domicile, vétérinaire…" },
+          { key: "habits", label: "Habitudes et soins", kind: "long" },
+          note,
+        ],
+      },
+      {
+        id: "a-prevenir",
+        title: "Contacts clés",
+        hint: "Proches, notaire, comptable, banquier, assureur, avocat, employeur",
+        advised: "now",
+        fields: [{ key: "name", label: "Nom" }, { key: "role", label: "Qui est-ce", placeholder: "Ex. Conjoint, comptable, employeur" }, { key: "phone", label: "Téléphone", kind: "phone" }, note],
+      },
     ],
   },
   {
     id: "documents",
     title: "Documents",
-    tagline: "Papiers d'identité, logement, véhicules, papiers juridiques",
+    tagline: "Identité, logement, véhicules, papiers juridiques, procurations, impôts",
     icon: "FileText",
     tone: "ink",
     subsections: [
-      { id: "identite-famille", title: "Identité et famille", hint: "Pièce d'identité, passeport, livret de famille", fields: [{ key: "doc", label: "Document", placeholder: "Ex. Passeport" }, { key: "number", label: "Numéro" }, { key: "expiry", label: "Date d'expiration", kind: "date" }, note] },
-      { id: "logement", title: "Logement et baux", hint: "Titre de propriété, bail, assurance habitation", fields: [{ key: "address", label: "Adresse" }, { key: "status", label: "Propriétaire ou locataire" }, { key: "contact", label: "Bailleur ou syndic" }, note] },
-      { id: "vehicules", title: "Véhicules", hint: "Carte grise, assurance, clés", fields: [{ key: "vehicle", label: "Véhicule" }, { key: "plate", label: "Immatriculation" }, { key: "keys", label: "Où sont les clés" }, note] },
-      { id: "juridique", title: "Papiers juridiques", hint: "Lieu de l'original du testament, donations, procurations", fields: [{ key: "doc", label: "Document", placeholder: "Ex. Testament" }, { key: "where", label: "Où se trouve l'original" }, { key: "pro", label: "Notaire ou avocat" }, note] },
+      { id: "identite-famille", title: "Identité et famille", hint: "Pièce d'identité, passeport, livret de famille", advised: "coup_dur", fields: [{ key: "doc", label: "Document", placeholder: "Ex. Passeport" }, { key: "number", label: "Numéro" }, { key: "expiry", label: "Date d'expiration", kind: "date" }, note] },
+      { id: "logement", title: "Logement et baux", hint: "Titre de propriété, bail, assurance habitation", advised: "coup_dur", fields: [{ key: "address", label: "Adresse" }, { key: "status", label: "Propriétaire ou locataire" }, { key: "contact", label: "Bailleur ou syndic" }, note] },
+      { id: "vehicules", title: "Véhicules", hint: "Carte grise, assurance, clés", advised: "coup_dur", fields: [{ key: "vehicle", label: "Véhicule" }, { key: "plate", label: "Immatriculation" }, { key: "keys", label: "Où sont les clés" }, note] },
+      { id: "juridique", title: "Papiers juridiques", hint: "Lieu de l'original du testament, donations", advised: "deces", fields: [{ key: "doc", label: "Document", placeholder: "Ex. Testament" }, { key: "where", label: "Où se trouve l'original" }, { key: "pro", label: "Qui le conserve" }, note] },
+      {
+        id: "procurations",
+        title: "Procurations et mandats",
+        hint: "Procurations bancaires, mandat de protection future, délégations",
+        advised: "coup_dur",
+        notice: "Le Coffre permet de retrouver le document ; c'est le document lui-même qui donne le droit d'agir. Pour le faire de votre vivant : « Mes démarches de protection », dans l'Espace.",
+        fields: [{ key: "doc", label: "Document", placeholder: "Ex. Procuration bancaire" }, { key: "to", label: "Au profit de" }, { key: "date", label: "Date", kind: "date" }, { key: "where", label: "Où se trouve l'original" }, note],
+      },
+      {
+        id: "administratif",
+        title: "Administration et impôts",
+        hint: "Numéro fiscal, impôts, retraite, sécurité sociale, mutuelle",
+        advised: "coup_dur",
+        fields: [{ key: "org", label: "Organisme", placeholder: "Ex. Impôts" }, { key: "number", label: "Numéro", placeholder: "Fiscal, sécurité sociale, adhérent…" }, { key: "access", label: "Comment y accéder", kind: "secret" }, note],
+      },
     ],
   },
   {
     id: "argent",
     title: "Argent et contrats",
-    tagline: "Banques, assurances, placements, crédits, abonnements",
+    tagline: "Banques, assurances, placements, crédits, abonnements, patrimoine",
     icon: "Landmark",
     tone: "gold",
     subsections: [
-      { id: "banques", title: "Banques", hint: "Établissements, conseillers, comptes", fields: [{ key: "bank", label: "Banque" }, { key: "advisor", label: "Conseiller" }, { key: "phone", label: "Téléphone", kind: "phone" }, note] },
-      { id: "assurances", title: "Assurances et assurance-vie", hint: "Assureur, numéro de contrat, bénéficiaires", fields: [{ key: "insurer", label: "Assureur" }, { key: "contract", label: "Numéro de contrat" }, { key: "beneficiaries", label: "Bénéficiaires" }, { key: "expiry", label: "Échéance", kind: "date" }, note] },
-      { id: "placements", title: "Placements", hint: "Épargne, comptes-titres, retraite, autres comptes", fields: [{ key: "product", label: "Placement" }, { key: "where", label: "Établissement" }, note] },
-      { id: "credits", title: "Crédits", hint: "Prêts en cours, assurance emprunteur", fields: [{ key: "loan", label: "Crédit" }, { key: "lender", label: "Organisme" }, note] },
-      { id: "abonnements", title: "Abonnements", hint: "Téléphone, internet, énergie, presse, plateformes", fields: [{ key: "service", label: "Service" }, { key: "account", label: "Identifiant client" }, { key: "expiry", label: "Échéance", kind: "date" }, note] },
+      { id: "banques", title: "Banques", hint: "Établissements, conseillers, comptes", advised: "coup_dur", fields: [{ key: "bank", label: "Banque" }, { key: "advisor", label: "Conseiller" }, { key: "phone", label: "Téléphone", kind: "phone" }, note] },
+      {
+        id: "assurances",
+        title: "Assurances et assurance-vie",
+        hint: "Assureur, contrat, garanties, bénéficiaires, comment déclarer",
+        advised: "coup_dur",
+        fields: [
+          { key: "insurer", label: "Assureur" },
+          { key: "contract", label: "Numéro de contrat" },
+          { key: "guarantee", label: "Garanties", placeholder: "Décès, incapacité, accident, maladie" },
+          { key: "beneficiaries", label: "Bénéficiaires" },
+          { key: "claim", label: "Contact et procédure de déclaration", kind: "long" },
+          { key: "expiry", label: "Échéance", kind: "date" },
+          note,
+        ],
+      },
+      { id: "placements", title: "Placements", hint: "Épargne, comptes-titres, retraite, autres comptes", advised: "deces", fields: [{ key: "product", label: "Placement" }, { key: "where", label: "Établissement" }, note] },
+      { id: "credits", title: "Crédits", hint: "Prêts en cours, assurance emprunteur", advised: "coup_dur", fields: [{ key: "loan", label: "Crédit" }, { key: "lender", label: "Organisme" }, tag, note] },
+      { id: "abonnements", title: "Abonnements", hint: "Téléphone, internet, énergie, presse, plateformes", advised: "coup_dur", fields: [{ key: "service", label: "Service" }, { key: "account", label: "Identifiant client" }, { key: "expiry", label: "Échéance", kind: "date" }, tag, note] },
+      {
+        id: "patrimoine",
+        title: "Inventaire du patrimoine",
+        hint: "Vue d'ensemble : comptes, placements, biens, véhicules, objets de valeur, dettes",
+        advised: "deces",
+        notice: "Accès conseillé : au décès, ou en cas de coup dur pour votre conjoint. Les montants sont facultatifs.",
+        fields: [{ key: "asset", label: "Bien ou dette", placeholder: "Ex. Appartement de Lyon" }, { key: "type", label: "Type", placeholder: "Compte, placement, immobilier, véhicule, objet de valeur, dette" }, { key: "amount", label: "Montant (facultatif)" }, note],
+      },
     ],
   },
   {
     id: "numerique",
     title: "Vie numérique",
-    tagline: "Téléphone, messageries, réseaux, photos, mots de passe",
+    tagline: "Téléphone, messageries, réseaux, photos, mots de passe, cryptos",
     icon: "Smartphone",
     tone: "mist",
     subsections: [
-      { id: "telephone", title: "Téléphone", hint: "Code de déverrouillage, opérateur", fields: [{ key: "device", label: "Appareil" }, { key: "code", label: "Code de déverrouillage", kind: "secret" }, note] },
-      { id: "messageries", title: "Messageries", hint: "Adresses e-mail principales", fields: [{ key: "address", label: "Adresse" }, { key: "access", label: "Comment y accéder", kind: "secret" }, note] },
-      { id: "reseaux", title: "Réseaux sociaux", hint: "Supprimer, commémorer ou transmettre", fields: [{ key: "network", label: "Réseau" }, { key: "wish", label: "Mon souhait" }, note] },
-      { id: "photos", title: "Photos et cloud", hint: "Où sont les souvenirs", fields: [{ key: "service", label: "Service" }, { key: "access", label: "Accès", kind: "secret" }, note] },
-      { id: "mots-de-passe", title: "Mots de passe", hint: "Gestionnaire, comptes importants", fields: [{ key: "account", label: "Compte" }, { key: "login", label: "Identifiant" }, { key: "password", label: "Mot de passe", kind: "secret" }, note] },
+      { id: "telephone", title: "Téléphone", hint: "Code de déverrouillage, opérateur", advised: "coup_dur", fields: [{ key: "device", label: "Appareil" }, { key: "code", label: "Code de déverrouillage", kind: "secret" }, note] },
+      { id: "messageries", title: "Messageries", hint: "Adresses e-mail principales", advised: "deces", fields: [{ key: "address", label: "Adresse" }, { key: "access", label: "Comment y accéder", kind: "secret" }, note] },
+      { id: "reseaux", title: "Réseaux sociaux", hint: "Supprimer, commémorer ou transmettre", advised: "deces", fields: [{ key: "network", label: "Réseau" }, { key: "wish", label: "Mon souhait" }, note] },
+      { id: "photos", title: "Photos et cloud", hint: "Où sont les souvenirs", advised: "deces", fields: [{ key: "service", label: "Service" }, { key: "access", label: "Accès", kind: "secret" }, note] },
+      { id: "mots-de-passe", title: "Mots de passe", hint: "Gestionnaire, comptes importants", advised: "deces", fields: [{ key: "account", label: "Compte" }, { key: "login", label: "Identifiant" }, { key: "password", label: "Mot de passe", kind: "secret" }, note] },
+      {
+        id: "cryptos",
+        title: "Cryptos et actifs numériques",
+        hint: "Wallets, où ils se trouvent, comment y accéder, où est rangée la phrase de récupération",
+        advised: "deces",
+        notice: "Indiquez où est rangée la phrase de récupération, plutôt que de la recopier ici.",
+        fields: [{ key: "wallet", label: "Wallet ou plateforme" }, { key: "where", label: "Où il se trouve" }, { key: "how", label: "Procédure d'accès", kind: "long" }, { key: "seed", label: "Où est rangée la phrase de récupération" }, note],
+      },
     ],
   },
   {
     id: "volontes",
     title: "Volontés et messages",
-    tagline: "Obsèques, lettres, où sont mes vidéos, animaux",
+    tagline: "Obsèques, lettres, où sont mes vidéos et souvenirs",
     icon: "Feather",
     tone: "sage",
     subsections: [
-      { id: "obseques", title: "Obsèques", hint: "Contrat obsèques, souhaits", fields: [{ key: "contract", label: "Contrat obsèques" }, { key: "wishes", label: "Mes souhaits", kind: "long" }, note] },
-      { id: "lettres", title: "Lettres", hint: "Un mot pour chacun", fields: [{ key: "to", label: "Pour" }, { key: "text", label: "Ma lettre", kind: "long" }] },
+      { id: "obseques", title: "Obsèques", hint: "Contrat obsèques, souhaits", advised: "deces", fields: [{ key: "contract", label: "Contrat obsèques" }, { key: "wishes", label: "Mes souhaits", kind: "long" }, note] },
+      { id: "lettres", title: "Lettres", hint: "Un mot pour chacun", advised: "deces", fields: [{ key: "to", label: "Pour" }, { key: "text", label: "Ma lettre", kind: "long" }] },
       // Filmed messages are not stored at launch: the Coffre only says where they are kept.
-      { id: "ou-videos", title: "Où se trouvent mes vidéos", hint: "Disque dur, clé USB, chez le notaire…", fields: [{ key: "support", label: "Support", placeholder: "Ex. Disque dur externe" }, { key: "where", label: "Où il se trouve", placeholder: "Ex. Chez Maître Roux" }, { key: "to", label: "Pour qui" }, note] },
-      { id: "animaux", title: "Animaux", hint: "Qui les recueille, vétérinaire", fields: [{ key: "animal", label: "Animal" }, { key: "keeper", label: "Qui le recueille" }, note] },
+      {
+        id: "ou-videos",
+        title: "Où se trouvent mes vidéos et souvenirs",
+        hint: "Support externe, lieu, personne qui le garde",
+        advised: "deces",
+        fields: [{ key: "support", label: "Support", placeholder: "Ex. Disque dur externe" }, { key: "where", label: "Où il se trouve", placeholder: "Ex. Dans le bureau, tiroir du haut" }, { key: "keeper", label: "Qui le garde" }, { key: "to", label: "Pour qui" }, note],
+      },
     ],
   },
   {
@@ -116,12 +205,12 @@ export const SECTIONS: Section[] = [
     tone: "ink",
     optional: true,
     subsections: [
-      { id: "societe", title: "Société", hint: "Immatriculation, statuts, associés", fields: [{ key: "company", label: "Société" }, { key: "id", label: "Numéro d'immatriculation" }, note] },
-      { id: "banques-pro", title: "Banques professionnelles", hint: "Comptes, pouvoirs", fields: [{ key: "bank", label: "Banque" }, { key: "powers", label: "Qui a les pouvoirs" }, note] },
-      { id: "baux-commerciaux", title: "Baux commerciaux", hint: "Locaux, échéances", fields: [{ key: "place", label: "Local" }, { key: "expiry", label: "Échéance", kind: "date" }, note] },
-      { id: "clients", title: "Clients", hint: "Principaux clients et contrats", fields: [{ key: "client", label: "Client" }, note] },
-      { id: "equipe", title: "Équipe", hint: "Personnes clés, délégations", fields: [{ key: "person", label: "Personne" }, { key: "role", label: "Rôle" }, note] },
-      { id: "acces-procedures", title: "Accès et procédures", hint: "Outils, comptes administrateur, pas-à-pas", fields: [{ key: "tool", label: "Outil" }, { key: "access", label: "Accès", kind: "secret" }, note] },
+      { id: "societe", title: "Société", hint: "Immatriculation, statuts, associés", advised: "coup_dur", fields: [{ key: "company", label: "Société" }, { key: "id", label: "Numéro d'immatriculation" }, note] },
+      { id: "banques-pro", title: "Banques professionnelles", hint: "Comptes, pouvoirs", advised: "coup_dur", fields: [{ key: "bank", label: "Banque" }, { key: "powers", label: "Qui a les pouvoirs" }, note] },
+      { id: "baux-commerciaux", title: "Baux commerciaux", hint: "Locaux, échéances", advised: "coup_dur", fields: [{ key: "place", label: "Local" }, { key: "expiry", label: "Échéance", kind: "date" }, note] },
+      { id: "clients", title: "Clients", hint: "Principaux clients et contrats", advised: "coup_dur", fields: [{ key: "client", label: "Client" }, note] },
+      { id: "equipe", title: "Équipe", hint: "Personnes clés, délégations", advised: "coup_dur", fields: [{ key: "person", label: "Personne" }, { key: "role", label: "Rôle" }, note] },
+      { id: "acces-procedures", title: "Accès et procédures", hint: "Outils, comptes administrateur, pas-à-pas", advised: "coup_dur", fields: [{ key: "tool", label: "Outil" }, { key: "access", label: "Accès", kind: "secret" }, note] },
     ],
   },
 ];
@@ -132,7 +221,7 @@ export const subsection = (id: string) => ALL_SUBSECTIONS.find((s) => s.id === i
 
 // Guided start: "commencer par l'essentiel".
 export const ESSENTIALS: { subsectionId: string; title: string; why: string }[] = [
-  { subsectionId: "a-prevenir", title: "Une personne à prévenir", why: "Le premier réflexe en cas d'accident" },
+  { subsectionId: "a-prevenir", title: "Un contact clé", why: "Le premier réflexe en cas d'accident" },
   { subsectionId: "groupe-allergies", title: "Groupe sanguin et allergies", why: "Utile aux secours" },
   { subsectionId: "identite-famille", title: "Votre pièce d'identité", why: "Demandée dans presque toutes les démarches" },
   { subsectionId: "banques", title: "Votre banque principale", why: "La première démarche de vos proches" },

@@ -6,8 +6,8 @@ const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
 
 export const DELAYS = {
-  coupDur: 48 * HOUR, // délai après la déclaration d'un coup dur (à décider)
-  deces: 15 * DAY, // délai d'annulation après la vérification d'un décès (à décider)
+  coupDurAccess: 30 * DAY, // durée d'ouverture d'un coup dur validé, pour le proche qui l'a demandé (à décider)
+  deces: 15 * DAY, // délai d'annulation après la vérification d'un décès, 15 jours à 1 mois (à décider)
 };
 
 // After a confirmed death the Coffre stays open for a limited time, then it is erased for good (4, 6 or 12 months: à décider).
@@ -15,11 +15,11 @@ export const POST_DEATH_ACCESS_DAYS = 6 * 30;
 // Unpaid subscription: reminders during a grace period, then everything is erased (à décider).
 export const GRACE_DAYS = 30;
 
-// Two-step launch: a paid discovery phase (everything works except adding documents to the Coffre), then the official launch.
+// Two-step launch: a paid pre-launch (everything works except the Coffre, which opens with the cards), then the official launch.
 // shortcut: global constant for the demo (switchable in Mode démonstration); in production it is the app_settings.launched flag.
 export const LAUNCH = {
   phase: "decouverte" as "decouverte" | "lancement",
-  plannedDate: null as string | null, // date de lancement officiel annoncée (à décider)
+  plannedDate: null as string | null, // date de lancement officiel annoncée, AAAA-MM-JJ (à décider) ; en production : app_settings.planned_launch
   discoveryPrice: null as number | null, // prix de la phase découverte (à décider)
 };
 
@@ -33,7 +33,7 @@ export const OFFER = {
 };
 
 export const CONCIERGE = {
-  partner: "Conciergerie partenaire", // nom du partenaire (à décider)
+  partner: "Conciergerie", // la conciergerie de la société, sur ticket payant
   price: null as string | null, // tarif ou « sur devis » (à décider)
 };
 

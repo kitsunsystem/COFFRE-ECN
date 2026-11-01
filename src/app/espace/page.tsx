@@ -9,11 +9,12 @@ import { Card, Eyebrow, Notice } from "@/components/ui";
 import { rise, ScoreRing, stagger, Tilt } from "@/components/visuals";
 import { RUBRICS } from "@/lib/aide";
 import { PROD } from "@/lib/env";
+import { applicable, protectionDone } from "@/lib/protection";
 import { progress } from "@/lib/score";
 import { isPhone, personName, useApp } from "@/lib/store";
 
 export default function Accueil() {
-  const s = useApp(useShallow((x) => ({ account: x.account!, cards: x.cards, guarantors: x.guarantors, vault: x.vault, people: x.people, reminders: x.reminders, set: x.set })));
+  const s = useApp(useShallow((x) => ({ account: x.account!, cards: x.cards, guarantors: x.guarantors, vault: x.vault, rights: x.rights, checklist: x.checklist, people: x.people, reminders: x.reminders, set: x.set })));
   const t = useNow(60_000);
   const { score, steps, next } = progress(s);
   const activeCards = s.cards.filter((c) => c.holderId === "owner" && c.status === "active").length;
@@ -81,13 +82,24 @@ export default function Accueil() {
         </Card>
       </motion.div>
 
+      <motion.div variants={rise}>
+        <Link href="/espace/protection" className="flex items-center gap-4 rounded-[1.5rem] bg-paper p-4 shadow-soft ring-1 ring-line/70">
+          <ShieldCheck className="h-7 w-7 shrink-0 text-gold-deep" />
+          <span className="flex-1">
+            <span className="block font-semibold">Mes démarches de protection</span>
+            <span className="text-[0.88rem] text-mist">{`${protectionDone(s.checklist, s.account.isBusinessOwner)} sur ${applicable(s.account.isBusinessOwner).length} réglées · procuration, mandat, testament…`}</span>
+          </span>
+          <ChevronRight className="h-5 w-5 text-mist" />
+        </Link>
+      </motion.div>
+
       {next && (
         <motion.div variants={rise}>
           <Link href="/espace/services" className="flex items-center gap-4 rounded-[1.5rem] bg-paper p-4 shadow-soft ring-1 ring-line/70">
             <ConciergeBell className="h-7 w-7 shrink-0 text-gold-deep" />
             <span className="flex-1">
               <span className="block font-semibold">Besoin d&apos;aide pour tout mettre en place ?</span>
-              <span className="text-[0.88rem] text-mist">La conciergerie le fait avec vous.</span>
+              <span className="text-[0.88rem] text-mist">Alma vous répond ; la conciergerie vous accompagne sur ticket, un service payant à part.</span>
             </span>
             <ChevronRight className="h-5 w-5 text-mist" />
           </Link>
@@ -136,8 +148,8 @@ export default function Accueil() {
           { href: "/espace/famille", icon: Users, title: "Ma famille", sub: `${s.people.length} proche${s.people.length > 1 ? "s" : ""} · ${s.guarantors.length} garant${s.guarantors.length > 1 ? "s" : ""}` },
           { href: "/espace/echeances", icon: CalendarClock, title: "Mes échéances", sub: `${s.reminders.length} suivie${s.reminders.length > 1 ? "s" : ""}` },
           { href: "/coffre/rubriques/urgence", icon: HeartPulse, title: "Fiche d'urgence", sub: "À copier dans le téléphone" },
-          { href: "/espace/services", icon: ConciergeBell, title: "Conciergerie", sub: "On s'occupe de tout" },
-          { href: "/espace/aide", icon: LifeBuoy, title: "Démarches", sub: "Listes et courriers" },
+          { href: "/espace/services", icon: ConciergeBell, title: "Conciergerie", sub: "Sur ticket" },
+          { href: "/espace/aide", icon: LifeBuoy, title: "Guides", sub: "Démarches et courriers" },
         ].map((x) => (
           <Link key={x.href + x.title} href={x.href}>
             <Tilt className="rounded-[1.5rem]">

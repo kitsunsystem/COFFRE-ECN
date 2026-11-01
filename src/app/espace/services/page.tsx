@@ -4,6 +4,7 @@ import { Check, ConciergeBell, FileSignature, Lock, MailCheck, Send } from "luci
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
+import { ASSISTANT_NAME } from "@/lib/config";
 import { rise, stagger } from "@/components/visuals";
 import { requestConcierge, signMandate } from "@/lib/api";
 import { CONCIERGE } from "@/lib/config";
@@ -28,17 +29,19 @@ export default function Services() {
   const [kind, setKind] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [sign, setSign] = useState<ConciergeCase | null>(null);
+  const [paid, setPaid] = useState(false);
 
   async function request() {
     const k = KINDS.find((x) => x.id === kind)!;
     if (!(await requestConcierge(k.title, message.trim() || undefined))) return;
     setKind(null);
     setMessage("");
+    setPaid(false);
   }
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show">
-      <PageTitle eyebrow="Services" title="On s'occupe de tout" lead="Quand les démarches sont trop lourdes, une conciergerie les fait pour vous. Elle ne voit que les documents que vous lui confiez, avec votre mandat." />
+      <PageTitle eyebrow="Conciergerie" title="Une aide humaine, sur ticket" lead={`${ASSISTANT_NAME} répond d'abord à toutes vos questions : remplissage, démarches, délais, courriers. Si elle ne peut pas, ouvrez un ticket auprès de notre conciergerie : c'est un service avec un coût à part, annoncé avant tout engagement.`} />
 
       <motion.div variants={rise}>
         {/* !bg-night: Card's own bg-paper otherwise wins, leaving light text on a light card. */}
@@ -47,7 +50,7 @@ export default function Services() {
           <ConciergeBell className="relative h-9 w-9 text-gold-soft" />
           <h2 className="relative mt-3 text-[1.5rem] font-semibold">La conciergerie</h2>
           <ul className="relative mt-3 space-y-2 text-paper/80">
-            {["Un interlocuteur unique, par téléphone ou e-mail", "Un mandat simple, signé en ligne", "Accès uniquement aux documents partagés", "Service optionnel et payant, devis avant tout engagement"].map((t) => (
+            {[`${ASSISTANT_NAME} d'abord, à toute heure, sans frais`, "Un ticket quand une aide humaine est vraiment nécessaire", "Un coût à part de l'abonnement, devis accepté avant toute prestation", "Accès uniquement aux documents que vous confiez, avec votre mandat"].map((t) => (
               <li key={t} className="flex gap-2.5">
                 <Check className="mt-1 h-4 w-4 shrink-0 text-sage-soft" /> {t}
               </li>
@@ -58,7 +61,7 @@ export default function Services() {
       </motion.div>
 
       <motion.section variants={rise} className="mt-8">
-        <h2 className="mb-3 text-[1.4rem] font-semibold">De quoi avez-vous besoin ?</h2>
+        <h2 className="mb-3 text-[1.4rem] font-semibold">Ouvrir un ticket</h2>
         <div className="grid gap-2.5">
           {KINDS.map((k) => (
             <motion.button key={k.id} whileTap={{ scale: 0.98 }} onClick={() => setKind(k.id)} className="flex items-center gap-4 rounded-2xl bg-paper p-4 text-left shadow-soft ring-1 ring-line/70">
@@ -74,7 +77,7 @@ export default function Services() {
 
       {s.concierge.length > 0 && (
         <motion.section variants={rise} className="mt-8">
-          <h2 className="mb-3 text-[1.4rem] font-semibold">Mes demandes</h2>
+          <h2 className="mb-3 text-[1.4rem] font-semibold">Mes tickets</h2>
           <div className="space-y-3">
             {s.concierge.map((c) => (
               <Card key={c.id} layout className="!p-4">
@@ -116,8 +119,13 @@ export default function Services() {
         <div className="space-y-4">
           <Field label="Quelques mots sur votre situation (facultatif)" multiline value={message} onChange={setMessage} placeholder="Ex. Mon père est hospitalisé depuis lundi…" />
           <Notice tone="ink">N'écrivez rien de confidentiel ici : les documents se partagent depuis le Coffre, une fois le mandat signé.</Notice>
-          <Button full variant="gold" onClick={request}>
-            Envoyer la demande
+          <Notice tone="gold">{`La conciergerie est un service payant, à part de l'abonnement${CONCIERGE.price ? ` : ${CONCIERGE.price}` : ""}. Un devis vous est proposé avant toute prestation.`}</Notice>
+          <button type="button" onClick={() => setPaid(!paid)} aria-pressed={paid} className="flex w-full items-start gap-3 text-left">
+            <span className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md ring-2 ${paid ? "bg-ink ring-ink" : "ring-line"}`}>{paid && <Check className="h-4 w-4 text-paper" strokeWidth={3} />}</span>
+            <span className="text-[0.92rem]">J&apos;ai compris que ce service a un coût à part.</span>
+          </button>
+          <Button full variant="gold" disabled={!paid} onClick={request}>
+            Ouvrir le ticket
           </Button>
         </div>
       </Sheet>

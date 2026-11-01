@@ -1,8 +1,9 @@
 "use client";
 import { motion } from "motion/react";
-import { Pencil, Plus, ShieldCheck, Trash, UserPlus } from "lucide-react";
+import { Mail, Pencil, Plus, ShieldCheck, Trash, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { Invite } from "@/components/invite";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
 import { removeGuarantor, removePerson, saveGuarantor, savePerson } from "@/lib/api";
@@ -15,13 +16,19 @@ export default function Famille() {
   const s = useApp(useShallow((x) => ({ people: x.people, guarantors: x.guarantors, cards: x.cards })));
   const [edit, setEdit] = useState<Person | null>(null);
   const [garant, setGarant] = useState<{ personId: string; role: string } | null>(null);
+  const [invite, setInvite] = useState<Person | null>(null);
   const close = (setter: (v: null) => void) => (ok: boolean) => ok && setter(null);
+  // Right after a designation, the owner is offered the message to send (nothing leaves on its own).
+  const offerInvite = (personId: string) => {
+    const p = useApp.getState().people.find((x) => x.id === personId);
+    if (p && !p.linked) setInvite(p);
+  };
 
   const card = (id: string) => s.cards.find((c) => c.holderId === id && c.status !== "perdue");
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show">
-      <PageTitle eyebrow="Ma famille" title="Ceux qui comptent" lead="Vos proches, vos garants, et ceux qui pourront vous aider. Ici, seulement des noms et des coordonnées : rien de personnel." />
+      <PageTitle eyebrow="Ma famille" title="Ceux qui comptent" lead="Vos proches et vos garants. Chacun a obligatoirement son propre compte, créé sur votre invitation. Ici, seulement des noms et des adresses e-mail : rien de personnel." />
 
       <motion.section variants={rise}>
         <div className="mb-3 flex items-center justify-between">
@@ -30,17 +37,11 @@ export default function Famille() {
             Ajouter
           </Button>
         </div>
-        {s.people.length === 0 && <Notice tone="ink">Ajoutez votre conjoint, vos enfants, vos parents… Vous choisirez ensuite qui reçoit une carte et ce qu'il peut ouvrir.</Notice>}
+        {s.people.length === 0 && <Notice tone="ink">Ajoutez votre conjoint, vos enfants, vos parents… Chacun crée son compte sur votre invitation ; vous choisirez ensuite ce qu&apos;il peut ouvrir, et quand.</Notice>}
         <div className="space-y-2.5">
           {s.people.map((p, i) => (
-            <motion.button
-              key={p.id}
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              onClick={() => setEdit(p)}
-              className="flex w-full items-center gap-4 rounded-[1.4rem] bg-paper p-4 text-left shadow-soft ring-1 ring-line/70"
-            >
+            <motion.div key={p.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="rounded-[1.4rem] bg-paper shadow-soft ring-1 ring-line/70">
+            <button onClick={() => setEdit(p)} className="flex w-full items-center gap-4 p-4 text-left">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-gold-soft to-sand font-display text-[1.1rem] font-semibold">
                 {p.firstName[0]}
                 {p.lastName[0]}
@@ -53,17 +54,24 @@ export default function Famille() {
                   <Badge>{p.relation}</Badge>
                   {s.guarantors.some((g) => g.personId === p.id) && <Badge tone="gold">Garant</Badge>}
                   {card(p.id) && <Badge tone="sage">Bénéficiaire · 2 cartes</Badge>}
+                  {p.linked ? <Badge tone="sage">Compte créé</Badge> : <Badge tone="coral">Sans compte</Badge>}
                 </span>
               </span>
               <Pencil className="h-4 w-4 shrink-0 text-mist" />
-            </motion.button>
+            </button>
+            {!p.linked && (
+              <button onClick={() => setInvite(p)} className="flex w-full items-center gap-2 border-t border-line/70 px-4 py-3 text-[0.9rem] font-semibold text-gold-deep">
+                <Mail className="h-4 w-4" /> {`Inviter ${p.firstName} à créer son compte`}
+              </button>
+            )}
+            </motion.div>
           ))}
         </div>
       </motion.section>
 
       <motion.section variants={rise} className="mt-10">
         <h2 className="text-[1.4rem] font-semibold">Mes garants</h2>
-        <p className="mt-1 text-ink-soft">Ce sont eux qui pourront signaler un coup dur ou un décès. Choisissez autant de garants que vous voulez, et écrivez vous-même le rôle de chacun.</p>
+        <p className="mt-1 text-ink-soft">Ce sont eux qui pourront signaler un décès. Un coup dur, lui, se demande par le proche concerné, avec un justificatif. Choisissez autant de garants que vous voulez, et écrivez vous-même le rôle de chacun.</p>
         <div className="mt-4 space-y-2.5">
           {s.guarantors.map((g) => {
             const p = s.people.find((x) => x.id === g.personId);
@@ -102,7 +110,19 @@ export default function Famille() {
       </motion.section>
 
       <Sheet open={!!edit} onClose={() => setEdit(null)} title={edit?.id ? "Modifier ce proche" : "Ajouter un proche"}>
-        {edit && <PersonForm value={edit} onSave={(p) => savePerson(p).then(close(setEdit))} onDelete={edit.id ? () => removePerson(edit.id).then(close(setEdit)) : undefined} />}
+        {edit && (
+          <PersonForm
+            value={edit}
+            onSave={async (p) => {
+              const isNew = !p.id;
+              if (!(await savePerson(p))) return;
+              setEdit(null);
+              // A new relative: the invitation to send comes right away.
+              if (isNew) offerInvite(useApp.getState().people.at(-1)!.id);
+            }}
+            onDelete={edit.id ? () => removePerson(edit.id).then(close(setEdit)) : undefined}
+          />
+        )}
       </Sheet>
 
       <Sheet open={!!garant} onClose={() => setGarant(null)} title="Garant">
@@ -123,17 +143,32 @@ export default function Famille() {
                 ))}
               </select>
             </label>
-            <Field label="Son rôle, avec vos mots" multiline value={garant.role} onChange={(role) => setGarant({ ...garant, role })} placeholder="Ex. Prévenir les enfants et appeler le notaire" />
-            <p className="text-[0.88rem] text-mist">Il ou elle recevra un e-mail pour l'en informer. Être garant ne donne accès à rien dans votre Coffre.</p>
-            <Button full variant="gold" disabled={!garant.role.trim()} onClick={() => saveGuarantor({ ...garant, role: garant.role.trim() }).then(close(setGarant))}>
+            <Field label="Son rôle, avec vos mots" multiline value={garant.role} onChange={(role) => setGarant({ ...garant, role })} placeholder="Ex. Prévenir les enfants et signaler un décès" />
+            <p className="text-[0.88rem] text-mist">Prévenez-le vous-même : un message prêt à envoyer vous est proposé. Être garant ne donne accès à rien dans votre Coffre.</p>
+            <Button
+              full
+              variant="gold"
+              disabled={!garant.role.trim()}
+              onClick={async () => {
+                if (!(await saveGuarantor({ ...garant, role: garant.role.trim() }))) return;
+                setGarant(null);
+                offerInvite(garant.personId);
+              }}
+            >
               Enregistrer
             </Button>
           </div>
         )}
       </Sheet>
+
+      <Sheet open={!!invite} onClose={() => setInvite(null)} title="Inviter à créer son compte">
+        {invite && <Invite person={invite} onDone={() => setInvite(null)} />}
+      </Sheet>
     </motion.div>
   );
 }
+
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function PersonForm({ value, onSave, onDelete }: { value: Person; onSave: (p: Person) => void; onDelete?: () => void }) {
   const [p, setP] = useState(value);
@@ -154,8 +189,8 @@ function PersonForm({ value, onSave, onDelete }: { value: Person; onSave: (p: Pe
           ))}
         </div>
       </div>
-      <Field label="E-mail" type="email" inputMode="email" value={p.email ?? ""} onChange={up("email")} hint="Pour le prévenir s'il reçoit une carte ou devient garant." />
-      <Button full variant="gold" disabled={!p.firstName.trim() || !p.lastName.trim()} onClick={() => onSave({ ...p, firstName: p.firstName.trim(), lastName: p.lastName.trim() })}>
+      <Field label="E-mail" type="email" inputMode="email" value={p.email ?? ""} onChange={up("email")} hint="Obligatoire : c'est avec cette adresse qu'il ou elle crée son propre compte." />
+      <Button full variant="gold" disabled={!p.firstName.trim() || !p.lastName.trim() || !EMAIL.test(p.email?.trim() ?? "")} onClick={() => onSave({ ...p, firstName: p.firstName.trim(), lastName: p.lastName.trim(), email: (p.email ?? "").trim() })}>
         Enregistrer
       </Button>
       {onDelete && (

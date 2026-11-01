@@ -9,7 +9,8 @@ import { Loader } from "@/components/shell";
 import { Badge, Button, Card, Segmented } from "@/components/ui";
 import { Logo } from "@/components/visuals";
 import { openFrom } from "@/lib/crypto";
-import { canConfirmDeath, procedureStatus, verify } from "@/lib/rules";
+import { canConfirmDeath, canOpenCoupDur, MOTIFS, procedureStatus, verify, type Procedure } from "@/lib/rules";
+import { DELAYS } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { now, useApp, type ConciergeCase } from "@/lib/store";
 import { ProdAdmin } from "./prod";
@@ -53,7 +54,7 @@ function DemoAdmin() {
           value={tab}
           onChange={setTab}
           options={[
-            { id: "deces", label: `Décès (${queue.length})` },
+            { id: "deces", label: `Vérifications (${queue.length})` },
             { id: "conciergerie", label: `Conciergerie (${s.concierge.length})` },
             { id: "comptes", label: "Comptes" },
           ]}
@@ -62,9 +63,12 @@ function DemoAdmin() {
         <div className="mt-6 space-y-4">
           {tab === "deces" && (
             <>
-              <p className="text-ink-soft">Un décès n&apos;est confirmé que sur concordance : registre INSEE (ou signalement d&apos;un garant), acte de décès fourni par un bénéficiaire, et identité de ce bénéficiaire vérifiée. Les correspondances douteuses ont d&apos;abord été examinées par l&apos;IA. Ensuite seulement, le délai d&apos;annulation commence.</p>
+              <p className="text-ink-soft">Un coup dur ne s&apos;ouvre qu&apos;après la vérification du justificatif et de l&apos;identité du proche (pièce d&apos;identité et visage), pour lui seul. Un décès n&apos;est confirmé que sur concordance : registre INSEE (ou signalement d&apos;un garant), acte de décès fourni par un bénéficiaire, et identité de ce bénéficiaire vérifiée. L&apos;IA donne un avis ; une personne décide toujours.</p>
               {queue.length === 0 && <Card className="text-center text-mist">Rien à vérifier.</Card>}
-              {queue.map((p) => (
+              {queue.map((p) =>
+                p.kind === "coup_dur" ? (
+                  <CoupDurCheck key={p.id} p={p} owner={owner} />
+                ) : (
                 <Card key={p.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -94,10 +98,10 @@ function DemoAdmin() {
                       <Dot ok={!!p.acte?.idChecked} />
                       {p.acte ? (
                         <button className="font-semibold underline" onClick={() => s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === p.id && y.acte ? { ...y, acte: { ...y.acte, idChecked: !y.acte.idChecked } } : y)) }))}>
-                          {p.acte.idChecked ? "Identité et KYC du bénéficiaire vérifiés" : "Vérifier l'identité et le KYC du bénéficiaire"}
+                          {p.acte.idChecked ? "Identité et visage du bénéficiaire vérifiés" : "Vérifier l'identité et le visage du bénéficiaire"}
                         </button>
                       ) : (
-                        "Identité et KYC du bénéficiaire"
+                        "Identité et visage du bénéficiaire"
                       )}
                     </li>
                   </ul>
@@ -122,7 +126,8 @@ function DemoAdmin() {
                     </Button>
                   </div>
                 </Card>
-              ))}
+                ),
+              )}
             </>
           )}
 
@@ -165,6 +170,63 @@ function DemoAdmin() {
         </div>
       </main>
     </div>
+  );
+}
+
+// A relative's coup dur request: the proof and their identity (ID and face) checked, then it opens for them only.
+function CoupDurCheck({ p, owner }: { p: Procedure; owner: string }) {
+  const s = useApp(useShallow((x) => ({ account: x.account, people: x.people, set: x.set, email: x.email })));
+  const asker = s.people.find((x) => x.id === p.requestedBy);
+  const update = (fn: (y: Procedure) => Procedure) => s.set((x) => ({ procedures: x.procedures.map((y) => (y.id === p.id ? fn(y) : y)) }));
+  return (
+    <Card layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-[1.15rem] font-semibold">Coup dur : {owner}</div>
+          <div className="text-[0.88rem] text-mist">
+            Demande de {p.declaredBy} · {fmt(p.declaredAt)}
+          </div>
+        </div>
+        <Badge tone="coral">{MOTIFS.find((m) => m.id === p.note)?.label ?? p.note}</Badge>
+      </div>
+      <p className="mt-3 rounded-2xl bg-ink/[0.04] p-3 text-[0.88rem] text-ink-soft">Avis de l&apos;IA sur le justificatif : en production, il est analysé dès le dépôt (document cohérent, nom, dates). Il n&apos;ouvre jamais rien seul.</p>
+      <ul className="mt-3 space-y-1.5 text-[0.9rem]">
+        <li className="flex items-center gap-2">
+          <Dot ok={!!p.acte} /> Justificatif déposé{p.acte ? ` (${p.acte.file})` : ""}
+        </li>
+        <li className="flex items-center gap-2">
+          <Dot ok={!!p.acte?.idChecked} />
+          <button className="font-semibold underline" onClick={() => update((y) => (y.acte ? { ...y, acte: { ...y.acte, idChecked: !y.acte.idChecked } } : y))}>
+            {p.acte?.idChecked ? "Pièce d'identité et visage du proche vérifiés" : "Vérifier la pièce d'identité et le visage du proche"}
+          </button>
+        </li>
+      </ul>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Button
+          variant="danger"
+          disabled={!canOpenCoupDur(p)}
+          onClick={() => {
+            const v = verify(p, now());
+            update(() => v);
+            // shortcut: e-mail only in the demo; production also sends SMS (Brevo) and a push notification.
+            const until = new Date(v.endsAt! + DELAYS.coupDurAccess).toISOString();
+            if (s.account) s.email(s.account.email, "coup-dur-ouvert", { declaredBy: p.declaredBy, until });
+            if (asker) s.email(asker.email || p.declaredBy, "coup-dur-acces", { ownerName: owner, until });
+          }}
+        >
+          Ouvrir l&apos;accès
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            update((y) => ({ ...y, rejectedAt: now() }));
+            if (asker) s.email(asker.email || p.declaredBy, "coup-dur-ferme", { ownerName: owner });
+          }}
+        >
+          Rejeter
+        </Button>
+      </div>
+    </Card>
   );
 }
 

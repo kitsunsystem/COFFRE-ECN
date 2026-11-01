@@ -37,25 +37,30 @@ npm run deploy       # met à jour la démo en ligne (toujours en mode démonstr
 npx cap sync         # copie le site dans les projets iOS (ios/) et Android (android/)
 ```
 
-**Démonstration** : page *Connexion* → « Découvrir la démonstration ». Code de toutes les cartes et des téléphones des proches : `123456`. Le *Mode démonstration* (Compte) avance le temps, simule la veille INSEE, bascule entre phase découverte et lancement officiel, simule un impayé, et ouvre l'Espace bénéficiaire et l'administration.
+**Démonstration** : page *Connexion* → « Découvrir la démonstration ». Code de toutes les cartes et des téléphones des proches : `123456`. Le *Mode démonstration* (Compte) avance le temps, simule la veille INSEE, bascule entre pré-lancement et lancement officiel, simule un impayé, et ouvre l'Espace bénéficiaire et l'administration.
 
 Parcours à montrer :
 1. Espace : « Paul Durand demande l'accès » → « Ouvrir le Coffre » avec une carte de Claire → « Qui voit quoi » : code de contrôle, « Accepter ». Puis « Urgence et santé » → « Copier dans la fiche médicale de mon téléphone ». Pour revenir à l'Espace, il faut **fermer le Coffre**.
 2. Coffre → « Démo : ouvrir comme un proche » → Marc (Face ID simulé, code) : il ne voit que l'urgence ; chaque information se copie, et le PDF ne contient que sa part.
-3. Compte → Coup dur et décès → signaler un coup dur comme garant → Démo : « Aller à la fin du délai » → Marc voit Banques et Téléphone, pas l'assurance-vie.
+3. Compte → Coup dur et décès → « Demande d'ouverture d'un proche » : Marc dépose un justificatif, sa pièce d'identité et une photo → Administration › Vérifications : vérifier son identité, « Ouvrir l'accès » → Marc (et lui seul) voit Banques et Téléphone, pas l'assurance-vie, pendant 30 jours ; Claire peut fermer l'accès à tout moment.
 4. Démo : correspondance INSEE → Espace bénéficiaire : Léa s'identifie avec son téléphone et dépose l'acte de décès → Administration : vérifier son identité, puis « Décès confirmé » : les packs réservés partent.
 5. Mes cartes : « Démo : livrer » puis « Démo : activer » le pack de Léa (avec son téléphone) → Démo : fin du délai → Léa ouvre le Coffre avec sa carte (ou son téléphone) et télécharge son PDF → Démo : « Aller à la fin de l'accès » → le Coffre est effacé.
 
 ## Décisions intégrées (suivi du projet)
-- **Trois niveaux d'accès**, un seul code couleur partout : Urgence (vert), Coup dur (rouge, garant + délai), Décès (doré). « Jamais » par défaut.
+- **Trois niveaux d'accès**, un seul code couleur partout : Maintenant (vert), Coup dur (rouge : demande du proche + justificatif, avis IA puis vérification humaine, ouvert pour lui seul 30 jours), Décès (doré). « Jamais » par défaut ; un **accès conseillé** est proposé pour chaque sous-rubrique (fiche v2 d'octobre 2026).
 - **Cartes** : 3 pour le titulaire ; la carte est toujours nécessaire, le code en plus. **Un pack de 2 cartes obligatoire par bénéficiaire**, payé à sa désignation mais **réservé jusqu'au décès confirmé** (rangées des années, des cartes se perdent et leur puce vieillit) : il part pendant le délai d'annulation, à l'adresse que le bénéficiaire donne alors, et s'active avec son téléphone (chaque carte garde la clé du téléphone). Marque ECN retirée.
-- **Accès des proches sans carte** (urgence, coup dur : hospitalisation, banque, procuration…) : le bénéficiaire demande son accès dans l'application ; son téléphone crée sa clé, protégée par **Face ID + un code à 6 chiffres** ; le titulaire reçoit un e-mail et **accepte depuis son Coffre** (« Qui voit quoi », code de contrôle à comparer au besoin par téléphone). Un seul téléphone par proche ; le serveur ne voit que la clé publique.
+- **Comptes obligatoires** : chaque proche a son compte ; le titulaire envoie lui-même l'invitation (message prêt à envoyer ou à copier, rien ne part automatiquement) ; relance mensuelle tant qu'un proche n'a pas de compte.
+- **Accès des proches sans carte** (maintenant, coup dur) : le proche demande son accès dans l'application ; son téléphone crée sa clé, protégée par **Face ID + un code à 6 chiffres** ; le titulaire reçoit un e-mail et **accepte depuis son Coffre** (« Qui voit quoi », code de contrôle à comparer au besoin par téléphone). Un seul téléphone par proche ; le serveur ne voit que la clé publique.
 - **Coffre séparé de l'Espace** : on ne revient à l'Espace qu'en fermant le Coffre (et ouvrir l'Espace le ferme).
-- **Décès** : veille INSEE ou garant, **acte de décès déposé par un bénéficiaire**, vérification par l'équipe (identité du bénéficiaire), pas de notaire par défaut ; délai d'annulation ; **accès limité dans le temps puis effacement définitif**.
+- **Coup dur** : demande depuis le compte du proche (motif, justificatif, pièce d'identité, photo du visage), avis de l'IA, vérification par l'équipe, ouverture temporaire pour ce proche seul (le serveur ne libère que ses enveloppes scellées), titulaire alerté et libre de refuser ou fermer.
+- **Décès** : acte de décès déposé par un bénéficiaire (avec pièce d'identité et visage), vérification par l'équipe, veille INSEE en bonus ; délai d'annulation ; **accès limité dans le temps puis effacement définitif**.
+- **Mes démarches de protection** (procuration, compte joint, mandat de protection future, personne de confiance, assurance-vie, testament, délégation, tuteur) : pourquoi, où, quoi apporter ; relance mensuelle ; comptent dans le pourcentage.
+- **Rubriques v2** : volontés médicales, personnes et animaux à charge, contacts clés, procurations et mandats, administration et impôts, inventaire du patrimoine, étiquettes « à maintenir / à résilier », déclaration des assurances, cryptos et actifs numériques, où sont mes vidéos et souvenirs.
+- **Autonomie** : Alma répond à tout, sinon ticket de conciergerie (coût à part, affiché avant) ; plus aucun renvoi vers un juriste, un notaire ou un avocat.
 - **Fiche d'urgence** copiée dans la fiche médicale du téléphone ; **PDF téléchargeable** contenant uniquement ce que la personne a le droit de voir (sans codes ni mots de passe).
-- **Vidéos** retirées du lancement : « Où se trouvent mes vidéos » dans Volontés et messages.
+- **Vidéos** retirées du lancement : « Où se trouvent mes vidéos et souvenirs » dans Volontés et messages.
 - **Échéances** saisies dans l'Espace avec consentement ; relances « tout est-il à jour ? » tous les 3 mois.
-- **Lancement en deux temps** : phase découverte (tout sauf l'ajout de documents, bloqué aussi par la base), puis lancement officiel (Administration › Réglages).
+- **Pré-lancement** : tout sauf le Coffre (qui s'active avec les cartes) ; « Qui voit quoi » se règle déjà ; date de lancement affichée (Administration › Réglages), report ou remboursement si elle est repoussée. Paiement : **Paddle**.
 - **Impayé** : relances pendant le délai de grâce, puis effacement.
 - Pour plus tard : formule famille, mode aidant (procuration), notaire partenaire, vidéos dans le Coffre, avatar vidéo.
 
@@ -76,11 +81,11 @@ Parcours à montrer :
 | `src/lib/crypto.ts`, `cards.ts`, `vault.ts` | Chiffrement, cartes (FIDO2, Tangem, démo), Coffre |
 | `src/lib/rules.ts` | Niveaux d'accès et procédures (même logique qu'en SQL) |
 | `supabase/migrations/` | Schéma, droits, RLS, fonctions métier, fichiers, tâches planifiées |
-| `supabase/functions/` | `mailer` (Brevo), `procedures-tick`, `relances`, `insee-watch`, `billing` + `stripe-webhook` (Stripe), `account-delete` (RGPD), `kyc-webhook` |
+| `supabase/functions/` | `mailer` (Brevo), `procedures-tick` (dont l'avis IA sur les justificatifs), `relances`, `insee-watch`, `billing` + `paddle-webhook` (Paddle), `account-delete` (RGPD), `kyc-webhook` |
 | `supabase/tests/`, `tests/e2e/` | Tests des règles d'accès et parcours de bout en bout |
 | `android/`, `ios/` | Applications natives (Capacitor) |
 | `.github/workflows/` | CI, applications mobiles, déploiement, analyse de sécurité |
 | `deploy/README.md` | Les actions à faire pour la mise en production |
 
 ## Points encore « à décider »
-Nom (Sillage, Védora ou Laréo) · délai du coup dur et délai d'annulation du décès · durée d'accès après décès (4, 6 ou 12 mois) · délai de grâce · prix de la formule simple et de la phase découverte · date de lancement officiel · pack bénéficiaire (inclus ou payant) · cartes FIDO2 ou Tangem · système KYC du groupe · registres de décès en Espagne et en Andorre.
+Nom (Sillage, Védora ou Laréo) · durée d'ouverture d'un coup dur (30 jours par défaut) et délai d'annulation du décès (15 jours à 1 mois) · système de clés et verrou de déblocage à faire valider par le cabinet d'audit · prestataire de contrôle d'identité (pièce + visage) · durée d'accès après décès (4, 6 ou 12 mois) · délai de grâce · prix de la formule simple et du pré-lancement · date de lancement officiel · pack bénéficiaire (inclus ou payant) · cartes FIDO2 ou Tangem · système KYC du groupe · registres de décès en Espagne et en Andorre.

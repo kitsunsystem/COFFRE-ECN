@@ -1,6 +1,6 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { ArrowLeft, Monitor, Nfc, ScanFace, ShieldCheck } from "lucide-react";
+import { ArrowLeft, CalendarClock, Monitor, Nfc, ScanFace, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -32,6 +32,8 @@ export default function Verrou() {
   const people = useApp((s) => s.people);
   const account = useApp((s) => s.account);
   const me = useApp((s) => s.me);
+  const prelaunch = useApp((s) => s.phase === "decouverte" && !s.vault.salt);
+  const plannedLaunch = useApp((s) => s.plannedLaunch);
   const session = useSession((s) => s.session);
   const router = useRouter();
   const [faceId, setFaceId] = useState(false);
@@ -62,6 +64,8 @@ export default function Verrou() {
     await openSession(keys);
   };
   const tapped = f.tap?.card;
+  // Pre-launch: no card yet, the Coffre activates when they arrive.
+  const waiting = !!account && prelaunch && active.length === 0;
   // Production: a beneficiary card belongs to someone else's Coffre.
   const ownerOf = (holderId: string) => trusts.find((t) => t.personId === holderId)?.ownerName ?? "votre proche";
 
@@ -87,12 +91,29 @@ export default function Verrou() {
                 <ShieldCheck className="h-4 w-4" /> Chiffré sur cet appareil
               </motion.div>
               <h1 className="text-[2.2rem] font-semibold leading-tight">Le Coffre</h1>
-              <p className="mt-2 max-w-xs text-paper/70">
-                {driver() === "fido" ? "Posez votre carte contre le téléphone (ou branchez-la), puis tapez son code quand il est demandé." : "Posez votre carte au dos du téléphone. Elle seule peut l'ouvrir, avec votre code."}
-              </p>
-              <TapReader state={f.reading} light />
+              {!waiting && (
+                <>
+                  <p className="mt-2 max-w-xs text-paper/70">
+                    {driver() === "fido" ? "Posez votre carte contre le téléphone (ou branchez-la), puis tapez son code quand il est demandé." : "Posez votre carte au dos du téléphone. Elle seule peut l'ouvrir, avec votre code."}
+                  </p>
+                  <TapReader state={f.reading} light />
+                </>
+              )}
               {f.error && <p className="mb-3 font-semibold text-coral-soft">{f.error}</p>}
-              {active.length === 0 && accesses.length === 0 ? (
+              {waiting ? (
+                <div className="mt-6 w-full space-y-3 rounded-[1.6rem] bg-paper/[0.06] p-5 text-left ring-1 ring-paper/10">
+                  <div className="flex items-center gap-2 font-semibold text-gold-soft">
+                    <CalendarClock className="h-5 w-5" /> Pré-lancement
+                  </div>
+                  <p className="text-paper/80">
+                    {`Le Coffre s'active à la réception de vos cartes, au lancement ${plannedLaunch ? `prévu le ${new Date(plannedLaunch).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : "dont la date vous sera annoncée par e-mail"}. En attendant, tout le reste est ouvert : votre Espace, vos proches, vos démarches de protection et « Qui voit quoi ».`}
+                  </p>
+                  <p className="text-[0.88rem] text-paper/60">Si la date est repoussée, vous êtes prévenu par e-mail et vous choisissez : reporter, ou être remboursé.</p>
+                  <Button full variant="gold" href="/coffre/droits" icon={<ShieldCheck className="h-5 w-5" />}>
+                    Régler qui verra quoi
+                  </Button>
+                </div>
+              ) : active.length === 0 && accesses.length === 0 ? (
                 <div className="w-full space-y-3">
                   <p className="text-paper/70">Aucune carte n&apos;est encore active.</p>
                   <Button full variant="gold" href={account ? "/espace/cartes" : PROD && me ? "/proche" : "/connexion"}>

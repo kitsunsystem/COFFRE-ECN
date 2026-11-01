@@ -1,27 +1,38 @@
 "use client";
 // Production: the page of a relative who signs in — what they are for others (guarantor, beneficiary), their access
-// from this phone, and their cards, which only arrive after a death.
+// from this phone, their requests to open in a coup dur, and their cards, which only arrive after a death.
 import { motion } from "motion/react";
-import { ArrowRight, FileUp, Lock, LogOut, ScanFace, ShieldAlert, ShieldCheck, Smartphone, Truck } from "lucide-react";
+import { ArrowRight, FileUp, HeartPulse, Lock, LogOut, ScanFace, ShieldAlert, ShieldCheck, Smartphone, Truck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AccessRequest } from "@/components/access";
 import { Activation, type ActivationMode } from "@/components/activation";
+import { CoupDurRequest } from "@/components/proof";
 import { useHydrated, useNow } from "@/components/providers";
 import { Loader } from "@/components/shell";
-import { Badge, Button, Card, Field, Notice, Segmented, Sheet } from "@/components/ui";
+import { Badge, Button, Card, Field, Notice, Sheet } from "@/components/ui";
 import { Aurora, Countdown, Logo, NfcCard } from "@/components/visuals";
 import { hasAccessKey } from "@/lib/access";
 import { declareAsGuarantor, declareLost, setPackAddress, signOut } from "@/lib/api";
 import { DELAYS } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { isNative } from "@/lib/native";
-import { activeProcedure, procedureStatus, type ProcedureKind } from "@/lib/rules";
+import { procedureStatus, type Procedure } from "@/lib/rules";
 import { isPhone, useApp, type Card as CardT, type Trust } from "@/lib/store";
 
 const hours = (ms: number) => (ms >= 86_400_000 ? `${Math.round(ms / 86_400_000)} jours` : `${Math.round(ms / 3_600_000)} heures`);
 const STATUS: Record<string, string> = { reservee: "Réservée", commandee: "En fabrication", en_route: "En livraison", recue: "À activer", active: "Active", perdue: "Désactivée" };
+
+// Where the relative's last coup dur request stands.
+function requestStatus(p: Procedure, t: number, first: string) {
+  const s = procedureStatus(p, t);
+  if (s === "verification") return `Votre demande est en cours de vérification par notre équipe : justificatif et identité. ${first} est prévenu(e).`;
+  if (s === "active") return `Accès ouvert jusqu'au ${new Date(p.endsAt! + DELAYS.coupDurAccess).toLocaleDateString("fr-FR", { dateStyle: "long" })} : ouvrez avec Face ID et votre code.`;
+  if (s === "rejetee") return "Votre dernière demande n'a pas été validée par notre équipe.";
+  if (s === "annulee") return `Votre dernière demande a été refusée par ${first}.`;
+  return "Votre dernier accès pour un coup dur est fermé.";
+}
 
 export default function Proche() {
   const hydrated = useHydrated();
@@ -32,6 +43,7 @@ export default function Proche() {
   const t = useNow(1000);
   const [mode, setMode] = useState<ActivationMode | null>(null);
   const [declaring, setDeclaring] = useState<Trust | null>(null);
+  const [requesting, setRequesting] = useState<Trust | null>(null);
   const [lost, setLost] = useState<CardT | null>(null);
   const [asking, setAsking] = useState<Trust | null>(null);
   // Whether this phone holds the person's access key (it never leaves the phone where it was made).
@@ -82,8 +94,11 @@ export default function Proche() {
 
         <div className="mt-6 space-y-5">
           {trusts.map((x) => {
-            const live = activeProcedure(x.procedures, t);
-            const status = live && procedureStatus(live, t);
+            const death = x.procedures.find((p) => p.kind === "deces" && ["verification", "delai", "terminee"].includes(procedureStatus(p, t)));
+            const status = death && procedureStatus(death, t);
+            // Only their own requests come back from the server (newest first).
+            const mine = x.procedures.find((p) => p.kind === "coup_dur" && p.acteByMe);
+            const pending = !!mine && ["verification", "active"].includes(procedureStatus(mine, t));
             const pack = x.cards.filter((c) => !isPhone(c));
             const phone = x.cards.find((c) => isPhone(c) && c.status !== "perdue");
             const isBeneficiary = pack.some((c) => c.status !== "perdue");
@@ -100,13 +115,13 @@ export default function Proche() {
                 </div>
                 {x.guarantorRole && <p className="mt-2 text-ink-soft">Votre rôle : « {x.guarantorRole} »</p>}
 
-                {live && (
+                {death && (
                   <div className="mt-4 rounded-2xl bg-coral-soft p-4">
-                    <div className="font-semibold">{live.kind === "coup_dur" ? "Coup dur signalé" : "Décès signalé"}</div>
+                    <div className="font-semibold">Décès signalé</div>
                     <div className="text-[0.9rem] text-ink-soft">
-                      {status === "verification" ? "Vérification en cours par notre équipe." : status === "delai" && live.endsAt ? (
+                      {status === "verification" ? "Vérification en cours par notre équipe." : status === "delai" && death.endsAt ? (
                         <>
-                          Ouverture des accès dans <Countdown to={live.endsAt} now={t} />, sauf annulation.
+                          Ouverture des accès dans <Countdown to={death.endsAt} now={t} />, sauf annulation.
                         </>
                       ) : (
                         "Les accès prévus sont ouverts."
@@ -143,6 +158,25 @@ export default function Proche() {
                         </Button>
                       </>
                     )}
+                  </div>
+                )}
+
+                {isBeneficiary && !death && (
+                  <div className="mt-4 rounded-2xl bg-ink/[0.04] p-4">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <HeartPulse className="h-5 w-5 text-coral" /> En cas de coup dur
+                    </div>
+                    <p className="mt-1 text-[0.92rem] text-ink-soft">
+                      {mine ? requestStatus(mine, t, first) : `Hospitalisation, coma, incapacité : demandez l'ouverture de ce que ${first} a prévu pour vous, avec un justificatif. Notre équipe vérifie, puis l'accès s'ouvre pour vous seul(e).`}
+                    </p>
+                    {!pending &&
+                      (ready ? (
+                        <Button className="mt-3" full variant="outline" onClick={() => setRequesting(x)}>
+                          Faire une demande d&apos;ouverture
+                        </Button>
+                      ) : (
+                        <p className="mt-2 text-[0.88rem] text-mist">La demande se fait depuis le téléphone où votre accès est validé.</p>
+                      ))}
                   </div>
                 )}
 
@@ -187,9 +221,9 @@ export default function Proche() {
                   </div>
                 )}
 
-                {x.guarantorRole && !live && (
+                {x.guarantorRole && !death && (
                   <Button className="mt-4" full variant="outline" icon={<ShieldAlert className="h-5 w-5" />} onClick={() => setDeclaring(x)}>
-                    Signaler un coup dur ou un décès
+                    Signaler un décès
                   </Button>
                 )}
               </Card>
@@ -214,8 +248,12 @@ export default function Proche() {
         {asking && <AccessRequest personId={asking.personId} ownerName={asking.ownerName} onDone={() => setAsking(null)} />}
       </Sheet>
 
-      <Sheet open={!!declaring} onClose={() => setDeclaring(null)} title="Votre signalement">
-        {declaring && <Declare ownerName={declaring.ownerName} onDeclare={async (kind, note) => (await declareAsGuarantor(declaring.ownerId, kind, "", note)) && setDeclaring(null)} />}
+      <Sheet open={!!requesting} onClose={() => setRequesting(null)} title="Demande d'ouverture">
+        {requesting && <CoupDurRequest ownerId={requesting.ownerId} ownerName={requesting.ownerName} personId={requesting.personId} who="" onDone={() => setRequesting(null)} />}
+      </Sheet>
+
+      <Sheet open={!!declaring} onClose={() => setDeclaring(null)} title="Signaler un décès">
+        {declaring && <Declare onDeclare={async (note) => (await declareAsGuarantor(declaring.ownerId, "", note)) && setDeclaring(null)} />}
       </Sheet>
 
       <Sheet open={!!lost} onClose={() => setLost(null)} title="Désactiver cette carte ?">
@@ -259,25 +297,14 @@ function ShipTo({ personId, address }: { personId: string; address?: string }) {
   );
 }
 
-function Declare({ ownerName, onDeclare }: { ownerName: string; onDeclare: (k: ProcedureKind, note: string) => void }) {
-  const [kind, setKind] = useState<ProcedureKind>("coup_dur");
+// A guarantor reports a death; a coup dur goes through the relative's own request, with a proof.
+function Declare({ onDeclare }: { onDeclare: (note: string) => void }) {
   const [note, setNote] = useState("");
   return (
     <div className="space-y-4">
-      <Segmented layoutKey="declare-proche" value={kind} onChange={setKind} options={[{ id: "coup_dur", label: "Coup dur" }, { id: "deces", label: "Décès" }]} />
-      <Field
-        label={kind === "coup_dur" ? "Que se passe-t-il ?" : "Mairie et date du décès, si vous les connaissez"}
-        multiline
-        value={note}
-        onChange={setNote}
-        placeholder={kind === "coup_dur" ? "Ex. Hospitalisée à Lyon depuis ce matin" : "Ex. Mairie de Nantes, le 3 mars"}
-      />
-      <Notice tone={kind === "coup_dur" ? "gold" : "coral"}>
-        {kind === "coup_dur"
-          ? `${ownerName} est prévenu(e) partout et peut annuler pendant ${hours(DELAYS.coupDur)}. Ensuite, seuls les éléments prévus pour un coup dur s'ouvrent.`
-          : `Un décès est toujours vérifié par notre équipe : registre INSEE, acte de décès fourni par un bénéficiaire et son identité. Puis un délai de ${hours(DELAYS.deces)} s'ouvre, avec des alertes, avant toute transmission.`}
-      </Notice>
-      <Button full variant="danger" onClick={() => onDeclare(kind, note.trim())}>
+      <Field label="Mairie et date du décès, si vous les connaissez" multiline value={note} onChange={setNote} placeholder="Ex. Mairie de Nantes, le 3 mars" />
+      <Notice tone="coral">{`Un décès est toujours vérifié par notre équipe : registre INSEE, acte de décès fourni par un bénéficiaire, son identité et son visage. Puis un délai de ${hours(DELAYS.deces)} s'ouvre, avec des alertes, avant toute transmission.`}</Notice>
+      <Button full variant="danger" onClick={() => onDeclare(note.trim())}>
         Envoyer le signalement
       </Button>
     </div>

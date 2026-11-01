@@ -63,7 +63,7 @@ describe("Coffre", () => {
     const pdf = await exportContent();
     expect(pdf.map((s) => s.title)).toEqual(["Urgence et santé"]);
     expect(pdf[0].subs[0].items[0].rows).toEqual([
-      ["Personne à prévenir", "Marc"],
+      ["Nom", "Marc"],
       ["Téléphone", "0612"],
       ["Documents", "ordonnance.pdf"],
     ]);

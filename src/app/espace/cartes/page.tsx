@@ -4,16 +4,17 @@ import { CircleAlert, Gift, Plus, RefreshCw, Smartphone, Truck } from "lucide-re
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Activation, PACK_INFO, type ActivationMode } from "@/components/activation";
+import { Invite } from "@/components/invite";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet } from "@/components/ui";
 import { NfcCard } from "@/components/visuals";
 import { declareLost, orderOwnerCards, orderPack, orderReplacement, saveAccount } from "@/lib/api";
 import { OFFER } from "@/lib/config";
 import { PROD } from "@/lib/env";
 import { isNative } from "@/lib/native";
-import { isPhone, ownerCards, phoneOf, personName, useApp, type Card as CardT, type CardStatus } from "@/lib/store";
+import { isPhone, ownerCards, phoneOf, personName, useApp, type Card as CardT, type CardStatus, type Person } from "@/lib/store";
 
 const STATUS: Record<CardStatus, { label: string; tone: "ink" | "gold" | "sage" | "coral" | "mist" }> = {
-  reservee: { label: "Réservée", tone: "mist" },
+  reservee: { label: "En solde", tone: "mist" },
   demandee: { label: "En attente", tone: "gold" },
   commandee: { label: "En fabrication", tone: "gold" },
   en_route: { label: "En livraison", tone: "gold" },
@@ -30,6 +31,7 @@ export default function Cartes() {
   const [mode, setMode] = useState<ActivationMode | null>(null);
   const [assign, setAssign] = useState(false);
   const [lost, setLost] = useState<CardT | null>(null);
+  const [invite, setInvite] = useState<Person | null>(null);
   const [busy, setBusy] = useState(false);
   const mine = ownerCards(s);
   const toActivate = mine.filter(activatable);
@@ -122,7 +124,7 @@ export default function Cartes() {
       <div className="mt-10">
         <h2 className="text-[1.5rem] font-semibold">Les cartes de vos bénéficiaires</h2>
         <p className="mt-1 text-ink-soft">
-          Chaque bénéficiaire a obligatoirement un pack de {OFFER.packCards} cartes à son nom. Il est réservé dès sa désignation et ne part qu&apos;à votre décès : rangées des années, des cartes se perdent, et leur puce vieillit. D&apos;ici là, chacun ouvre ce que vous lui confiez depuis son téléphone, avec Face ID et son code, une fois sa demande acceptée.
+          Chaque bénéficiaire a un pack de {OFFER.packCards} cartes à son nom, prépayé et gardé en solde : il ne part qu&apos;à votre décès, à l&apos;adresse qu&apos;il confirme alors. Rangées des années, des cartes se perdent, et leur puce vieillit. D&apos;ici là, vos proches n&apos;ont pas de carte : chacun ouvre ce que vous lui confiez depuis son compte, sur son téléphone, avec son visage et son code, une fois son accès accepté.
         </p>
         <div className="mt-5 space-y-5">
           {beneficiaries.map((p) => {
@@ -139,7 +141,7 @@ export default function Cartes() {
                       {p.firstName} {p.lastName}
                     </div>
                     <div className="text-[0.85rem] text-mist">
-                      {all.every((c) => c.status === "reservee") ? `Pack de ${OFFER.packCards} cartes · réservé, envoyé au décès` : `Pack de ${OFFER.packCards} cartes · ${activeCount} active${activeCount > 1 ? "s" : ""}`}
+                      {all.every((c) => c.status === "reservee") ? `Pack de ${OFFER.packCards} cartes · en solde, envoyé au décès` : `Pack de ${OFFER.packCards} cartes · ${activeCount} active${activeCount > 1 ? "s" : ""}`}
                     </div>
                   </div>
                   {/* Production: the beneficiary activates them in their own app, with their phone. */}
@@ -161,8 +163,15 @@ export default function Cartes() {
                       ? `Accès validé sur son téléphone le ${new Date(phone.activatedAt ?? phone.orderedAt).toLocaleDateString("fr-FR", { dateStyle: "long" })}.`
                       : phone
                         ? "Demande d'accès en attente : répondez dans le Coffre, « Qui voit quoi »."
-                        : `Pas encore d'accès : ${p.firstName} installe l'application et le demande, avec l'adresse ${p.email || "indiquée dans Famille"}.`}
+                        : p.linked
+                          ? `Compte créé : ${p.firstName} doit encore demander son accès depuis l'application, sur son téléphone.`
+                          : `Pas encore de compte : ${p.firstName} doit le créer avec l'adresse ${p.email || "indiquée dans Famille"}.`}
                   </span>
+                  {!phone && !p.linked && (
+                    <button onClick={() => setInvite(p)} className="shrink-0 text-[0.85rem] font-semibold text-gold-deep">
+                      Inviter
+                    </button>
+                  )}
                   {phone?.status === "active" && (
                     <button onClick={() => setLost(phone)} className="shrink-0 text-[0.85rem] font-semibold text-coral">
                       Retirer
@@ -208,8 +217,11 @@ export default function Cartes() {
                 key={p.id}
                 disabled={busy}
                 onClick={async () => {
-                  if (await order(() => orderPack(p.id))) setAssign(false);
-                  else if (!s.account.address.trim()) setAssign(false);
+                  if (await order(() => orderPack(p.id))) {
+                    setAssign(false);
+                    // Designated: the invitation to send comes right away (nothing leaves on its own).
+                    if (!p.linked) setInvite(p);
+                  } else if (!s.account.address.trim()) setAssign(false);
                 }}
                 className="flex w-full items-center justify-between rounded-2xl bg-paper p-4 text-left ring-1 ring-line hover:ring-ink/30"
               >
@@ -223,6 +235,10 @@ export default function Cartes() {
               </button>
             ))}
         </div>
+      </Sheet>
+
+      <Sheet open={!!invite} onClose={() => setInvite(null)} title="Inviter à créer son compte">
+        {invite && <Invite person={invite} onDone={() => setInvite(null)} />}
       </Sheet>
 
       <Sheet open={!!pending} onClose={() => setPending(null)} title="Où livrer les cartes ?">

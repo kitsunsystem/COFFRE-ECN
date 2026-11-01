@@ -41,8 +41,13 @@ function ownerVmk() {
 // Where the Coffre being read lives: the owner's own data, or (production) the part of someone else's that was released.
 function src() {
   const st = useApp.getState();
-  const h = useSession.getState().session.mode === "holder" ? st.holder : undefined;
-  return h ? { items: h.items, envelopes: h.envelopes, procedures: h.procedures, ownerId: h.ownerId } : { items: st.vault.items, envelopes: st.vault.envelopes, procedures: st.procedures, ownerId: st.me?.userId ?? "local" };
+  const ses = useSession.getState().session;
+  const h = ses.mode === "holder" ? st.holder : undefined;
+  // The relative reading (demo: the person of the phone that opened): a coup dur only opens for the one who asked.
+  const personId = h?.personId ?? (ses.mode === "holder" ? st.cards.find((c) => c.id === ses.cardId)?.holderId : undefined);
+  return h
+    ? { items: h.items, envelopes: h.envelopes, procedures: h.procedures, ownerId: h.ownerId, personId }
+    : { items: st.vault.items, envelopes: st.vault.envelopes, procedures: st.procedures, ownerId: st.me?.userId ?? "local", personId };
 }
 
 /* ---------- Encrypted files: IndexedDB in the demo, private bucket in production ---------- */
@@ -99,8 +104,9 @@ export async function activatePackCard(card: Card, enrolled: Enrolled, pin: stri
 // The owner agrees to a relative's phone: it receives the keys of everything already attributed to that person, and
 // their previous phone, if any, stops opening anything.
 export async function approveAccess(phone: Card) {
-  ownerVmk();
   const st = useApp.getState();
+  // Before the Coffre exists (pre-launch), there is nothing to seal yet: its first opening seals what is due.
+  if (st.vault.salt) ownerVmk();
   const added: Envelope[] = [];
   for (const [subId, m] of Object.entries(st.rights[phone.holderId] ?? {})) {
     const key = m === "jamais" ? null : await subsectionKey(subId);
@@ -179,8 +185,8 @@ export async function subsectionKey(subId: string): Promise<Uint8Array | null> {
   const st = useApp.getState();
   if (ses.mode === "owner") return st.vault.ssk[subId] ? open(ses.vmk, st.vault.ssk[subId], sskAad(subId)) : null;
   if (ses.mode === "holder") {
-    const { envelopes, procedures } = src();
-    const env = envelopes.find((e) => e.cardId === ses.cardId && e.subsectionId === subId && isReleased(e.moment, procedures, now()));
+    const { envelopes, procedures, personId } = src();
+    const env = envelopes.find((e) => e.cardId === ses.cardId && e.subsectionId === subId && isReleased(e.moment, procedures, now(), personId));
     return env ? openFrom(env.sealed, ses.publicKey, ses.privateKey) : null;
   }
   return null;
@@ -190,8 +196,8 @@ export function visibleSubsections(): string[] {
   const ses = useSession.getState().session;
   if (ses.mode === "owner") return ALL_SUBSECTIONS.map((s) => s.id);
   if (ses.mode === "holder") {
-    const { envelopes, procedures } = src();
-    return envelopes.filter((e) => e.cardId === ses.cardId && isReleased(e.moment, procedures, now())).map((e) => e.subsectionId);
+    const { envelopes, procedures, personId } = src();
+    return envelopes.filter((e) => e.cardId === ses.cardId && isReleased(e.moment, procedures, now(), personId)).map((e) => e.subsectionId);
   }
   return [];
 }
@@ -278,8 +284,9 @@ export async function rotate(subId: string) {
 
 // Rights belong to a person and apply to their approved phone (their cards, after the death, keep its key).
 export async function setRight(personId: string, subId: string, moment: Moment) {
-  ownerVmk();
   const st = useApp.getState();
+  // Before the Coffre exists (pre-launch), only the choice is saved: its first opening seals the envelopes.
+  if (st.vault.salt) ownerVmk();
   const prev = st.rights[personId]?.[subId] ?? "jamais";
   if (prev === moment) return;
   const cards = packOf(st, personId).filter((c) => c.status === "active" && c.boxPk);
@@ -288,7 +295,7 @@ export async function setRight(personId: string, subId: string, moment: Moment) 
   const added: Envelope[] = key ? await Promise.all(cards.map(async (c) => ({ cardId: c.id, subsectionId: subId, moment: moment as Envelope["moment"], sealed: await sealTo(c.boxPk!, key) }))) : [];
   await remote.setRight(personId, subId, moment, moment === "jamais" ? cards.map((c) => c.id) : [], added);
   st.set((s) => ({ rights: { ...s.rights, [personId]: { ...s.rights[personId], [subId]: moment } }, vault: { ...s.vault, envelopes: [...others, ...added] } }));
-  if (moment === "jamais" && prev !== "jamais") await rotate(subId);
+  if (moment === "jamais" && prev !== "jamais" && st.vault.salt) await rotate(subId);
 }
 
 export async function setSectionRight(personId: string, sectionId: string, moment: Moment) {

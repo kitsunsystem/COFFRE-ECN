@@ -9,14 +9,15 @@ const origin = new URL(api).origin;
 
 const csp = [
   "default-src 'self'",
-  // Next.js static pages carry small inline boot scripts; libsodium runs as WebAssembly.
-  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
-  "style-src 'self' 'unsafe-inline'",
+  // Next.js static pages carry small inline boot scripts; libsodium runs as WebAssembly; Paddle.js opens the checkout.
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.paddle.com",
+  "style-src 'self' 'unsafe-inline' https://cdn.paddle.com",
   "font-src 'self' data:",
-  "img-src 'self' data: blob:",
-  `connect-src 'self' ${origin} ${origin.replace(/^http/, "ws")}`,
+  "img-src 'self' data: blob: https://*.paddle.com",
+  // Alma talks to the Botpress webchat API; the checkout to Paddle (shortcut: hosts to confirm in the Paddle sandbox).
+  `connect-src 'self' ${origin} ${origin.replace(/^http/, "ws")} https://webchat.botpress.cloud https://*.paddle.com`,
   "worker-src 'self' blob:",
-  "frame-src 'none'",
+  "frame-src https://buy.paddle.com https://sandbox-buy.paddle.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -32,7 +33,7 @@ const headers = `/*
   Referrer-Policy: strict-origin-when-cross-origin
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(self), publickey-credentials-get=(self), publickey-credentials-create=(self)
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://buy.paddle.com" "https://sandbox-buy.paddle.com"), usb=(self), publickey-credentials-get=(self), publickey-credentials-create=(self)
 
 /_next/static/*
   Cache-Control: public, max-age=31536000, immutable

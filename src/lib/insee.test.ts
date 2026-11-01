@@ -35,7 +35,7 @@ describe("INSEE file", () => {
 
 describe("e-mails", () => {
   it("never inject user-supplied HTML", () => {
-    const html = toHtml(render("invitation-garant", { ownerName: "<script>x</script>", role: "a" }), "https://app");
+    const html = toHtml(render("coup-dur-acces", { ownerName: "<script>x</script>", until: "2026-12-01" }), "https://app");
     expect(html).not.toContain("<script>");
     expect(html).toContain("&lt;script&gt;");
   });

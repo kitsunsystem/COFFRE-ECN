@@ -65,9 +65,9 @@ describe("famille et garants", () => {
     expect(await as(db, ids.eve, "select * from people")).toHaveLength(0);
   });
 
-  it("a guarantor must be one of the owner's relatives, and is invited by e-mail", async () => {
+  it("a guarantor must be one of the owner's relatives; nothing is e-mailed in the owner's place", async () => {
     await claire("insert into guarantors (owner_id, person_id, role) values ($1, $2, 'Prévenir les enfants')", [ids.claire, ids.pMarc]);
-    expect(await outbox("invitation-garant")).toContain("marc@exemple.fr");
+    expect((await db.query("select * from outbox where to_email = 'marc@exemple.fr'")).rows).toHaveLength(0);
     const evePerson = crypto.randomUUID();
     await db.query(`insert into profiles (id, first_name, last_name, email, birth_date) values ($1, 'Eve', 'X', 'eve@exemple.fr', '1980-01-01')`, [ids.eve]);
     await db.query(`insert into people (id, owner_id, first_name, last_name, relation) values ($1, $2, 'Z', 'Z', 'Ami')`, [evePerson, ids.eve]);
@@ -95,7 +95,11 @@ describe("cartes", () => {
     expect(pack.every((c) => c.extra && c.status === "reservee")).toBe(true); // only shipped once the death is confirmed
     await claire("select * from order_pack($1)", [ids.pLea]);
     await refused(as(db, ids.eve, "select * from order_pack($1)", [ids.pMarc]), /proche inconnu/);
-    expect(await outbox("invitation-porteur")).toEqual(expect.arrayContaining(["marc@exemple.fr", "LEA@exemple.fr"]));
+    // Every beneficiary has their own account, so an address; the owner invites them himself.
+    const [{ id: noMail }] = await claire<{ id: string }>(`insert into people (owner_id, first_name, last_name, relation) values ($1, 'Sans', 'Adresse', 'Ami') returning id`, [ids.claire]);
+    await refused(claire("select * from order_pack($1)", [noMail]), /adresse e-mail manquante/);
+    await claire("delete from people where id = $1", [noMail]);
+    expect((await db.query("select * from outbox where lower(to_email) in ('marc@exemple.fr', 'lea@exemple.fr')")).rows).toHaveLength(0);
   });
 
   it("cards cannot be written directly", async () => {
@@ -164,6 +168,8 @@ describe("Coffre", () => {
     await refused(claire(`insert into vault_items (id, owner_id, subsection_id, data) values ($1, $2, 'banques', $3::jsonb)`, [crypto.randomUUID(), ids.claire, sealed]), /row-level security/);
     await refused(claire(`insert into storage.objects (bucket_id, name) values ('coffre', $1)`, [`${ids.claire}/banques/f1`]), /row-level security/);
     await refused(claire("select staff_set_launched(true)"), /interdit/);
+    await refused(claire("select staff_set_planned_launch('2027-03-01')"), /interdit/);
+    await as(db, ids.admin, "select staff_set_planned_launch('2027-03-01')");
     await as(db, ids.admin, "select staff_set_launched(true)");
   });
 
@@ -204,41 +210,64 @@ describe("Coffre", () => {
 });
 
 describe("coup dur", () => {
-  it("only a guarantor declares; the owner is alerted; the delay applies", async () => {
-    await refused(as(db, ids.eve, "select declare_procedure($1, 'coup_dur', 'x')", [ids.claire]), /pas garant/);
-    await refused(as(db, ids.lea, "select declare_procedure($1, 'coup_dur', 'x')", [ids.claire]), /pas garant/);
-    const [{ declare_procedure: id }] = await as<{ declare_procedure: string }>(db, ids.marc, "select declare_procedure($1, 'coup_dur', 'Hospitalisée')", [ids.claire]);
+  const files = (who: string) => [`${who}/justificatif.pdf`, `${who}/identite.jpg`, `${who}/visage.jpg`];
+  const ask = (who: string, motif: string, paths: string[]) => as<{ request_coup_dur: string }>(db, who, "select request_coup_dur($1, $2, $3, $4, $5)", [ids.claire, motif, ...paths]);
+
+  it("a relative asks from their account, with a proof, their ID and their face; the owner is alerted; nothing opens yet", async () => {
+    await refused(ask(ids.eve, "hospitalisation", files(ids.eve)), /proche inconnu/);
+    await refused(ask(ids.lea, "hospitalisation", files(ids.lea)), /rien n'est prévu/);
+    await refused(ask(ids.marc, "vacances", files(ids.marc)), /motif invalide/);
+    await refused(ask(ids.marc, "coma", files(ids.lea)), /chemin invalide/);
+    const [{ request_coup_dur: id }] = await ask(ids.marc, "hospitalisation", files(ids.marc));
     ids.proc = id;
     expect(await outbox("coup-dur-declare")).toContain("claire@exemple.fr");
-    await refused(as(db, ids.marc, "select declare_procedure($1, 'coup_dur', 'encore')", [ids.claire]), /déjà signalé/);
+    await refused(ask(ids.marc, "coma", files(ids.marc)), /déjà en cours/);
     expect((await as(db, ids.marc, "select subsection_id from envelopes")).map((e) => e.subsection_id)).toEqual(["a-prevenir"]);
     await refused(as(db, ids.marc, "update procedures set ends_at = now()"), /permission denied/);
+    await refused(as(db, ids.marc, "select declare_procedure($1, 'coup_dur', 'x')", [ids.claire]), /type invalide/); // a guarantor only reports a death
   });
 
-  it("at the end of the delay, the coup dur elements open — only those", async () => {
-    await db.query("update procedures set ends_at = now() - interval '1 second' where id = $1", [ids.proc]);
+  it("only the verification team opens it, once the identity is checked, and for that relative only", async () => {
+    await refused(claire("select staff_open_coup_dur($1)", [ids.proc]), /interdit/);
+    await refused(as(db, ids.verif, "select staff_open_coup_dur($1)", [ids.proc]), /vérification incomplète/);
+    await as(db, ids.verif, "select staff_check_identity($1, true)", [ids.proc]);
+    await as(db, ids.verif, "select staff_open_coup_dur($1)", [ids.proc]);
+    expect(await outbox("coup-dur-ouvert")).toContain("claire@exemple.fr");
+    expect(await outbox("coup-dur-acces")).toContain("marc@exemple.fr");
     expect((await as<{ subsection_id: string }>(db, ids.marc, "select subsection_id from envelopes order by 1")).map((e) => e.subsection_id)).toEqual(["a-prevenir", "banques"]);
     expect((await as<{ id: string }>(db, ids.marc, "select id from vault_items")).map((i) => i.id).sort()).toEqual([ids.iBanque, ids.iPrevenir].sort());
     expect(await as(db, ids.lea, "select * from vault_items")).toHaveLength(0);
+    // The request (motif, documents) is for the owner, the relative who asked and the team; not for the other relatives.
+    expect(await as(db, ids.lea, "select * from procedures where kind = 'coup_dur'")).toHaveLength(0);
+    expect(await as(db, ids.marc, "select * from procedures where kind = 'coup_dur'")).toHaveLength(1);
+    expect((await as<{ procedures: unknown[] }>(db, ids.lea, "select procedures from my_trusts()"))[0].procedures).toHaveLength(0);
   });
 
-  it("the owner takes the keys back: access closes at once", async () => {
+  it("closes by itself after the planned time", async () => {
+    await db.query("update procedures set ends_at = now() - interval '31 days' where id = $1", [ids.proc]);
+    expect((await as(db, ids.marc, "select subsection_id from envelopes")).map((e) => e.subsection_id)).toEqual(["a-prevenir"]);
+    await db.query("update procedures set ends_at = now() where id = $1", [ids.proc]);
+  });
+
+  it("the owner takes the keys back: access closes at once, and the relative is told", async () => {
     await refused(as(db, ids.eve, "select close_procedure($1)", [ids.proc]), /non clôturable/);
     await claire("select close_procedure($1)", [ids.proc]);
-    expect((await as<{ subsection_id: string }>(db, ids.marc, "select subsection_id from envelopes")).map((e) => e.subsection_id)).toEqual(["a-prevenir"]);
+    expect((await as(db, ids.marc, "select subsection_id from envelopes")).map((e) => e.subsection_id)).toEqual(["a-prevenir"]);
+    expect(await outbox("coup-dur-ferme")).toContain("marc@exemple.fr");
   });
 });
 
 describe("décès", () => {
   it("a beneficiary hands in the certificate, from their own folder only", async () => {
-    await refused(as(db, ids.eve, "select declare_death_with_certificate($1, $2, $3)", [ids.claire, `${ids.eve}/a.pdf`, `${ids.eve}/i.pdf`]), /pas bénéficiaire/);
-    await refused(as(db, ids.lea, "select declare_death_with_certificate($1, $2, $3)", [ids.claire, `${ids.marc}/a.pdf`, `${ids.lea}/i.pdf`]), /chemin invalide/);
+    await refused(as(db, ids.eve, "select declare_death_with_certificate($1, $2, $3, $4)", [ids.claire, `${ids.eve}/a.pdf`, `${ids.eve}/i.pdf`, `${ids.eve}/v.jpg`]), /pas bénéficiaire/);
+    await refused(as(db, ids.lea, "select declare_death_with_certificate($1, $2, $3, $4)", [ids.claire, `${ids.marc}/a.pdf`, `${ids.lea}/i.pdf`, `${ids.lea}/v.jpg`]), /chemin invalide/);
+    await refused(as(db, ids.lea, "select declare_death_with_certificate($1, $2, $3, $4)", [ids.claire, `${ids.lea}/a.pdf`, `${ids.lea}/i.pdf`, `${ids.marc}/v.jpg`]), /chemin invalide/);
     await refused(as(db, ids.lea, `insert into storage.objects (bucket_id, name) values ('verification', $1)`, [`${ids.marc}/acte.pdf`]), /row-level security/);
-    await as(db, ids.lea, `insert into storage.objects (bucket_id, name) values ('verification', $1), ('verification', $2)`, [`${ids.lea}/acte.pdf`, `${ids.lea}/id.pdf`]);
-    const [{ declare_death_with_certificate: id }] = await as<{ declare_death_with_certificate: string }>(db, ids.lea, "select declare_death_with_certificate($1, $2, $3)", [ids.claire, `${ids.lea}/acte.pdf`, `${ids.lea}/id.pdf`]);
+    await as(db, ids.lea, `insert into storage.objects (bucket_id, name) values ('verification', $1), ('verification', $2), ('verification', $3)`, [`${ids.lea}/acte.pdf`, `${ids.lea}/id.pdf`, `${ids.lea}/visage.jpg`]);
+    const [{ declare_death_with_certificate: id }] = await as<{ declare_death_with_certificate: string }>(db, ids.lea, "select declare_death_with_certificate($1, $2, $3, $4)", [ids.claire, `${ids.lea}/acte.pdf`, `${ids.lea}/id.pdf`, `${ids.lea}/visage.jpg`]);
     ids.death = id;
     expect(await as(db, ids.lea, "select * from storage.objects where bucket_id = 'verification'")).toHaveLength(0); // cannot read it back
-    expect(await as(db, ids.verif, "select * from storage.objects where bucket_id = 'verification'")).toHaveLength(2);
+    expect(await as(db, ids.verif, "select * from storage.objects where bucket_id = 'verification'")).toHaveLength(3);
     expect(await claire("select * from storage.objects where bucket_id = 'verification'")).toHaveLength(0);
   });
 
@@ -316,7 +345,7 @@ describe("conciergerie, échéances, journal", () => {
 
   it("the audit log keeps sensitive actions, readable by the owner and the team only", async () => {
     const mine = await claire<{ action: string }>("select action from audit_log");
-    expect(mine.map((a) => a.action)).toEqual(expect.arrayContaining(["cartes.commande", "carte.activation", "procedure.declaration", "verification.deces_confirme"]));
+    expect(mine.map((a) => a.action)).toEqual(expect.arrayContaining(["cartes.commande", "carte.activation", "procedure.demande_coup_dur", "verification.coup_dur_ouvert", "procedure.acte", "verification.deces_confirme"]));
     expect(await as(db, ids.lea, "select * from audit_log where owner_id = $1", [ids.claire])).toHaveLength(0);
     await refused(claire("delete from audit_log"), /permission denied/);
   });
@@ -398,8 +427,8 @@ describe("langue des e-mails", () => {
     await claire("update profiles set lang = 'es' where id = $1", [ids.claire]);
     await refused(claire("update profiles set lang = 'de' where id = $1", [ids.claire]), /check/);
     const [{ id }] = await claire<{ id: string }>(`insert into people (owner_id, first_name, last_name, relation, email) values ($1, 'Ana', 'Ruiz', 'Ami', 'ana@exemple.es') returning id`, [ids.claire]);
-    await claire("insert into guarantors (owner_id, person_id, role) values ($1, $2, 'Prévenir')", [ids.claire, id]);
-    await db.query("insert into outbox (to_email, template) values ('claire@exemple.fr', 'a-jour')");
+    expect(id).toBeTruthy();
+    await db.query("insert into outbox (to_email, template) values ('ana@exemple.es', 'verifier-infos'), ('claire@exemple.fr', 'a-jour')");
     const lang = async (to: string) => (await db.query<{ lang: string }>("select lang from outbox where to_email = $1 order by created_at desc limit 1", [to])).rows[0].lang;
     expect(await lang("ana@exemple.es")).toBe("es");
     expect(await lang("claire@exemple.fr")).toBe("es");

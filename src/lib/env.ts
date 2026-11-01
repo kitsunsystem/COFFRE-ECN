@@ -17,3 +17,6 @@ export const STORE_IOS = process.env.NEXT_PUBLIC_STORE_IOS ?? "";
 export const STORE_ANDROID = process.env.NEXT_PUBLIC_STORE_ANDROID ?? "";
 // Alma's Botpress bot (webchat client id: public by design, it is in every page that embeds the bot). Empty: local answers only.
 export const BOTPRESS_CLIENT_ID = process.env.NEXT_PUBLIC_BOTPRESS_CLIENT_ID ?? "823e2188-b3d6-4f84-86fa-c2e34d246f65";
+// Paddle checkout: the client-side token (public by design) and "sandbox" while testing. Empty: payment unavailable.
+export const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ?? "";
+export const PADDLE_SANDBOX = process.env.NEXT_PUBLIC_PADDLE_ENV === "sandbox";

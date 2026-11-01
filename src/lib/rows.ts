@@ -48,7 +48,7 @@ export const profileRow = (id: string, a: Omit<Account, "kyc" | "createdAt" | "e
   lang,
 });
 
-export const toPerson = (r: Row): Person => ({ id: r.id, firstName: r.first_name, lastName: r.last_name, relation: r.relation, email: r.email ?? "", managesMe: r.manages_me });
+export const toPerson = (r: Row): Person => ({ id: r.id, firstName: r.first_name, lastName: r.last_name, relation: r.relation, email: r.email ?? "", managesMe: r.manages_me, linked: !!r.user_id });
 export const personRow = (p: Person, ownerId: string) => ({ id: p.id, owner_id: ownerId, first_name: p.firstName, last_name: p.lastName, relation: p.relation, email: p.email || null });
 
 export const toCard = (r: Row): Card => ({
@@ -84,7 +84,8 @@ export const toProcedure = (r: Row): Procedure => ({
   erasedAt: ms(r.erased_at),
   note: r.note ?? undefined,
   match: r.match ? { score: r.match.score, doubtful: r.match.doubtful, reasons: r.match.reasons ?? [] } : undefined,
-  acte: r.acte_path ? { by: r.acte_by_name ?? "un bénéficiaire", file: "acte de décès", idChecked: !!r.acte_id_checked, at: ms(r.acte_at) ?? 0 } : undefined,
+  acte: r.acte_path ? { by: r.acte_by_name ?? r.declared_by ?? "", file: r.kind === "coup_dur" ? "justificatif" : "acte de décès", idChecked: !!r.acte_id_checked, at: ms(r.acte_at) ?? 0 } : undefined,
+  requestedBy: r.kind === "coup_dur" ? (r.acte_by ?? undefined) : undefined,
 });
 
 export const toReminder = (r: Row): Reminder => ({ id: r.id, label: r.label, date: r.date });

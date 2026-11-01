@@ -65,9 +65,22 @@ export function ItemEditor({ subId, entry, onDone }: { subId: string; entry?: En
   return (
     <div className="space-y-4">
       <Field label="Titre" value={title} onChange={setTitle} placeholder={sub.fields[0]?.placeholder ?? sub.title} autoFocus={!entry} />
+      {sub.notice && <Notice tone="gold">{sub.notice}</Notice>}
       {sub.fields.map((f) =>
         f.kind === "secret" ? (
           <SecretInput key={f.key} f={f} value={fields[f.key] ?? ""} onChange={(v) => setFields({ ...fields, [f.key]: v })} />
+        ) : f.kind === "choice" ? (
+          <label key={f.key} className="block">
+            <span className="mb-1.5 block text-[0.92rem] font-semibold text-ink-soft">{f.label}</span>
+            <select value={fields[f.key] ?? ""} onChange={(e) => setFields({ ...fields, [f.key]: e.target.value })} className="w-full rounded-2xl bg-paper px-4 py-3.5 text-[1.05rem] ring-1 ring-line outline-none focus:ring-2 focus:ring-gold">
+              <option value="">—</option>
+              {f.options!.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
+          </label>
         ) : (
           <Field
             key={f.key}

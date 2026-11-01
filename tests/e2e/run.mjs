@@ -59,7 +59,7 @@ const pMarc = randomUUID();
 await must(claire.c.from("people").insert({ id: pMarc, owner_id: claire.id, first_name: "Marc", last_name: "Durand", relation: "Conjoint", email: mail("marc") }), "proche");
 await must(claire.c.from("guarantors").insert({ owner_id: claire.id, person_id: pMarc, role: "Prévenir les enfants" }), "garant");
 // Exactly what the app sends when the role is edited (upsert).
-await must(claire.c.from("guarantors").upsert({ owner_id: claire.id, person_id: pMarc, role: "Prévenir les enfants et le notaire" }), "garant modifié");
+await must(claire.c.from("guarantors").upsert({ owner_id: claire.id, person_id: pMarc, role: "Prévenir les enfants et signaler un décès" }), "garant modifié");
 await must(claire.c.from("people").update({ relation: "Époux" }).eq("id", pMarc), "proche modifié");
 assert.equal((await must(eve.c.from("people").select("*"), "eve")).length, 0);
 ok("famille et garant ; invisibles pour un inconnu");
@@ -108,11 +108,17 @@ const dlEve = await eve.c.storage.from("coffre").download(`${claire.id}/a-preven
 assert.ok(dlEve.error, "téléchargement par un inconnu");
 ok("Urgence : Marc lit l'élément et télécharge le fichier chiffré ; un inconnu ne peut pas");
 
-const procId = await must(marc.c.rpc("declare_procedure", { owner: claire.id, proc_kind: "coup_dur", proc_note: "Hospitalisée" }), "coup dur");
+// Coup dur: Marc asks from his account with a proof, his ID and his face, all in his own folder; Claire refuses.
+await must(claire.c.from("rights").upsert({ person_id: pMarc, owner_id: claire.id, subsection_id: "banques", moment: "coup_dur" }), "droit coup dur");
+const docs = ["justificatif.pdf", "identite.jpg", "visage.jpg"].map((f) => `${marc.id}/${tag}-${f}`);
+for (const d of docs) await must(marc.c.storage.from("verification").upload(d, new Blob([new Uint8Array([1])]), { contentType: d.endsWith(".pdf") ? "application/pdf" : "image/jpeg" }), "justificatif");
+const ask = { owner: claire.id, motif: "hospitalisation", proof_path: docs[0], id_path: docs[1], face_path: docs[2] };
+const procId = await must(marc.c.rpc("request_coup_dur", ask), "demande de coup dur");
 assert.ok(procId);
-await refused(eve.c.rpc("declare_procedure", { owner: claire.id, proc_kind: "coup_dur" }), "déclaration par un inconnu");
-await must(claire.c.rpc("cancel_procedure", { proc: procId }), "annulation");
-ok("coup dur déclaré par le garant, refusé à un inconnu, annulé par la titulaire");
+await refused(eve.c.rpc("request_coup_dur", ask), "demande par une inconnue");
+await refused(marc.c.rpc("declare_procedure", { owner: claire.id, proc_kind: "coup_dur" }), "coup dur déclaré par un garant");
+await must(claire.c.rpc("cancel_procedure", { proc: procId }), "refus");
+ok("coup dur demandé par Marc avec un justificatif, refusé à une inconnue, refusé par la titulaire");
 
 const fn = (name, key, body = {}) => fetch(`${URL_}/functions/v1/${name}`, { method: "POST", headers: { authorization: `Bearer ${key}`, "content-type": "application/json" }, body: JSON.stringify(body) });
 const claireToken = (await claire.c.auth.getSession()).data.session.access_token;
@@ -135,7 +141,7 @@ assert.equal((await fn("push", ANON, { request: opening.id })).status, 401);
 ok("ordinateur de confiance : nombre de contrôle, clés scellées reprises une seule fois, notification");
 
 const queued = await must(admin.from("outbox").select("template, to_email").in("to_email", [mail("claire"), mail("marc")]), "outbox");
-for (const t of ["bienvenue", "invitation-garant", "cartes-commandees", "invitation-porteur", "demande-acces", "acces-valide", "coup-dur-declare", "nouvel-appareil"]) assert.ok(queued.some((m) => m.template === t), `e-mail ${t} en file`);
+for (const t of ["bienvenue", "cartes-commandees", "demande-acces", "acces-valide", "coup-dur-declare", "coup-dur-ferme", "nouvel-appareil"]) assert.ok(queued.some((m) => m.template === t), `e-mail ${t} en file`);
 await refused(claire.c.from("outbox").select("*"), "lecture de la file d'e-mails");
 const r = await fn("mailer", SERVICE);
 assert.equal(r.status, 200, `mailer: ${await r.clone().text()}`);

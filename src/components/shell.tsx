@@ -82,6 +82,7 @@ export function EspaceShell({ children }: { children: ReactNode }) {
   const procedures = useApp((s) => s.procedures);
   const tourPending = useApp((s) => s.tourPending);
   const phase = useApp((s) => s.phase);
+  const plannedLaunch = useApp((s) => s.plannedLaunch);
   const billing = useApp((s) => s.billing);
   const me = useApp((s) => s.me);
   const hasTrusts = useApp((s) => s.trusts.length > 0);
@@ -126,14 +127,16 @@ export function EspaceShell({ children }: { children: ReactNode }) {
         )}
         {phase === "decouverte" && (
           <div className="bg-gold-soft px-5 py-2.5 text-ink">
-            <div className="mx-auto max-w-lg text-[0.85rem] font-semibold">Phase découverte : tout est ouvert, sauf l&apos;ajout de documents dans le Coffre, qui ouvrira au lancement officiel.</div>
+            <div className="mx-auto max-w-lg text-[0.85rem] font-semibold">
+              {`Pré-lancement : tout est ouvert, sauf le Coffre, qui s'active avec vos cartes au lancement${plannedLaunch ? `, prévu le ${new Date(plannedLaunch).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : ""}.`}
+            </div>
           </div>
         )}
         {alert && status !== "active" && path !== "/espace/procedures" && (
           <Link href="/espace/procedures" className="block bg-coral px-5 py-3 text-paper">
             <div className="mx-auto flex max-w-lg items-center gap-3 text-[0.95rem] font-semibold">
               <CircleAlert className="h-5 w-5 shrink-0" />
-              {alert.kind === "coup_dur" ? "Un coup dur a été signalé. Tout va bien ?" : "Une procédure de transmission est ouverte à votre nom."}
+              {alert.kind === "coup_dur" ? "Un proche demande l'ouverture pour un coup dur. Tout va bien ?" : "Une procédure de transmission est ouverte à votre nom."}
               <span className="ml-auto underline">Voir</span>
             </div>
           </Link>
@@ -162,12 +165,16 @@ export function CoffreShell({ children }: { children: ReactNode }) {
   const session = useSession((s) => s.session);
   const account = useApp((s) => s.account);
   const me = useApp((s) => s.me);
+  const noVault = useApp((s) => !s.vault.salt);
+  const path = usePath();
   const router = useRouter();
+  // Pre-launch: no Coffre yet, but « Qui voit quoi » is already set (the choices only: they are sealed when it first opens).
+  const rightsOnly = session.mode === "locked" && noVault && !!account && path.startsWith("/coffre/droits");
   // Set when the person closes the Coffre: their destination wins over the "locked → lock screen" redirect.
   const closing = useRef(false);
   useEffect(() => {
-    if (hydrated && session.mode === "locked" && !closing.current) router.replace("/coffre");
-  }, [hydrated, session.mode, router]);
+    if (hydrated && session.mode === "locked" && !closing.current && !rightsOnly) router.replace("/coffre");
+  }, [hydrated, session.mode, rightsOnly, router]);
   // Auto-lock after 5 minutes without activity: keys must not stay in memory. Reading counts as activity too
   // (scrolling with a finger, a wheel or a trackpad), or the Coffre closed under someone reading "Qui voit quoi".
   useEffect(() => {
@@ -183,9 +190,9 @@ export function CoffreShell({ children }: { children: ReactNode }) {
       events.forEach((e) => window.removeEventListener(e, reset, { capture: true }));
     };
   }, []);
-  if (!hydrated || session.mode === "locked") return <Loader dark />;
+  if (!hydrated || (session.mode === "locked" && !rightsOnly)) return <Loader dark />;
   // No way back to the Espace from here: the Coffre has to be closed first.
-  const items: NavItem[] = [
+  const items: NavItem[] = rightsOnly ? [{ href: "/coffre/droits", label: "Qui voit quoi", icon: ShieldCheck }] : [
     { href: "/coffre/rubriques", label: "Rubriques", icon: LockOpen },
     ...(session.mode === "owner"
       ? [

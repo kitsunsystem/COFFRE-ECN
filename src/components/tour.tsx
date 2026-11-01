@@ -143,7 +143,7 @@ function Track({ level, items, delay }: { level: Moment; items: string[]; delay:
   );
 }
 
-const hours = Math.round(DELAYS.coupDur / 3_600_000);
+const coupDurDays = Math.round(DELAYS.coupDurAccess / 86_400_000);
 const days = Math.round(DELAYS.deces / 86_400_000);
 const months = Math.round(POST_DEATH_ACCESS_DAYS / 30);
 
@@ -179,8 +179,8 @@ function Packs() {
 
 const SCENARIO = [
   ["Ouvrez le Coffre avec une carte de Claire", `code ${DEMO_PIN} · essayez « Copier dans la fiche médicale »`],
-  ["Rouvrez-le comme Marc, avec son téléphone", "Face ID et son code : il ne voit que l'urgence"],
-  ["Compte → Coup dur et décès → Signaler comme garant", "puis Mode démonstration → Aller à la fin du délai, et rouvrez comme Marc"],
+  ["Rouvrez-le comme Marc, avec son téléphone", "Face ID et son code : il ne voit que ce qui est réglé sur « Maintenant »"],
+  ["Compte → Coup dur et décès → Demande d'ouverture d'un proche", "Marc dépose un justificatif ; Administration → vérifiez son identité et ouvrez, puis rouvrez comme Marc"],
   ["Mode démonstration → simulez un décès (INSEE)", "puis Espace bénéficiaire : Léa dépose l'acte de décès"],
   ["Administration → vérifiez l'identité et confirmez", "les cartes partent ; fin du délai, puis Léa ouvre sa part et l'exporte en PDF"],
 ];
@@ -201,7 +201,7 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
   {
     eyebrow: "Les cartes",
     title: "Votre carte, c'est votre clé",
-    text: "Claire a trois cartes : chacune ouvre tout son Coffre. Ses proches, eux, ouvrent leur part depuis leur téléphone, avec Face ID et leur code, une fois leur demande acceptée par Claire. Leurs 2 cartes sont réservées à leur nom et leur seront envoyées à son décès.",
+    text: "Claire a trois cartes : chacune ouvre tout son Coffre. Ses proches, eux, ont chacun leur compte et ouvrent leur part depuis leur téléphone, avec Face ID et leur code, une fois leur accès accepté par Claire. Les 2 cartes de ses bénéficiaires sont prépayées, gardées en solde, et ne leur seront envoyées qu'à son décès.",
     visual: <Packs />,
   },
   {
@@ -218,17 +218,17 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
   {
     eyebrow: "Qui voit quoi",
     title: "Chacun voit ce que Claire a choisi",
-    text: "Pour chaque bénéficiaire et chaque rubrique, Claire choisit le niveau : urgence, coup dur, décès, ou jamais. Elle peut changer d'avis quand elle veut.",
+    text: "Pour chaque proche et chaque sous-rubrique, Claire choisit le niveau : maintenant, coup dur, décès, ou jamais. L'accès conseillé lui est proposé, elle le confirme ou le change quand elle veut.",
     visual: <RightsMatrix />,
   },
   {
     eyebrow: "Trois niveaux d'accès",
     title: "Chaque niveau a ses règles",
-    text: "L'urgence est toujours ouverte aux bénéficiaires autorisés. Le reste ne s'ouvre jamais sans délai, et Claire peut tout annuler.",
+    text: "« Maintenant » est ouvert tout de suite aux proches autorisés. Le reste ne s'ouvre jamais sans vérification par notre équipe, et Claire peut tout refuser ou fermer.",
     visual: (
       <div className="mx-auto grid max-w-sm gap-3 sm:max-w-3xl sm:grid-cols-3">
         <Track level="now" delay={0.15} items={["Ouvert tout de suite, à tout moment", "Sans délai ni contrôle", "Fiche médicale copiée dans le téléphone"]} />
-        <Track level="coup_dur" delay={0.4} items={["Un garant signale", `${hours} h pour annuler`, "Seul le « coup dur » s'ouvre"]} />
+        <Track level="coup_dur" delay={0.4} items={["Le proche fait sa demande, avec un justificatif", "Avis de l'IA, puis vérification par notre équipe : justificatif, pièce d'identité, visage", `Ouvert pour lui seul, ${coupDurDays} jours, fermable à tout moment`]} />
         <Track level="deces" delay={0.65} items={["Registre INSEE ou garant", "Acte de décès déposé par un bénéficiaire", "Vérification par notre équipe", `${days} jours pour annuler`, `Accès ${months} mois, puis effacement définitif`]} />
       </div>
     ),

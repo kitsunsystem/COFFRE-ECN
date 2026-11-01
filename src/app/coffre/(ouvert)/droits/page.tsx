@@ -1,13 +1,13 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, CreditCard, Loader2 } from "lucide-react";
+import { ChevronDown, CreditCard, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AccessRequests } from "@/components/access";
 import { NamedIcon } from "@/components/icons";
 import { Segmented } from "@/components/ui";
 import { moment, MOMENTS, type Moment } from "@/lib/rules";
-import { SECTIONS } from "@/lib/sections";
+import { SECTIONS, type Subsection } from "@/lib/sections";
 import { packOf, phoneOf, useApp, useSession } from "@/lib/store";
 import { setRight, setSectionRight } from "@/lib/vault";
 
@@ -46,12 +46,17 @@ export default function Droits() {
   }
 
   const sections = SECTIONS.filter((s) => s.id !== "effacer" && (!s.optional || account?.isBusinessOwner));
+  // The advised access, for what has not been chosen yet: the owner confirms with one tap, then changes what they want.
+  const unset = sections.flatMap((s) => s.subsections).filter((x): x is Subsection & { advised: Moment } => !!x.advised && r[x.id] === undefined);
+  async function applyAdvised(person: string) {
+    for (const x of unset) await setRight(person, x.id, x.advised);
+  }
 
   return (
     <div>
       <div className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-gold-soft">Qui voit quoi</div>
       <h1 className="mt-2 text-[2rem] font-semibold leading-tight">Pour chacun, au bon moment</h1>
-      <p className="mt-2 text-paper/65">Pour chaque bénéficiaire et chaque rubrique, choisissez quand il pourra l&apos;ouvrir : depuis son téléphone, avec Face ID et son code, puis avec ses cartes après votre décès. Par défaut : jamais.</p>
+      <p className="mt-2 text-paper/65">Pour chaque proche et chaque sous-rubrique, choisissez quand il pourra l&apos;ouvrir : depuis son compte, sur son téléphone, avec son visage et son code, puis avec ses cartes après votre décès. Par défaut : jamais. L&apos;accès conseillé vous est proposé : rien n&apos;est ouvert sans votre accord.</p>
 
       <AccessRequests />
 
@@ -85,6 +90,15 @@ export default function Droits() {
             </p>
           )}
           {error && <p className="mt-3 font-semibold text-coral-soft">{error}</p>}
+          {personId && unset.length > 0 && (
+            <button onClick={() => change("advised", () => applyAdvised(personId))} disabled={!!busy} className="mt-4 flex w-full items-center gap-3 rounded-2xl bg-gold/15 p-4 text-left ring-1 ring-gold/30">
+              {busy === "advised" ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-gold-soft" /> : <Sparkles className="h-5 w-5 shrink-0 text-gold-soft" />}
+              <span className="flex-1">
+                <span className="block font-semibold">{`Appliquer les accès conseillés à ${firstName}`}</span>
+                <span className="block text-[0.85rem] text-paper/65">{`Pour les ${unset.length} sous-rubriques pas encore réglées. Vous pourrez tout changer ensuite.`}</span>
+              </span>
+            </button>
+          )}
 
           <div className="mt-5 space-y-3">
             {sections.map((s) => {
@@ -126,8 +140,9 @@ export default function Droits() {
                           {s.subsections.map((x) => (
                             <div key={x.id}>
                               <div className="mb-1.5 flex items-center gap-2 text-[0.92rem] font-semibold">
-                                <span className={`h-2 w-2 rounded-full ${moment(r[x.id] ?? "jamais").dot}`} />
-                                {x.title}
+                                <span className={`h-2 w-2 shrink-0 rounded-full ${moment(r[x.id] ?? "jamais").dot}`} />
+                                <span className="flex-1">{x.title}</span>
+                                {x.advised && <span className="shrink-0 text-[0.75rem] font-normal text-paper/50">{`Conseillé : ${moment(x.advised).short}`}</span>}
                               </div>
                               <div className="rounded-full bg-paper">
                                 <Segmented layoutKey={`${personId}-${x.id}`} options={OPTIONS} value={r[x.id] ?? "jamais"} onChange={(m) => change(`${s.id}:${x.id}`, () => setRight(personId, x.id, m))} />

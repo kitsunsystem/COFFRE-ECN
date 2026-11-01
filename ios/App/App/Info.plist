@@ -12,7 +12,7 @@
 	<key>NSFaceIDUsageDescription</key>
 	<string>Confirmer que c'est bien vous avant d'ouvrir le Coffre.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Scanner le code QR d'un ordinateur pour y ouvrir votre Coffre.</string>
+	<string>Scanner le code QR d'un ordinateur pour y ouvrir votre Coffre, ou photographier votre visage pour la vérification de votre identité.</string>
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>

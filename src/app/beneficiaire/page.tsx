@@ -1,6 +1,7 @@
 "use client";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { ArrowLeft, Check, ConciergeBell, FileUp, Hourglass, Lock, LogIn, ScanFace, SearchCheck, ShieldCheck } from "lucide-react";
+import { ProofForm } from "@/components/proof";
 import Link from "next/link";
 import { useState } from "react";
 import { AccessUnlock } from "@/components/access";
@@ -16,13 +17,11 @@ import { isPhone, personName, useApp } from "@/lib/store";
 
 const STEPS = [
   { icon: ScanFace, t: PROD ? "Connectez-vous avec l'adresse e-mail à laquelle vous avez été désigné" : "Identifiez-vous avec votre téléphone : Face ID et votre code" },
-  { icon: FileUp, t: "Déposez l'acte de décès et votre pièce d'identité" },
+  { icon: FileUp, t: "Déposez l'acte de décès, votre pièce d'identité et une photo de votre visage" },
   { icon: SearchCheck, t: "Notre équipe vérifie : registre INSEE, acte de décès, votre identité" },
   { icon: Hourglass, t: `Un délai de ${Math.round(DELAYS.deces / 86_400_000)} jours s'écoule, avec des alertes, pour éviter toute erreur` },
   { icon: Lock, t: `Vous ouvrez ce qui vous a été confié avec votre téléphone, ou vos cartes reçues pendant le délai, pendant ${Math.round(POST_DEATH_ACCESS_DAYS / 30)} mois` },
 ];
-const ACCEPT = ["image/", "application/pdf"];
-const MAX = 20 * 1024 * 1024;
 
 // The beneficiary's side of a death: certificate, verification, delay (their cards arrive), then opening their part.
 export default function Beneficiaire() {
@@ -36,11 +35,6 @@ export default function Beneficiaire() {
   const t = useNow(1000);
   const [step, setStep] = useState<"intro" | "phone" | "docs">("intro");
   const [who, setWho] = useState("");
-  const [acte, setActe] = useState<File | null>(null);
-  const [idDoc, setIdDoc] = useState<File | null>(null);
-  const [sure, setSure] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [fileError, setFileError] = useState<string | null>(null);
   // Production: the Coffres the signed-in person holds a pack for.
   const mine = trusts.filter((x) => x.cards.some((c) => c.status !== "perdue"));
   const [ownerId, setOwnerId] = useState<string | null>(null);
@@ -56,24 +50,6 @@ export default function Beneficiaire() {
   const hasActe = current && (PROD ? (current as { hasActe?: boolean }).hasActe : !!current.acte);
   const canStart = PROD ? !!trust : phones.length > 0;
 
-  async function submit() {
-    setBusy(true);
-    const name = PROD ? (trust?.cards[0]?.printedName ?? "") : who;
-    const ok = await declareDeath(trust?.ownerId ?? null, name, acte!, idDoc!);
-    setBusy(false);
-    if (ok) {
-      setStep("intro");
-      setActe(null);
-      setIdDoc(null);
-      setSure(false);
-    }
-  }
-
-  const pick = (setFile: (f: File | null) => void) => (f: File | undefined) => {
-    if (f && (f.size > MAX || !ACCEPT.some((a) => f.type.startsWith(a)))) return setFileError("Photo ou PDF uniquement, 20 Mo maximum.");
-    setFileError(null);
-    setFile(f ?? null);
-  };
 
   return (
     <div className="relative min-h-dvh overflow-x-clip">
@@ -199,38 +175,21 @@ export default function Beneficiaire() {
       </Sheet>
 
       <Sheet open={step === "docs"} onClose={() => setStep("intro")} title="Les documents">
-        <AnimatePresence>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-            {!PROD && (
-              <p className="flex items-center gap-2 font-semibold text-sage">
-                <ShieldCheck className="h-5 w-5" /> {who}, votre accès est reconnu.
-              </p>
-            )}
-            {[
-              { label: "Acte de décès", file: acte, setFile: setActe },
-              { label: "Votre pièce d'identité", file: idDoc, setFile: setIdDoc },
-            ].map((d) => (
-              <label key={d.label} className="flex cursor-pointer items-center gap-3 rounded-2xl bg-paper p-4 ring-1 ring-line">
-                <FileUp className="h-6 w-6 shrink-0 text-gold-deep" />
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{d.label}</span>
-                  <span className="block truncate text-[0.85rem] text-mist">{d.file ? d.file.name : "Photo ou PDF"}</span>
-                </span>
-                {d.file && <Check className="h-5 w-5 text-sage" />}
-                <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => pick(d.setFile)(e.target.files?.[0])} />
-              </label>
-            ))}
-            {fileError && <p className="font-semibold text-coral">{fileError}</p>}
-            <button type="button" onClick={() => setSure(!sure)} aria-pressed={sure} className="flex w-full items-start gap-3 text-left">
-              <span className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md ring-2 ${sure ? "bg-ink ring-ink" : "ring-line"}`}>{sure && <Check className="h-4 w-4 text-paper" strokeWidth={3} />}</span>
-              <span className="text-[0.92rem]">Je certifie que ces documents sont authentiques.</span>
-            </button>
-            <p className="text-[0.85rem] text-mist">Ils servent uniquement à la vérification par notre équipe. Le titulaire est prévenu et peut encore annuler pendant le délai.</p>
-            <Button full variant="gold" disabled={!acte || !idDoc || !sure || busy} onClick={submit}>
-              {busy ? "Envoi…" : "Envoyer pour vérification"}
-            </Button>
-          </motion.div>
-        </AnimatePresence>
+        <ProofForm
+          proofLabel="Acte de décès"
+          note="Ils servent uniquement à la vérification par notre équipe. Le titulaire est prévenu et peut encore annuler pendant le délai."
+          submit={async (f) => {
+            const ok = await declareDeath(trust?.ownerId ?? null, PROD ? (trust?.cards[0]?.printedName ?? "") : who, f);
+            if (ok) setStep("intro");
+            return ok;
+          }}
+        >
+          {!PROD && (
+            <p className="flex items-center gap-2 font-semibold text-sage">
+              <ShieldCheck className="h-5 w-5" /> {who}, votre accès est reconnu.
+            </p>
+          )}
+        </ProofForm>
       </Sheet>
     </div>
   );

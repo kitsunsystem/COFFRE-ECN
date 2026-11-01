@@ -4,11 +4,11 @@ import { DELAYS, GRACE_DAYS, POST_DEATH_ACCESS_DAYS } from "./config";
 export type Moment = "now" | "coup_dur" | "deces" | "jamais";
 export type ProcedureKind = "coup_dur" | "deces";
 
-// The three access levels, with ONE colour code used everywhere (Urgence green, Coup dur red, Décès gold).
+// The three access levels, with ONE colour code used everywhere (Maintenant green, Coup dur red, Décès gold).
 export const MOMENTS: { id: Moment; label: string; short: string; dot: string; pill: string }[] = [
-  { id: "now", label: "Urgence : tout de suite, à tout moment", short: "Urgence", dot: "bg-sage", pill: "bg-sage text-paper" },
-  { id: "coup_dur", label: "En cas de coup dur", short: "Coup dur", dot: "bg-coral", pill: "bg-coral text-paper" },
-  { id: "deces", label: "Au décès", short: "Décès", dot: "bg-gold", pill: "bg-gold text-night" },
+  { id: "now", label: "Maintenant : tout de suite, depuis son compte", short: "Maintenant", dot: "bg-sage", pill: "bg-sage text-paper" },
+  { id: "coup_dur", label: "Coup dur : sur sa demande, vérifiée par notre équipe, pour un temps limité", short: "Coup dur", dot: "bg-coral", pill: "bg-coral text-paper" },
+  { id: "deces", label: "Décès : après la vérification et le délai d'annulation", short: "Décès", dot: "bg-gold", pill: "bg-gold text-night" },
   { id: "jamais", label: "Jamais", short: "Jamais", dot: "bg-mist/40", pill: "bg-mist/15 text-mist" },
 ];
 export const moment = (id: Moment) => MOMENTS.find((m) => m.id === id)!;
@@ -16,7 +16,7 @@ export const moment = (id: Moment) => MOMENTS.find((m) => m.id === id)!;
 export interface Procedure {
   id: string;
   kind: ProcedureKind;
-  source: "garant" | "insee" | "beneficiaire";
+  source: "garant" | "insee" | "beneficiaire" | "proche";
   declaredBy: string; // guarantor or beneficiary name, or "Veille INSEE"
   declaredAt: number;
   needsVerification: boolean;
@@ -28,9 +28,18 @@ export interface Procedure {
   finalizedAt?: number; // "À effacer" destroyed, holders notified
   erasedAt?: number; // death: the whole Coffre erased once the post-death access period is over
   note?: string;
-  match?: { score: number; doubtful: boolean; reasons: string[] };
-  acte?: { by: string; file: string; idChecked: boolean; at: number }; // death certificate supplied by a beneficiary
+  match?: { score: number; doubtful: boolean; reasons: string[] }; // INSEE match, or the AI's opinion on a coup dur proof
+  acte?: { by: string; file: string; idChecked: boolean; at: number }; // death certificate, or coup dur proof, with the ID (and face) checked
+  requestedBy?: string; // coup dur: the relative who asked; only their access opens
 }
+
+// Why a relative asks to open what is planned for a coup dur.
+export const MOTIFS = [
+  { id: "hospitalisation", label: "Hospitalisation" },
+  { id: "coma", label: "Coma" },
+  { id: "incapacite", label: "Incapacité" },
+] as const;
+export type Motif = (typeof MOTIFS)[number]["id"];
 
 export type ProcedureStatus = "verification" | "delai" | "active" | "terminee" | "annulee" | "rejetee" | "cloturee";
 
@@ -40,33 +49,26 @@ export function procedureStatus(p: Procedure, now: number): ProcedureStatus {
   if (p.closedAt) return "cloturee";
   if (p.needsVerification && !p.verifiedAt) return "verification";
   if (p.endsAt === undefined || now < p.endsAt) return "delai";
-  return p.kind === "coup_dur" ? "active" : "terminee";
+  // A validated coup dur opens for a limited time, then closes by itself.
+  if (p.kind === "coup_dur") return now >= p.endsAt + DELAYS.coupDurAccess ? "cloturee" : "active";
+  return "terminee";
 }
 
+// Both always go through a person of the team first: a coup dur request (proof, identity), a death (certificate, identity).
 export function declare(kind: ProcedureKind, source: Procedure["source"], declaredBy: string, now: number, extra: Partial<Procedure> = {}): Procedure {
-  // A death always goes through a human check first (brief §9); a coup dur starts its short window at once.
-  const needsVerification = kind === "deces";
-  return {
-    id: crypto.randomUUID(),
-    kind,
-    source,
-    declaredBy,
-    declaredAt: now,
-    needsVerification,
-    endsAt: needsVerification ? undefined : now + DELAYS.coupDur,
-    ...extra,
-  };
+  return { id: crypto.randomUUID(), kind, source, declaredBy, declaredAt: now, needsVerification: true, ...extra };
 }
 
-export const verify = (p: Procedure, now: number): Procedure => ({ ...p, verifiedAt: now, endsAt: now + (p.kind === "deces" ? DELAYS.deces : DELAYS.coupDur) });
+// Validated: a coup dur opens at once (for its limited time), a death starts its cancellation delay.
+export const verify = (p: Procedure, now: number): Procedure => ({ ...p, verifiedAt: now, endsAt: p.kind === "deces" ? now + DELAYS.deces : now });
 
-export function isReleased(moment: Moment, procedures: Procedure[], now: number) {
+// What a relative (`personId`) may open: « Coup dur » only through their own validated request, everything planned after a death.
+export function isReleased(moment: Moment, procedures: Procedure[], now: number, personId?: string) {
   if (moment === "now") return true;
   if (moment === "jamais") return false;
   const dead = procedures.some((p) => p.kind === "deces" && procedureStatus(p, now) === "terminee");
   if (moment === "deces") return dead;
-  // Someone trusted for a coup dur is trusted after a death too.
-  return dead || procedures.some((p) => p.kind === "coup_dur" && procedureStatus(p, now) === "active");
+  return dead || procedures.some((p) => p.kind === "coup_dur" && !!personId && p.requestedBy === personId && procedureStatus(p, now) === "active");
 }
 
 export function activeProcedure(procedures: Procedure[], now: number) {
@@ -75,6 +77,8 @@ export function activeProcedure(procedures: Procedure[], now: number) {
 
 // A death is confirmed only on concordance: INSEE match or guarantor report, plus the certificate supplied by a beneficiary.
 export const canConfirmDeath = (p: Procedure) => p.kind === "deces" && !!p.acte?.idChecked;
+// A coup dur opens only once the proof and the relative's identity (ID and face) have been checked by the team.
+export const canOpenCoupDur = (p: Procedure) => p.kind === "coup_dur" && !!p.acte?.idChecked;
 
 // End of the beneficiaries' access after a death (then the Coffre is erased for good).
 export const accessEnd = (p: Procedure) => (p.kind === "deces" && p.endsAt !== undefined ? p.endsAt + POST_DEATH_ACCESS_DAYS * 86_400_000 : undefined);

@@ -3,7 +3,8 @@
 import { CONCIERGE, OFFER } from "./config";
 import { currentLang } from "./i18n";
 import { PROD } from "./env";
-import { declare, type Moment, type ProcedureKind } from "./rules";
+import { paddle } from "./paddle";
+import { declare, type Moment, type Motif } from "./rules";
 import { envelopeRow, itemRow, personRow, profileRow, toAccount, toCard, toCase, toDevice, toDeviceRequest, toEnvelope, toItem, toPerson, toProcedure, toReminder, toRights, toTrust } from "./rows";
 import { sb, q, friendly } from "./supabase";
 import { isPhone, now, personName, toast, uid, useApp, type Account, type Card, type ConciergeCase, type DeviceRequest, type Envelope, type Guarantor, type Person, type Trust, type TrustedDevice, type VaultItem } from "./store";
@@ -109,7 +110,7 @@ export async function loadAll() {
   const id = user.id;
   const [profile, settings, staff, trusts] = await Promise.all([
     q(c.from("profiles").select("*").eq("id", id).maybeSingle()),
-    q(c.from("app_settings").select("launched, concierge_public_key").single()),
+    q(c.from("app_settings").select("launched, planned_launch, concierge_public_key").single()),
     q(c.from("staff").select("role").eq("user_id", id).maybeSingle()),
     q(c.rpc("my_trusts")),
   ]);
@@ -119,6 +120,7 @@ export async function loadAll() {
     staffRole: (staff as { role?: string } | null)?.role,
     trusts: ((trusts as unknown[]) ?? []).map((t) => toTrust(t as Record<string, unknown>)),
     phase: (settings as { launched: boolean }).launched ? ("lancement" as const) : ("decouverte" as const),
+    plannedLaunch: (settings as { planned_launch?: string }).planned_launch ?? undefined,
     conciergeKey: (settings as { concierge_public_key?: string }).concierge_public_key ?? undefined,
     holder: undefined,
   };
@@ -245,11 +247,6 @@ export const saveGuarantor = (g: Guarantor) =>
     const exists = st().guarantors.some((x) => x.personId === g.personId);
     if (PROD) await q(sb().from("guarantors").upsert({ owner_id: me(), person_id: g.personId, role: g.role }));
     st().set((x) => ({ guarantors: exists ? x.guarantors.map((y) => (y.personId === g.personId ? g : y)) : [...x.guarantors, g] }));
-    if (!exists && !PROD) {
-      const p = st().people.find((x) => x.id === g.personId)!;
-      const a = st().account!;
-      st().email(p.email || `${p.firstName} ${p.lastName}`, "invitation-garant", { ownerName: `${a.firstName} ${a.lastName}`, role: g.role });
-    }
   });
 
 export const removeGuarantor = (personId: string) =>
@@ -282,10 +279,9 @@ export const orderPack = (personId: string) =>
       const rows = await q<Record<string, unknown>[]>(sb().rpc("order_pack", { person: personId }) as never);
       return st().set((x) => ({ cards: [...x.cards, ...rows.map(toCard)] }));
     }
-    // Reserved: the pack is only shipped once the death is confirmed.
-    const p = st().people.find((x) => x.id === personId)!;
+    // Reserved: the pack is only shipped once the death is confirmed. Every beneficiary has their own account, so an address.
+    if (!st().people.find((x) => x.id === personId)?.email) throw new Error("Ajoutez d'abord son adresse e-mail : chaque bénéficiaire a son propre compte.");
     st().set((x) => ({ cards: [...x.cards, ...Array.from({ length: OFFER.packCards }, () => ({ ...newCard(personId), status: "reservee" as const }))] }));
-    st().email(p.email || personName(st().people, personId), "invitation-porteur", { ownerName: ownerFullName() });
   });
 
 // A beneficiary asks, from their phone, to open what is attributed to them; the owner answers from their Coffre.
@@ -391,35 +387,55 @@ export async function closeProcedureRemote(id: string) {
   if (PROD) await q(sb().rpc("close_procedure", { proc: id }));
 }
 
-// A guarantor's report. Demo: done from the owner's own screen; production: from the guarantor's own account.
-export const declareAsGuarantor = (ownerId: string | null, kind: ProcedureKind, by: string, note: string) =>
+// A guarantor reports a death (a coup dur goes through a relative's request). Demo: from the owner's own screen.
+export const declareAsGuarantor = (ownerId: string | null, by: string, note: string) =>
   attempt(async () => {
     if (PROD) {
-      await q(sb().rpc("declare_procedure", { owner: ownerId, proc_kind: kind, proc_note: note || null }));
+      await q(sb().rpc("declare_procedure", { owner: ownerId, proc_kind: "deces", proc_note: note || null }));
       return loadAll();
     }
-    const p = declare(kind, "garant", by, now(), { note: note || undefined });
-    st().set((x) => ({ procedures: [p, ...x.procedures] }));
-    if (p.kind === "coup_dur") st().email(st().account!.email, "coup-dur-declare", { declaredBy: by, endsAt: new Date(p.endsAt!).toISOString() });
+    st().set((x) => ({ procedures: [declare("deces", "garant", by, now(), { note: note || undefined }), ...x.procedures] }));
   });
 
-// A beneficiary hands in the death certificate and their ID: they go to the verification team, never to the Coffre.
-export const declareDeath = (ownerId: string | null, who: string, acte: File, idDoc: File) =>
+// Documents for the verification team only (proof, ID, face photo), each in the sender's own folder: never in the Coffre.
+export type Proofs = { proof: File; id: File; face: File };
+async function uploadProofs(f: Proofs, proofName: string) {
+  const base = `${me()}/${uid()}`;
+  const paths = { proof: `${base}-${proofName}.${ext(f.proof)}`, id: `${base}-identite.${ext(f.id)}`, face: `${base}-visage.${ext(f.face)}` };
+  for (const k of ["proof", "id", "face"] as const) await q(sb().storage.from("verification").upload(paths[k], f[k], { contentType: f[k].type }));
+  return paths;
+}
+
+// A relative asks to open what is planned for them in a coup dur: the AI gives an opinion, a person of the team decides.
+export const requestCoupDur = (ownerId: string | null, personId: string, who: string, motif: Motif, f: Proofs) =>
   attempt(async () => {
     if (PROD) {
-      const base = `${me()}/${uid()}`;
-      await q(sb().storage.from("verification").upload(`${base}-acte.${ext(acte)}`, acte, { contentType: acte.type }));
-      await q(sb().storage.from("verification").upload(`${base}-identite.${ext(idDoc)}`, idDoc, { contentType: idDoc.type }));
-      await q(sb().rpc("declare_death_with_certificate", { owner: ownerId, certificate_path: `${base}-acte.${ext(acte)}`, id_path: `${base}-identite.${ext(idDoc)}` }));
+      const p = await uploadProofs(f, "justificatif");
+      await q(sb().rpc("request_coup_dur", { owner: ownerId, motif, proof_path: p.proof, id_path: p.id, face_path: p.face }));
       return loadAll();
     }
     // Demo: only the file names are kept.
-    const info = { by: who, file: acte.name, idChecked: false, at: now() };
+    const p = declare("coup_dur", "proche", who, now(), { requestedBy: personId, note: motif, acte: { by: who, file: f.proof.name, idChecked: false, at: now() } });
+    st().set((x) => ({ procedures: [p, ...x.procedures] }));
+    st().email(st().account!.email, "coup-dur-declare", { declaredBy: who, motif });
+  });
+
+// A beneficiary hands in the death certificate, their ID and a photo of their face: for the verification team only.
+export const declareDeath = (ownerId: string | null, who: string, f: Proofs) =>
+  attempt(async () => {
+    if (PROD) {
+      const p = await uploadProofs(f, "acte");
+      await q(sb().rpc("declare_death_with_certificate", { owner: ownerId, certificate_path: p.proof, id_path: p.id, face_path: p.face }));
+      return loadAll();
+    }
+    // Demo: only the file names are kept.
+    const info = { by: who, file: f.proof.name, idChecked: false, at: now() };
+    const note = `Pièce d'identité : ${f.id.name} · visage : ${f.face.name}`;
     st().set((s) => {
       const open = s.procedures.find((p) => p.kind === "deces" && !p.verifiedAt && !p.cancelledAt && !p.rejectedAt);
       return open
-        ? { procedures: s.procedures.map((p) => (p.id === open.id ? { ...p, acte: info, note: `${p.note ? `${p.note} · ` : ""}Pièce d'identité : ${idDoc.name}` } : p)) }
-        : { procedures: [declare("deces", "beneficiaire", who, now(), { acte: info, note: `Pièce d'identité : ${idDoc.name}` }), ...s.procedures] };
+        ? { procedures: s.procedures.map((p) => (p.id === open.id ? { ...p, acte: info, note: `${p.note ? `${p.note} · ` : ""}${note}` } : p)) }
+        : { procedures: [declare("deces", "beneficiaire", who, now(), { acte: info, note }), ...s.procedures] };
     });
   });
 
@@ -431,15 +447,17 @@ async function invoke<T>(fn: string, body: Record<string, unknown> = {}) {
   return data as T;
 }
 
+// Paddle's checkout over the page; the webhook updates the subscription, read again a few seconds after payment.
 export const openCheckout = () =>
   attempt(async () => {
-    const { url } = await invoke<{ url: string }>("billing", { action: "checkout", returnUrl: location.origin + location.pathname });
-    location.assign(url);
+    const P = await paddle(() => setTimeout(() => void loadAll(), 4000));
+    const { transactionId } = await invoke<{ transactionId: string }>("billing", { action: "checkout" });
+    P.Checkout.open({ transactionId });
   });
 
 export const openBillingPortal = () =>
   attempt(async () => {
-    const { url } = await invoke<{ url: string }>("billing", { action: "portal", returnUrl: location.origin + location.pathname });
+    const { url } = await invoke<{ url: string }>("billing", { action: "portal" });
     location.assign(url);
   });
 
@@ -656,6 +674,7 @@ export async function loadHolderView(trust: Trust, card: Card) {
       ownerId: trust.ownerId,
       ownerName: trust.ownerName,
       holderName: card.printedName,
+      personId: trust.personId,
       envelopes: envelopes.map(toEnvelope),
       items: items.map(toItem),
       procedures: procedures.map(toProcedure),
