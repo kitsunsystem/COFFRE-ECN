@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { ArrowLeft, BadgeCheck, ConciergeBell, FileSearch, Mail, ShieldAlert } from "lucide-react";
+import { ArrowLeft, BadgeCheck, ConciergeBell, FileSearch, Handshake, Mail, ShieldAlert, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
@@ -12,11 +12,12 @@ import { openFrom } from "@/lib/crypto";
 import { canConfirmDeath, canOpenCoupDur, MOTIFS, procedureStatus, verify, type Procedure } from "@/lib/rules";
 import { DELAYS } from "@/lib/config";
 import { PROD } from "@/lib/env";
+import { euros, PAYOUT_STEPS, type Payout } from "@/lib/affiliation";
 import { now, useApp, type ConciergeCase } from "@/lib/store";
 import { ProdAdmin } from "./prod";
 import { conciergeKeys } from "@/lib/vault";
 
-type Tab = "deces" | "conciergerie" | "comptes";
+type Tab = "deces" | "conciergerie" | "comptes" | "partenaires" | "retraits" | "stats";
 const Dot = ({ ok }: { ok: boolean }) => <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${ok ? "bg-sage" : "bg-coral"}`} />;
 const fmt = (t: number) => new Date(t).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
 
@@ -49,16 +50,23 @@ function DemoAdmin() {
         <Link href="/espace/demo" className="mb-4 inline-flex items-center gap-2 text-[0.95rem] font-semibold text-ink-soft">
           <ArrowLeft className="h-4 w-4" /> Retour à la démonstration
         </Link>
-        <Segmented
-          layoutKey="admin"
-          value={tab}
-          onChange={setTab}
-          options={[
-            { id: "deces", label: `Vérifications (${queue.length})` },
-            { id: "conciergerie", label: `Conciergerie (${s.concierge.length})` },
-            { id: "comptes", label: "Comptes" },
-          ]}
-        />
+        <div className="-mx-5 overflow-x-auto px-5">
+          <div className="min-w-[44rem]">
+            <Segmented
+              layoutKey="admin"
+              value={tab}
+              onChange={setTab}
+              options={[
+                { id: "deces", label: `Vérifications (${queue.length})` },
+                { id: "conciergerie", label: `Conciergerie (${s.concierge.length})` },
+                { id: "partenaires", label: "Partenaires" },
+                { id: "retraits", label: "Retraits" },
+                { id: "stats", label: "Statistiques" },
+                { id: "comptes", label: "Comptes" },
+              ]}
+            />
+          </div>
+        </div>
 
         <div className="mt-6 space-y-4">
           {tab === "deces" && (
@@ -141,6 +149,10 @@ function DemoAdmin() {
             </>
           )}
 
+          {tab === "partenaires" && <DemoPartners owner={owner} />}
+          {tab === "retraits" && <DemoPayouts owner={owner} />}
+          {tab === "stats" && <DemoStats />}
+
           {tab === "comptes" && (
             <Card>
               {s.account ? (
@@ -169,6 +181,110 @@ function DemoAdmin() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+// Demo: the team accepts or refuses the member's application (production: staff_partner_decision).
+function DemoPartners({ owner }: { owner: string }) {
+  const s = useApp(useShallow((x) => ({ partner: x.partner, account: x.account, set: x.set, email: x.email, sales: x.partnerDemo.sales.length })));
+  const decide = (ok: boolean) => {
+    const code = Math.random().toString(16).slice(2, 10).toUpperCase().padEnd(8, "0");
+    s.set({ partner: ok ? { status: "actif", code, n1: 25 } : { status: "refuse", n1: 25 } });
+    if (s.account) s.email(s.account.email, ok ? "partenaire-valide" : "partenaire-refuse", ok ? { code } : {});
+  };
+  if (!s.partner) return <Card className="text-center text-mist">Aucune candidature. Espace › Compte › Programme partenaires.</Card>;
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Handshake className="h-6 w-6 text-gold-deep" />
+          <div>
+            <div className="font-semibold">{owner}</div>
+            <div className="text-[0.88rem] text-mist">{s.account?.email}</div>
+          </div>
+        </div>
+        <Badge tone={s.partner.status === "actif" ? "sage" : s.partner.status === "refuse" ? "mist" : "gold"}>{s.partner.status === "actif" ? "Partenaire" : s.partner.status === "refuse" ? "Refusé" : "Candidature"}</Badge>
+      </div>
+      {s.partner.status === "actif" && <p className="mt-3 text-[0.92rem] text-ink-soft">{`Code ${s.partner.code} · niveau 1 : ${s.partner.n1} %, niveau 2 : ${25 - s.partner.n1} % · ${s.sales} vente${s.sales > 1 ? "s" : ""}`}</p>}
+      {s.partner.status === "candidat" && (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button variant="gold" onClick={() => decide(true)}>
+            Accepter
+          </Button>
+          <Button variant="outline" onClick={() => decide(false)}>
+            Refuser
+          </Button>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+// Demo: the finance team moves each payout step by step; the IBAN or address is erased at the end.
+function DemoPayouts({ owner }: { owner: string }) {
+  const s = useApp(useShallow((x) => ({ payouts: x.partnerDemo.payouts, account: x.account, set: x.set, email: x.email })));
+  const move = (p: Payout, status: Payout["status"]) => {
+    const closed = status === "reussi" || status === "refuse";
+    s.set((x) => ({ partnerDemo: { ...x.partnerDemo, payouts: x.partnerDemo.payouts.map((y) => (y.id === p.id ? { ...y, status, destination: closed ? null : y.destination } : y)) } }));
+    if (closed && s.account) s.email(s.account.email, status === "reussi" ? "retrait-reussi" : "retrait-refuse", { amount: (p.amount_cents / 100).toFixed(2), currency: "EUR" });
+  };
+  if (s.payouts.length === 0) return <Card className="text-center text-mist">Aucune demande de retrait.</Card>;
+  return (
+    <>
+      {s.payouts.map((p) => {
+        const i = PAYOUT_STEPS.findIndex((x) => x.id === p.status);
+        const next = p.status === "refuse" ? undefined : PAYOUT_STEPS[i + 1];
+        return (
+          <Card key={p.id}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Wallet className="h-6 w-6 text-gold-deep" />
+                <div>
+                  <div className="font-semibold">{`${euros(p.amount_cents)} · ${owner}`}</div>
+                  <div className="text-[0.88rem] text-mist">{`${p.method === "sepa" ? "Virement SEPA" : "Crypto"} · ${p.destination ?? "coordonnée effacée"}`}</div>
+                </div>
+              </div>
+              <Badge tone={p.status === "reussi" ? "sage" : p.status === "refuse" ? "coral" : "gold"}>{p.status === "refuse" ? "Refusé" : PAYOUT_STEPS[i].label}</Badge>
+            </div>
+            {next && (
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Button variant="gold" onClick={() => move(p, next.id)}>
+                  {next.label}
+                </Button>
+                <Button variant="outline" onClick={() => move(p, "refuse")}>
+                  Refuser
+                </Button>
+              </div>
+            )}
+          </Card>
+        );
+      })}
+    </>
+  );
+}
+
+// Demo: the anonymous counters of this browser, and what the team can count without reading anything.
+function DemoStats() {
+  const s = useApp(useShallow((x) => ({ t: x.telemetry, guarantors: x.guarantors.length, cards: x.cards, procedures: x.procedures, partner: x.partner })));
+  const openings = s.t.coffre_ouvert ?? 0;
+  const fails = s.t.carte_echec ?? 0;
+  const tries = fails + (s.t.carte_ok ?? 0);
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {[
+        { label: "Ouvertures du Coffre", value: String(openings) },
+        { label: "Temps moyen dans le Coffre", value: openings ? `${Math.round((s.t.coffre_secondes ?? 0) / openings / 60)} min` : "—" },
+        { label: "Échecs d'authentification par carte", value: tries ? `${Math.round((fails / tries) * 100)} %` : "—" },
+        { label: "Titulaires avec un garant", value: s.guarantors ? "1 sur 1" : "0 sur 1" },
+        { label: "Demandes coup dur", value: String(s.procedures.filter((p) => p.kind === "coup_dur").length) },
+        { label: "Partenaires actifs", value: s.partner?.status === "actif" ? "1" : "0" },
+      ].map((x) => (
+        <Card key={x.label} className="!p-4">
+          <div className="text-[0.82rem] text-mist">{x.label}</div>
+          <div className="mt-1 font-display text-[1.4rem] font-semibold">{x.value}</div>
+        </Card>
+      ))}
     </div>
   );
 }

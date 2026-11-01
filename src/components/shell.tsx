@@ -1,9 +1,10 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { CircleAlert, House, LifeBuoy, Lock, LockOpen, ShieldCheck, Sparkles, UserRound, Users, type LucideIcon } from "lucide-react";
+import { CircleAlert, Handshake, House, LifeBuoy, Lock, LockOpen, ShieldCheck, Sparkles, UserRound, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
+import { ping } from "@/lib/api";
 import { PROD } from "@/lib/env";
 import { activeProcedure, graceEnd, procedureStatus } from "@/lib/rules";
 import { useApp, useSession } from "@/lib/store";
@@ -66,6 +67,15 @@ function Transition({ children }: { children: ReactNode }) {
   );
 }
 
+// "Sessions actives" for the team: an anonymous ping every 2 minutes while the app is open.
+function usePresence() {
+  useEffect(() => {
+    ping();
+    const t = setInterval(ping, 120_000);
+    return () => clearInterval(t);
+  }, []);
+}
+
 export function Loader({ dark }: { dark?: boolean }) {
   return (
     <div className={`grid min-h-dvh place-items-center ${dark ? "bg-night" : "bg-cream"}`}>
@@ -86,9 +96,11 @@ export function EspaceShell({ children }: { children: ReactNode }) {
   const billing = useApp((s) => s.billing);
   const me = useApp((s) => s.me);
   const hasTrusts = useApp((s) => s.trusts.length > 0);
+  const partner = useApp((s) => s.partner?.status === "actif");
   const router = useRouter();
   const path = usePath();
   const t = useNow(5000);
+  usePresence();
   useEffect(() => {
     // Production: signed in without an Espace of one's own = a relative (guarantor, beneficiary) or a sign-up to finish.
     if (hydrated && !account) router.replace(PROD && me ? (hasTrusts ? "/proche" : "/inscription") : "/connexion");
@@ -109,6 +121,12 @@ export function EspaceShell({ children }: { children: ReactNode }) {
             <Logo />
           </Link>
           <div className="flex items-center gap-2">
+            {/* Appears once the team has accepted the member as a partner. */}
+            {partner && (
+              <Link href="/espace/partenaire" className="grid h-11 w-11 place-items-center rounded-full bg-paper ring-1 ring-line" aria-label="Espace partenaire">
+                <Handshake className="h-5 w-5 text-gold-deep" />
+              </Link>
+            )}
             <Alma />
             <Link href="/espace/compte" className="grid h-11 w-11 place-items-center rounded-full bg-ink font-display text-[1.05rem] font-semibold text-paper" aria-label="Mon compte">
               {account.firstName[0]}
@@ -170,6 +188,7 @@ export function CoffreShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   // Pre-launch: no Coffre yet, but « Qui voit quoi » is already set (the choices only: they are sealed when it first opens).
   const rightsOnly = session.mode === "locked" && noVault && !!account && path.startsWith("/coffre/droits");
+  usePresence();
   // Set when the person closes the Coffre: their destination wins over the "locked → lock screen" redirect.
   const closing = useRef(false);
   useEffect(() => {

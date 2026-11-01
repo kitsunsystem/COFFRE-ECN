@@ -100,5 +100,6 @@ Deno.serve(async (req) => {
     stats.pieces += gone.length;
   }
   await db.from("outbox").delete().eq("status", "sent").lt("sent_at", new Date(today.getTime() - 30 * DAY).toISOString());
+  await db.from("telemetry_presence").delete().lt("seen", new Date(today.getTime() - DAY).toISOString());
   return json(stats);
 });

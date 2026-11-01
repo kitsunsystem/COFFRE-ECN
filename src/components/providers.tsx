@@ -3,7 +3,7 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { CircleAlert, CircleCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { bootstrap } from "@/lib/api";
+import { bootstrap, captureReferral } from "@/lib/api";
 import { PROD } from "@/lib/env";
 import { startI18n } from "@/lib/i18n";
 import { startPush } from "@/lib/push";
@@ -95,6 +95,7 @@ export function Providers({ children }: { children: ReactNode }) {
   const signedIn = useApp((s) => s.me?.userId);
   useEffect(() => {
     void startI18n();
+    captureReferral();
     if (PROD) void bootstrap().finally(() => useApp.getState().set({ ready: true }));
     else void Promise.resolve(useApp.persist.rehydrate()).finally(() => useApp.getState().set({ ready: true }));
   }, []);

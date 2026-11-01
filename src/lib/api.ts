@@ -3,6 +3,7 @@
 import { CONCIERGE, OFFER } from "./config";
 import { currentLang } from "./i18n";
 import { PROD } from "./env";
+import { rates, type Dashboard, type Payout } from "./affiliation";
 import { paddle } from "./paddle";
 import { declare, type Moment, type Motif } from "./rules";
 import { envelopeRow, itemRow, personRow, profileRow, toAccount, toCard, toCase, toDevice, toDeviceRequest, toEnvelope, toItem, toPerson, toProcedure, toReminder, toRights, toTrust } from "./rows";
@@ -108,11 +109,12 @@ export async function loadAll() {
   // A relative who signs in with the address the owner typed is linked to their records.
   await c.rpc("claim_invitations");
   const id = user.id;
-  const [profile, settings, staff, trusts] = await Promise.all([
+  const [profile, settings, staff, trusts, partner] = await Promise.all([
     q(c.from("profiles").select("*").eq("id", id).maybeSingle()),
     q(c.from("app_settings").select("launched, planned_launch, concierge_public_key").single()),
     q(c.from("staff").select("role").eq("user_id", id).maybeSingle()),
     q(c.rpc("my_trusts")),
+    q(c.from("partners").select("status, code, n1").eq("user_id", id).maybeSingle()),
   ]);
   const base = {
     ready: true,
@@ -123,6 +125,7 @@ export async function loadAll() {
     plannedLaunch: (settings as { planned_launch?: string }).planned_launch ?? undefined,
     conciergeKey: (settings as { concierge_public_key?: string }).concierge_public_key ?? undefined,
     holder: undefined,
+    partner: partner ? { ...(partner as { status: "candidat" | "actif" | "refuse"; n1: number }), code: (partner as { code: string | null }).code ?? undefined } : undefined,
   };
   if (!profile) {
     st().set({ ...base, account: undefined, people: [], cards: [], guarantors: [], rights: {}, vault: { ssk: {}, items: [], envelopes: [] }, procedures: [], reminders: [], concierge: [], checklist: {} });
@@ -173,6 +176,9 @@ export async function createProfile(draft: Omit<Account, "kyc" | "createdAt">, p
   }
   const id = me();
   await q(sb().from("profiles").insert(profileRow(id, draft, currentLang())));
+  // Came through a partner's link: he is credited with the first sale (set once, never oneself).
+  const ref = remembered();
+  if (ref) await q(sb().rpc("set_referrer", { ref_code: ref })).then(forgetReferral);
   if (people.length) await q(sb().from("people").insert(people.map((p) => personRow(p, id))));
   await loadAll();
 }
@@ -374,6 +380,104 @@ export const signMandate = (caseId: string, name: string) =>
     if (PROD) await q(sb().rpc("sign_mandate", { case_id: caseId, signer: name }));
     st().set((x) => ({ concierge: x.concierge.map((y) => (y.id === caseId ? { ...y, status: "mandat_signe" as const, mandate: { name, signedAt: now() } } : y)) }));
   });
+
+/* ---------- Partenaires ---------- */
+
+const REF = "sillage-ref";
+const remembered = () => {
+  try {
+    return localStorage.getItem(REF);
+  } catch {
+    return null;
+  }
+};
+const forgetReferral = () => {
+  try {
+    localStorage.removeItem(REF);
+  } catch {}
+};
+
+// A partner's link (?ref=CODE): kept on this device until the sign-up, one click counted per visit.
+export function captureReferral() {
+  const code = new URLSearchParams(location.search).get("ref");
+  if (!code || !/^[0-9a-f]{8}$/i.test(code) || remembered() === code) return;
+  try {
+    localStorage.setItem(REF, code);
+  } catch {}
+  if (PROD) void sb().rpc("ref_click", { ref_code: code }).then(undefined, () => {});
+}
+
+export const applyPartner = (why: string) =>
+  attempt(async () => {
+    if (PROD) await q(sb().rpc("apply_partner", { why }));
+    st().set({ partner: { status: "candidat", n1: 25 } });
+  });
+
+export const setPartnerSplit = (n1: number) =>
+  attempt(async () => {
+    if (PROD) await q(sb().rpc("set_partner_split", { level1: n1 }));
+    st().set((x) => ({ partner: x.partner && { ...x.partner, n1 } }));
+  });
+
+// Totals only: a partner never sees who his clients are.
+export async function partnerDashboard(): Promise<Dashboard> {
+  if (PROD) return q<Dashboard>(sb().rpc("partner_dashboard") as never);
+  const { sales, payouts } = st().partnerDemo;
+  const cut = (s: { saleCents: number; rate: number }) => Math.floor((s.saleCents * s.rate) / 100);
+  const months = new Map<string, number>();
+  for (const s of sales) months.set(new Date(s.at).toISOString().slice(0, 7), (months.get(new Date(s.at).toISOString().slice(0, 7)) ?? 0) + cut(s));
+  const direct = sales.filter((s) => s.level === 1).length;
+  const earned = sales.reduce((a, s) => a + cut(s), 0);
+  return {
+    clicks: direct * 4,
+    signups: direct,
+    n1_sales: direct,
+    n2_sales: sales.length - direct,
+    volume_cents: sales.reduce((a, s) => a + s.saleCents, 0),
+    earned_cents: earned,
+    balance_cents: earned - payouts.filter((p) => p.status !== "refuse").reduce((a, p) => a + p.amount_cents, 0),
+    months: [...months].sort().map(([month, cents]) => ({ month, cents })),
+    team: direct < sales.length ? [{ name: "Sophie M.", sales: sales.length - direct }] : [],
+  };
+}
+
+export async function loadPayouts(): Promise<Payout[]> {
+  if (!PROD) return st().partnerDemo.payouts;
+  return q<Payout[]>(sb().from("payouts").select("id, amount_cents, method, status, requested_at, destination, reference").eq("partner_id", me()).order("requested_at", { ascending: false }) as never);
+}
+
+// The IBAN or the wallet address is kept only until the payout is closed.
+export const requestPayout = (cents: number, method: Payout["method"], dest: string) =>
+  attempt(async () => {
+    if (PROD) return void (await q(sb().rpc("request_payout", { cents, pay_method: method, dest })));
+    if (dest.trim().length < 8) throw new Error("IBAN ou adresse invalide.");
+    if (cents <= 0 || cents > (await partnerDashboard()).balance_cents) throw new Error("Solde insuffisant.");
+    if (st().partnerDemo.payouts.some((p) => ["demande", "validation", "traitement"].includes(p.status))) throw new Error("Un retrait est déjà en cours.");
+    const p: Payout = { id: uid(), amount_cents: cents, method, status: "demande", requested_at: new Date(now()).toISOString(), destination: dest.trim() };
+    st().set((x) => ({ partnerDemo: { ...x.partnerDemo, payouts: [p, ...x.partnerDemo.payouts] } }));
+  });
+
+// Demo only: what the payment webhook does for a real sale (Claire has no sponsor; her recruit keeps 25 % on his own sales).
+export function simulateSale(level: 1 | 2) {
+  const n1 = st().partner?.n1 ?? 25;
+  const rate = level === 1 ? rates(n1).r1 : rates(25, n1).r2;
+  st().set((x) => ({ partnerDemo: { ...x.partnerDemo, sales: [...x.partnerDemo.sales, { level, rate, saleCents: 25000, at: now() }] } }));
+}
+
+/* ---------- Statistiques anonymes ---------- */
+
+export type Metric = "coffre_ouvert" | "coffre_secondes" | "carte_ok" | "carte_echec";
+// Counters for the team, never who nor what: a lost one does not matter.
+export function track(metric: Metric, amount = 1) {
+  if (PROD) void sb().rpc("track", { metric_name: metric, amount }).then(undefined, () => {});
+  else st().set((x) => ({ telemetry: { ...x.telemetry, [metric]: (x.telemetry[metric] ?? 0) + amount } }));
+}
+let session: string | undefined;
+// "Sessions actives": a random id per tab, never the person.
+export function ping() {
+  session ??= uid();
+  if (PROD) void sb().rpc("ping", { session_id: session }).then(undefined, () => {});
+}
 
 /* ---------- Procédures ---------- */
 

@@ -102,7 +102,7 @@ R : Ne le donnez jamais. L'équipe, le support, la conciergerie et Alma ne vous 
 
 === 6. LE COFFRE SUR UN ORDINATEUR OU SUR LE NAVIGATEUR DU TÉLÉPHONE ===
 
-Sur un téléphone, le Coffre s'ouvre dans l'application (App Store, Google Play) : le navigateur du téléphone ne sait pas lire la carte. Installez l'application et connectez-vous avec la même adresse.
+Sur un téléphone, le Coffre s'ouvre dans l'application (App Store, Google Play), ou directement dans le navigateur (Safari, Chrome) avec une carte FIDO2 : touchez « Poser ma carte », posez-la au dos du téléphone, puis tapez son code quand il est demandé. L'accès d'un proche, lui, se fait dans l'application.
 Sur un ordinateur, le Coffre s'ouvre avec l'accord du téléphone :
 1. La première fois, l'ordinateur affiche un code QR et un nombre. Dans l'application : Coffre › Scanner un ordinateur, visez le code QR, choisissez le même nombre parmi les trois proposés, posez votre carte et confirmez avec Face ID. Le Coffre s'ouvre sur l'ordinateur.
 2. L'ordinateur devient un appareil de confiance pendant 90 jours : les fois suivantes, « Ouvrir avec mon téléphone » envoie une notification au téléphone. Touchez-la, choisissez le nombre affiché sur l'ordinateur, posez la carte.
@@ -402,6 +402,23 @@ En cas de coup dur, le vrai blocage, c'est l'accès à l'argent et le droit d'ag
 6. Testament et lieu de l'original : sans testament, la loi décide ; un testament introuvable est comme inexistant. Écrit entièrement à la main, daté et signé (olographe), ou par acte authentique ; noter dans le Coffre où est l'original. Preuve : Documents › Papiers juridiques.
 7. Délégation de pouvoirs dans l'entreprise (chefs d'entreprise seulement) : pour signer, payer salaires et fournisseurs si vous êtes indisponible. Par écrit, dans l'entreprise, puis prévenir la banque professionnelle.
 8. Tuteur pour les enfants mineurs : désigner à l'avance qui élèvera vos enfants si les deux parents disparaissent ; sinon, le conseil de famille choisit, sous le contrôle du juge. Par testament, ou par une déclaration spéciale par acte authentique.
+
+
+=== 20 ter. LE PROGRAMME PARTENAIRES (ESPACE › COMPTE › PROGRAMME PARTENAIRES) ===
+
+Un membre peut recommander le Coffre et être rémunéré. Il candidate (quelques mots sur son activité et son réseau) ; l'équipe accepte ou refuse. Une fois accepté, un bouton « Espace partenaire » apparaît en haut de l'Espace.
+Rémunération : sur la première vente d'un client venu par son lien, 25 % du prix hors taxes au plus sont reversés, sur deux niveaux. Le partenaire règle avec un curseur la part qu'il garde sur ses ventes directes (niveau 1) et celle qu'il prend sur les ventes de ses filleuls (niveau 2), les deux faisant toujours 25 %. Une vente ne coûte jamais plus de 25 % : sur la vente d'un filleul, la part de niveau 2 du parrain passe en premier ; le vendeur direct reçoit sa part de niveau 1 dans la limite du reste. Exemples : tout sur ses ventes directes (25 / 0) ; équipe équilibrée (13 / 12) ; apporteur qui parraine un gros distributeur (0 / 25). Un changement de répartition vaut pour les ventes à venir.
+Tableau de bord : lien de parrainage à copier, clics et inscriptions, coffres vendus en direct et par les filleuls, volume d'affaires, commissions par mois, liste des filleuls (prénom et initiale). Jamais l'identité des clients.
+Retraits : bouton « Demander le retrait », par virement SEPA (IBAN) ou en crypto (adresse du portefeuille), dans la limite du solde, une demande à la fois. Suivi : Demandé, Validation financière, Virement ou transaction en cours, Réussi (ou Refusé : le montant reste sur le solde). L'IBAN ou l'adresse n'est gardé que le temps du retrait. Un e-mail prévient à la fin.
+
+Q : Comment devenir partenaire ?
+R : Espace › Compte › Programme partenaires › Devenir partenaire : écrivez quelques mots sur votre activité, puis envoyez la candidature. L'équipe vous répond par e-mail.
+
+Q : Combien vais-je gagner ?
+R : Sur la première vente d'un client venu par votre lien, jusqu'à 25 % du prix hors taxes, selon la répartition que vous choisissez entre vos ventes directes et celles de vos filleuls.
+
+Q : Quand suis-je payé ?
+R : Quand vous le demandez : Espace partenaire › Demander le retrait. L'équipe financière valide, puis envoie le virement ou la transaction ; vous suivez chaque étape.
 
 
 === 21. ABONNEMENT, PRÉ-LANCEMENT, IMPAYÉ ===

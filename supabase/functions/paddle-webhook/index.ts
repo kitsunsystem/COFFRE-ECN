@@ -2,6 +2,7 @@
 // Unpaid or cancelled = "impaye" from that day: reminders during the grace period, then the Coffre is erased ("relances").
 // Secret: PADDLE_WEBHOOK_SECRET (the key of the notification destination). Events: subscription.created, subscription.updated,
 // subscription.canceled, subscription.past_due, transaction.completed. A card refused at checkout changes nothing.
+// A completed payment also pays the partners of the client's first sale (record_sale: 25 % at most, before tax).
 import { admin, enqueue, env, json } from "../_shared/server.ts";
 
 const enc = new TextEncoder();
@@ -36,7 +37,12 @@ Deno.serve(async (req) => {
   if (type.startsWith("subscription.")) {
     await db.from("profiles").update({ subscription_status: o.status }).eq("id", p.id);
     status = ["active", "trialing"].includes(o.status) ? "a_jour" : ["past_due", "paused", "canceled"].includes(o.status) ? "impaye" : null;
-  } else if (type === "transaction.completed") status = "a_jour";
+  } else if (type === "transaction.completed") {
+    status = "a_jour";
+    // shortcut: one currency assumed (EUR prices); convert with payout_totals if prices are set in other currencies.
+    const cents = Number(o.details?.totals?.subtotal) - Number(o.details?.totals?.discount ?? 0);
+    if (o.id && Number.isFinite(cents)) await db.rpc("record_sale", { buyer: p.id, sale: o.id, cents: Math.round(cents), cur: o.currency_code ?? "EUR" });
+  }
 
   if (status === "a_jour" && p.billing_status !== "efface") await db.from("profiles").update({ billing_status: "a_jour", billing_since: null }).eq("id", p.id);
   if (status === "impaye" && p.billing_status === "a_jour") {

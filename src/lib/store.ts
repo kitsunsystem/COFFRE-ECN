@@ -4,6 +4,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { render, type TemplateId } from "../../supabase/functions/_shared/templates";
+import type { DemoSale, Payout } from "./affiliation";
 import { LAUNCH } from "./config";
 import { currentLang } from "./i18n";
 import type { Sealed } from "./crypto";
@@ -177,6 +178,9 @@ interface State {
   outbox: OutboxEmail[];
   clockOffset: number; // demo only: lets the demo panel fast-forward the cancellation windows
   tourPending: boolean; // guided tour shown at the next entry in the Espace
+  partner?: { status: "candidat" | "actif" | "refuse"; code?: string; n1: number }; // partner programme (N2 = 25 - n1)
+  partnerDemo: { sales: DemoSale[]; payouts: Payout[] }; // demo only: what the server keeps in production
+  telemetry: Record<string, number>; // demo only: the anonymous counters of the team's statistics
 }
 
 interface Actions {
@@ -203,6 +207,8 @@ const initial: State = {
   outbox: [],
   clockOffset: 0,
   tourPending: false,
+  partnerDemo: { sales: [], payouts: [] },
+  telemetry: {},
 };
 
 export const useApp = create<State & Actions>()(

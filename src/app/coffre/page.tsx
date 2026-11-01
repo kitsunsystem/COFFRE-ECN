@@ -39,6 +39,7 @@ export default function Verrou() {
   const [faceId, setFaceId] = useState(false);
   const [viaPhone, setViaPhone] = useState(false);
   const [relative, setRelative] = useState(false);
+  const [install, setInstall] = useState(false);
   const [revealing, setRevealing] = useState(false);
   const active = hydrated ? openableCards() : [];
   // A relative's approved phone opens their part of someone else's Coffre (demo: Claire's relatives, in this browser).
@@ -49,7 +50,7 @@ export default function Verrou() {
       : cards.filter((c) => isPhone(c) && c.status === "active").map((c) => ({ personId: c.holderId, phone: c, label: personName(people, c.holderId) }));
   const f = useCardOpen(active, () => {});
   const home = account ? "/espace" : PROD && me ? "/proche" : "/";
-  // The website cannot read the cards: a computer asks the phone, a phone's browser sends to the app.
+  // A computer asks the phone. A phone's browser reads FIDO2 cards itself (WebAuthn over NFC); relatives' access needs the app.
   const where = !hydrated ? null : !PROD ? "demo" : isNative() ? "app" : isPhoneBrowser() ? "phone-browser" : "computer";
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function Verrou() {
         </div>
 
         <AnimatePresence mode="wait">
-          {where === "phone-browser" ? (
+          {where === "phone-browser" && install ? (
             <InstallApp />
           ) : where === "computer" || viaPhone ? (
             <PhoneOpen onKeys={fromPhone} onBack={where === "demo" ? () => setViaPhone(false) : undefined} />
@@ -127,10 +128,15 @@ export default function Verrou() {
                   </Button>
                 )
               )}
-              {accesses.length > 0 && (
+              {accesses.length > 0 && where !== "phone-browser" && (
                 <Button className="mt-3" full variant={active.length ? "light" : "gold"} icon={<ScanFace className="h-5 w-5" />} onClick={() => setRelative(true)}>
                   {where === "demo" ? "Démo : ouvrir comme un proche" : "Ouvrir avec Face ID et mon code"}
                 </Button>
+              )}
+              {where === "phone-browser" && (
+                <button onClick={() => setInstall(true)} className="mt-4 text-[0.9rem] font-semibold text-gold-soft underline">
+                  Proche d&apos;un titulaire ? Votre accès se fait dans l&apos;application
+                </button>
               )}
               {where === "app" && (
                 <div className="mt-4 w-full">

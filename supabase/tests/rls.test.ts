@@ -435,3 +435,76 @@ describe("langue des e-mails", () => {
     await claire("update profiles set lang = 'fr' where id = $1", [ids.claire]);
   });
 });
+
+describe("partenaires", () => {
+  const profile = (id: string, first: string) => db.query(`insert into profiles (id, first_name, last_name, email, birth_date) values ($1, $2, 'Test', $3, '1980-01-01') on conflict (id) do nothing`, [id, first, `${first.toLowerCase()}@exemple.fr`]);
+  const commissions = async (buyer: string) => (await db.query<{ level: number; rate: number; amount_cents: number }>("select level, rate, amount_cents from commissions where customer = $1 order by level", [buyer])).rows;
+
+  it("a member applies; only the team decides; the partner gets a code", async () => {
+    await as(db, ids.claire, "select apply_partner('Je conseille des familles')");
+    expect(await as(db, ids.lea, "select * from partners")).toHaveLength(0);
+    await refused(claire("select staff_partner_decision($1, true)", [ids.claire]), /interdit/);
+    await refused(claire("insert into partners (user_id) values ($1)", [ids.eve]), /permission denied/);
+    const [{ staff_partner_decision: code }] = await as<{ staff_partner_decision: string }>(db, ids.admin, "select staff_partner_decision($1, true)", [ids.claire]);
+    expect(code).toMatch(/^[0-9A-F]{8}$/);
+    ids.claireCode = code;
+    expect(await outbox("partenaire-valide")).toContain("claire@exemple.fr");
+    await refused(claire("select set_partner_split(26)"), /répartition invalide/);
+    await claire("select set_partner_split(10)"); // N1 10 %, N2 15 %
+  });
+
+  it("a sale costs 25 % at most: the sponsor's N2 first, the direct partner's N1 within the rest; first sale only", async () => {
+    await profile(ids.marc, "Marc");
+    await as(db, ids.marc, "select set_referrer($1)", [ids.claireCode.toLowerCase()]);
+    await as(db, ids.marc, "select apply_partner('Distributeur')");
+    const [{ staff_partner_decision: marcCode }] = await as<{ staff_partner_decision: string }>(db, ids.admin, "select staff_partner_decision($1, true)", [ids.marc]);
+    await as(db, ids.marc, "select set_partner_split(25)"); // Marc wants everything on his own sales
+    await claire("select set_referrer($1)", [ids.claireCode]); // never oneself
+    expect((await claire<{ referred_by: string | null }>("select referred_by from profiles where id = $1", [ids.claire]))[0].referred_by).toBeNull();
+    ids.zoe = await user(db, "zoe@exemple.fr");
+    await profile(ids.zoe, "Zoe");
+    await as(db, null, "select ref_click($1)", [marcCode]);
+    await as(db, ids.zoe, "select set_referrer($1)", [marcCode]);
+    await refused(as(db, ids.zoe, "select record_sale($1, 'txn_x', 25000)", [ids.zoe]), /permission denied/);
+    expect((await db.query<{ r: number }>("select record_sale($1, 'txn_1', 25000) as r", [ids.zoe])).rows[0].r).toBe(25);
+    expect(await commissions(ids.zoe)).toEqual([{ level: 1, rate: 10, amount_cents: 2500 }, { level: 2, rate: 15, amount_cents: 3750 }]);
+    expect((await db.query<{ r: number }>("select record_sale($1, 'txn_2', 25000) as r", [ids.zoe])).rows[0].r).toBe(0); // renewal
+    await as(db, ids.zoe, "select set_referrer($1)", [ids.claireCode]); // too late: already a client
+    expect((await db.query<{ referred_by: string }>("select referred_by from profiles where id = $1", [ids.zoe])).rows[0].referred_by).toBe(ids.marc);
+  });
+
+  it("each partner sees totals, never his clients; the team list shows first names only", async () => {
+    const [{ partner_dashboard: d }] = await claire<{ partner_dashboard: Record<string, unknown> }>("select partner_dashboard()");
+    expect(d).toMatchObject({ n1_sales: 0, n2_sales: 1, earned_cents: 3750, balance_cents: 3750, team: [{ name: "Marc T.", sales: 1 }] });
+    const [{ partner_dashboard: m }] = await as<{ partner_dashboard: Record<string, unknown> }>(db, ids.marc, "select partner_dashboard()");
+    expect(m).toMatchObject({ clicks: 1, signups: 1, n1_sales: 1, earned_cents: 2500 });
+    expect(await claire("select * from commissions")).toHaveLength(0);
+  });
+
+  it("withdrawals stay within the balance, one at a time; the finance team moves them step by step and erases the IBAN", async () => {
+    const iban = "FR76 3000 6000 0112 3456 7890 189";
+    await refused(claire("select request_payout(4000, 'sepa', $1)", [iban]), /solde insuffisant/);
+    await refused(claire("select request_payout(1000, 'cheque', $1)", [iban]), /moyen de retrait invalide/);
+    const [{ request_payout: id }] = await claire<{ request_payout: string }>("select request_payout(3000, 'sepa', $1)", [iban]);
+    await refused(claire("select request_payout(500, 'crypto', 'bc1qexempleadresse')"), /déjà en cours/);
+    expect(await as(db, ids.lea, "select * from payouts")).toHaveLength(0);
+    await refused(claire("select staff_payout_status($1, 'reussi')", [id]), /interdit/);
+    await refused(as(db, ids.admin, "select staff_payout_status($1, 'reussi')", [id]), /étape invalide/);
+    for (const step of ["validation", "traitement"]) await as(db, ids.admin, "select staff_payout_status($1, $2)", [id, step]);
+    await as(db, ids.admin, "select staff_payout_status($1, 'reussi', 'VIR-2026-001')", [id]);
+    expect((await claire<{ status: string; destination: string | null }>("select status, destination from payouts where id = $1", [id]))[0]).toEqual({ status: "reussi", destination: null });
+    expect(await outbox("retrait-reussi")).toContain("claire@exemple.fr");
+    expect((await claire<{ partner_dashboard: { balance_cents: number } }>("select partner_dashboard()"))[0].partner_dashboard.balance_cents).toBe(750);
+  });
+
+  it("statistics are anonymous counters, for the team only", async () => {
+    await claire("select track('coffre_ouvert')");
+    await claire("select track('coffre_secondes', 120)");
+    await claire("select track('autre_chose')");
+    await claire("select ping($1)", [crypto.randomUUID()]);
+    await refused(claire("select staff_metrics()"), /interdit/);
+    const [{ staff_metrics: s }] = await as<{ staff_metrics: Record<string, number> }>(db, ids.admin, "select staff_metrics()");
+    expect(s).toMatchObject({ openings: 1, seconds: 120, active_sessions: 1, partners: 2 });
+    expect(await claire("select * from telemetry_daily")).toHaveLength(0);
+  });
+});

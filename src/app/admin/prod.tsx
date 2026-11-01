@@ -2,19 +2,20 @@
 // Production back-office, reserved to staff accounts (table "staff"). It sees the Espace, never the Coffre:
 // every action goes through a database function that checks the staff role and writes the audit log.
 import { motion } from "motion/react";
-import { BadgeCheck, ConciergeBell, FileSearch, KeyRound, Loader2, Package, RefreshCw, ShieldAlert } from "lucide-react";
+import { BadgeCheck, ConciergeBell, FileSearch, Handshake, KeyRound, Loader2, Package, RefreshCw, ShieldAlert, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Badge, Button, Card, Field, Segmented, Toggle } from "@/components/ui";
 import { Logo } from "@/components/visuals";
 import { na, openFrom, fromB64 } from "@/lib/crypto";
 import { sb, q } from "@/lib/supabase";
+import { euros, PAYOUT_STEPS } from "@/lib/affiliation";
 import { MOTIFS } from "@/lib/rules";
 import { toast, useApp } from "@/lib/store";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows straight from supabase-js */
 type Row = Record<string, any>;
-type Tab = "deces" | "kyc" | "cartes" | "conciergerie" | "reglages";
+type Tab = "deces" | "kyc" | "cartes" | "conciergerie" | "partenaires" | "retraits" | "stats" | "reglages";
 const fmt = (t?: string) => (t ? new Date(t).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" }) : "—");
 const Dot = ({ ok }: { ok: boolean }) => <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${ok ? "bg-sage" : "bg-coral"}`} />;
 
@@ -46,6 +47,10 @@ async function fetchTab(tab: Tab): Promise<{ rows: Row[]; launched?: boolean; pl
     return { rows: await q<Row[]>(c.from("procedures").select("*, profiles!inner(first_name,last_name,birth_date,birth_city,email), acteur:people!acte_by(first_name,last_name,email)").is("verified_at", null).is("rejected_at", null).is("cancelled_at", null).eq("needs_verification", true).order("declared_at") as never) };
   if (tab === "kyc") return { rows: await q<Row[]>(c.from("profiles").select("id,first_name,last_name,birth_date,birth_city,email,kyc,kyc_doc_path,created_at").eq("kyc", "en_cours").order("created_at") as never) };
   if (tab === "cartes") return { rows: await q<Row[]>(c.from("cards").select("id,printed_name,status,ordered_at,holder_person_id,ship_to,profiles!inner(first_name,last_name,address)").in("status", ["commandee", "en_route"]).order("ordered_at") as never) };
+  // partners.user_id and profiles.referred_by link the same two tables: the foreign key says which one.
+  if (tab === "partenaires") return { rows: await q<Row[]>(c.from("partners").select("user_id, status, motivation, code, n1, applied_at, profiles!partners_user_id_fkey(first_name,last_name,email)").in("status", ["candidat", "actif"]).order("applied_at") as never) };
+  if (tab === "retraits") return { rows: await q<Row[]>(c.from("payouts").select("*, partners!inner(profiles!partners_user_id_fkey(first_name,last_name,email))").in("status", ["demande", "validation", "traitement"]).order("requested_at") as never) };
+  if (tab === "stats") return { rows: [await q<Row>(c.rpc("staff_metrics") as never)] };
   if (tab === "conciergerie") return { rows: await q<Row[]>(c.from("concierge_cases").select("*, profiles!inner(first_name,last_name,email,phone), concierge_shares(item_id,sealed)").order("created_at", { ascending: false }) as never) };
   const s = await q<Row>(c.from("app_settings").select("launched, planned_launch").single() as never);
   return { rows: [], launched: s.launched, planned: s.planned_launch ?? "" };
@@ -113,7 +118,7 @@ export function ProdAdmin() {
           </button>
         </div>
         <div className="-mx-5 overflow-x-auto px-5">
-          <div className="min-w-[36rem]">
+          <div className="min-w-[54rem]">
             <Segmented
               layoutKey="admin-prod"
               value={tab}
@@ -126,6 +131,9 @@ export function ProdAdmin() {
                 { id: "kyc", label: "Identités" },
                 { id: "cartes", label: "Cartes" },
                 { id: "conciergerie", label: "Conciergerie" },
+                { id: "partenaires", label: "Partenaires" },
+                { id: "retraits", label: "Retraits" },
+                { id: "stats", label: "Statistiques" },
                 { id: "reglages", label: "Réglages" },
               ]}
             />
@@ -135,6 +143,43 @@ export function ProdAdmin() {
         <div className="mt-6 space-y-4">
           {rows === null && <Loader2 className="mx-auto h-6 w-6 animate-spin text-mist" />}
           {rows?.length === 0 && tab !== "reglages" && <Card className="text-center text-mist">Rien à traiter.</Card>}
+
+          {tab === "partenaires" &&
+            rows?.map((p) => (
+              <Card key={p.user_id}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Handshake className="h-6 w-6 text-gold-deep" />
+                    <div>
+                      <div className="font-semibold">
+                        {p.profiles.first_name} {p.profiles.last_name}
+                      </div>
+                      <div className="text-[0.88rem] text-mist">
+                        {p.profiles.email} · {fmt(p.applied_at)}
+                      </div>
+                    </div>
+                  </div>
+                  <Badge tone={p.status === "actif" ? "sage" : "gold"}>{p.status === "actif" ? "Partenaire" : "Candidature"}</Badge>
+                </div>
+                {p.motivation && <p className="mt-3 rounded-2xl bg-ink/[0.04] p-3 text-[0.92rem]">« {p.motivation} »</p>}
+                {p.status === "actif" ? (
+                  <p className="mt-3 text-[0.9rem] text-ink-soft">{`Code ${p.code} · niveau 1 : ${p.n1} %, niveau 2 : ${25 - p.n1} %`}</p>
+                ) : (
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <Button variant="gold" onClick={async () => (await rpc("staff_partner_decision", { partner: p.user_id, ok: true })) && load()}>
+                      Accepter
+                    </Button>
+                    <Button variant="outline" onClick={async () => (await rpc("staff_partner_decision", { partner: p.user_id, ok: false })) && load()}>
+                      Refuser
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            ))}
+
+          {tab === "retraits" && rows?.map((p) => <PayoutCard key={p.id} p={p} reload={load} />)}
+
+          {tab === "stats" && rows?.[0] && <Stats m={rows[0]} />}
 
           {tab === "deces" &&
             rows?.map((p) =>
@@ -289,6 +334,73 @@ export function ProdAdmin() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+// A partner's withdrawal, step by step; the IBAN or the address is erased by the database once it is closed.
+function PayoutCard({ p, reload }: { p: Row; reload: () => void }) {
+  const [ref, setRef] = useState("");
+  const i = PAYOUT_STEPS.findIndex((x) => x.id === p.status);
+  const next = PAYOUT_STEPS[i + 1];
+  const who = p.partners.profiles;
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Wallet className="h-6 w-6 text-gold-deep" />
+          <div>
+            <div className="font-semibold">{`${euros(p.amount_cents)} · ${who.first_name} ${who.last_name}`}</div>
+            <div className="text-[0.88rem] text-mist">
+              {who.email} · {fmt(p.requested_at)}
+            </div>
+          </div>
+        </div>
+        <Badge tone="gold">{PAYOUT_STEPS[i].label}</Badge>
+      </div>
+      <p className="mt-3 break-all rounded-2xl bg-ink/[0.04] p-3 text-[0.92rem]">{`${p.method === "sepa" ? "IBAN" : "Adresse crypto"} : ${p.destination}`}</p>
+      {next.id === "reussi" && (
+        <div className="mt-3">
+          <Field label="Référence du virement ou de la transaction" value={ref} onChange={setRef} />
+        </div>
+      )}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Button variant="gold" disabled={next.id === "reussi" && !ref.trim()} onClick={async () => (await rpc("staff_payout_status", { payout: p.id, new_status: next.id, ref: ref.trim() || null })) && reload()}>
+          {next.label}
+        </Button>
+        <Button variant="outline" onClick={async () => (await rpc("staff_payout_status", { payout: p.id, new_status: "refuse" })) && reload()}>
+          Refuser
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
+// Anonymous counters and totals: never a person.
+function Stats({ m }: { m: Row }) {
+  const tries = m.card_ok + m.card_fail;
+  const share = (n: number) => (m.owners ? `${Math.round((n / m.owners) * 100)} %` : "—");
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {[
+        { label: "Sessions actives", value: String(m.active_sessions) },
+        { label: "Ouvertures du Coffre (30 jours)", value: String(m.openings) },
+        { label: "Temps moyen dans le Coffre", value: m.openings ? `${Math.round(m.seconds / m.openings / 60)} min` : "—" },
+        { label: "Échecs d'authentification par carte", value: tries ? `${Math.round((m.card_fail / tries) * 100)} %` : "—" },
+        { label: "Titulaires", value: String(m.owners) },
+        { label: "Avec au moins un garant", value: share(m.with_guarantors) },
+        { label: "Avec au moins un bénéficiaire", value: share(m.with_beneficiaries) },
+        { label: "Demandes coup dur (30 jours)", value: String(m.coup_dur) },
+        { label: "Décès signalés (30 jours)", value: String(m.deces) },
+        { label: "Partenaires actifs", value: `${m.partners} (+${m.candidates} en attente)` },
+        { label: "Commissions dues au total", value: euros(m.commissions_cents) },
+        { label: "Retraits en cours", value: String(m.payouts_pending) },
+      ].map((x) => (
+        <Card key={x.label} className="!p-4">
+          <div className="text-[0.82rem] text-mist">{x.label}</div>
+          <div className="mt-1 font-display text-[1.3rem] font-semibold">{x.value}</div>
+        </Card>
+      ))}
     </div>
   );
 }

@@ -16,6 +16,10 @@ export type TemplateId =
   | "proches-sans-compte"
   | "verifier-infos"
   | "protection"
+  | "partenaire-valide"
+  | "partenaire-refuse"
+  | "retrait-reussi"
+  | "retrait-refuse"
   | "cartes-commandees"
   | "a-jour"
   | "impaye"
@@ -97,6 +101,14 @@ export function render(id: TemplateId, d: Record<string, string> = {}, lang = "f
       return { subject: t`${d.ownerName} a validé votre accès`, title: t`Votre accès est prêt`, body: [t`${d.ownerName} a accepté votre demande. Dans l'application, avec Face ID et votre code, vous ouvrez ce qu'il ou elle vous confie, au moment prévu.`], cta: { label: t`Ouvrir l'application`, path: "/proche" } };
     case "cartes-beneficiaire":
       return { subject: t`Vos cartes pour le Coffre de ${d.ownerName}`, title: t`Où vous envoyer vos 2 cartes ?`, body: [t`Toutes nos condoléances. ${d.ownerName} vous avait réservé 2 cartes à votre nom.`, t`Indiquez dans l'application l'adresse où les recevoir : elles partent aussitôt et arrivent pendant le délai de vérification. Cette adresse est effacée dès leur envoi.`], cta: { label: t`Indiquer mon adresse`, path: "/proche" } };
+    case "partenaire-valide":
+      return { subject: t`Vous êtes partenaire`, title: t`Bienvenue dans le programme partenaires`, body: [t`Votre candidature est acceptée. Votre code de parrainage : ${d.code}.`, t`Dans votre espace partenaire : votre lien à partager, la répartition de vos 25 % entre vos ventes directes et celles de vos filleuls, vos commissions et vos retraits.`], cta: { label: t`Mon espace partenaire`, path: "/espace/partenaire" } };
+    case "partenaire-refuse":
+      return { subject: t`Votre candidature partenaire`, title: t`Candidature non retenue`, body: [t`Votre candidature au programme partenaires n'a pas été retenue pour le moment. Vous pourrez candidater de nouveau depuis votre Espace.`], cta: { label: t`Mon espace partenaire`, path: "/espace/partenaire" } };
+    case "retrait-reussi":
+      return { subject: t`Votre retrait de ${d.amount} ${d.currency} est effectué`, title: t`Retrait effectué`, body: [t`Votre retrait de ${d.amount} ${d.currency} a été envoyé. Selon le moyen choisi, il peut mettre quelques jours à arriver.`], cta: { label: t`Mon espace partenaire`, path: "/espace/partenaire" } };
+    case "retrait-refuse":
+      return { subject: t`Votre demande de retrait`, title: t`Retrait non effectué`, body: [t`Votre demande de retrait de ${d.amount} ${d.currency} n'a pas pu être traitée : le montant reste sur votre solde. Vérifiez vos coordonnées et refaites la demande, ou écrivez au support.`], cta: { label: t`Mon espace partenaire`, path: "/espace/partenaire" } };
     case "cartes-commandees":
       return { subject: t`Vos cartes sont en fabrication`, title: t`Vos cartes arrivent`, body: [t`${d.count} cartes sont en fabrication. Dès réception, posez-les sur votre téléphone pour les activer.`] };
     case "nouvel-appareil":

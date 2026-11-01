@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { BadgeCheck, Bell, CalendarClock, ChevronRight, CreditCard, FileUp, FlaskConical, Info, KeyRound, LogOut, Mail, ShieldCheck, Trash, Users } from "lucide-react";
+import { BadgeCheck, Bell, CalendarClock, ChevronRight, CreditCard, FileUp, FlaskConical, Handshake, Info, KeyRound, LogOut, Mail, ShieldCheck, Trash, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -193,6 +193,11 @@ export default function Compte() {
         <Link href="/espace/procedures" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
           <Bell className="h-6 w-6 text-gold-deep" />
           <span className="flex-1 font-semibold">Coup dur et décès : signalements</span>
+          <ChevronRight className="h-5 w-5 text-mist" />
+        </Link>
+        <Link href="/espace/partenaire" className="flex items-center gap-4 rounded-2xl bg-paper p-4 ring-1 ring-line">
+          <Handshake className="h-6 w-6 text-gold-deep" />
+          <span className="flex-1 font-semibold">Programme partenaires</span>
           <ChevronRight className="h-5 w-5 text-mist" />
         </Link>
         {!PROD && (

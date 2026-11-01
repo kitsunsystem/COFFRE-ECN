@@ -1,0 +1,104 @@
+# Programme partenaires, retraits, statistiques anonymes, Coffre dans le navigateur du téléphone (01/11/2026).
+EUR
+user_id, status, motivation, code, n1, applied_at, profiles!partners_user_id_fkey(first_name,last_name,email)
+*, partners!inner(profiles!partners_user_id_fkey(first_name,last_name,email))
+{0}/?ref={1}
+status, code, n1
+id, amount_cents, method, status, requested_at, destination, reference
+Sophie M.
+IBAN
+FR76 …
+Partenaires	Partners	Socios	Socis
+Retraits	Withdrawals	Retiradas	Retirades
+Statistiques	Statistics	Estadísticas	Estadístiques
+Aucune candidature. Espace › Compte › Programme partenaires.	No application. Space › Account › Partner programme.	Ninguna solicitud. Espacio › Cuenta › Programa de socios.	Cap sol·licitud. Espai › Compte › Programa de socis.
+Partenaire	Partner	Socio	Soci
+Refusé	Refused	Rechazado	Rebutjat
+Candidature	Application	Solicitud	Sol·licitud
+Code {0} · niveau 1 : {1} %, niveau 2 : {2} % · {3} vente{4}	Code {0} · level 1: {1}%, level 2: {2}% · {3} sale(s)	Código {0} · nivel 1: {1} %, nivel 2: {2} % · {3} venta(s)	Codi {0} · nivell 1: {1} %, nivell 2: {2} % · {3} venda(es)
+Aucune demande de retrait.	No withdrawal request.	Ninguna solicitud de retirada.	Cap sol·licitud de retirada.
+Virement SEPA	SEPA transfer	Transferencia SEPA	Transferència SEPA
+Crypto	Crypto	Cripto	Cripto
+coordonnée effacée	details erased	datos borrados	dades esborrades
+Ouvertures du Coffre	Vault openings	Aperturas del Cofre	Obertures del Cofre
+Temps moyen dans le Coffre	Average time in the Vault	Tiempo medio en el Cofre	Temps mitjà al Cofre
+{0} min	{0} min	{0} min	{0} min
+Échecs d'authentification par carte	Card authentication failures	Fallos de autenticación con tarjeta	Errors d'autenticació amb targeta
+Titulaires avec un garant	Holders with a trusted contact	Titulares con un garante	Titulars amb un garant
+1 sur 1	1 of 1	1 de 1	1 de 1
+0 sur 1	0 of 1	0 de 1	0 de 1
+Demandes coup dur	Crisis requests	Solicitudes por imprevisto grave	Sol·licituds per imprevist greu
+Partenaires actifs	Active partners	Socios activos	Socis actius
+Code {0} · niveau 1 : {1} %, niveau 2 : {2} %	Code {0} · level 1: {1}%, level 2: {2}%	Código {0} · nivel 1: {1} %, nivel 2: {2} %	Codi {0} · nivell 1: {1} %, nivell 2: {2} %
+Adresse crypto	Crypto address	Dirección cripto	Adreça cripto
+Référence du virement ou de la transaction	Transfer or transaction reference	Referencia de la transferencia o de la transacción	Referència de la transferència o de la transacció
+Sessions actives	Active sessions	Sesiones activas	Sessions actives
+Ouvertures du Coffre (30 jours)	Vault openings (30 days)	Aperturas del Cofre (30 días)	Obertures del Cofre (30 dies)
+Titulaires	Holders	Titulares	Titulars
+Avec au moins un garant	With at least one trusted contact	Con al menos un garante	Amb almenys un garant
+Avec au moins un bénéficiaire	With at least one beneficiary	Con al menos un beneficiario	Amb almenys un beneficiari
+Demandes coup dur (30 jours)	Crisis requests (30 days)	Solicitudes por imprevisto grave (30 días)	Sol·licituds per imprevist greu (30 dies)
+Décès signalés (30 jours)	Deaths reported (30 days)	Fallecimientos comunicados (30 días)	Defuncions comunicades (30 dies)
+{0} (+{1} en attente)	{0} (+{1} pending)	{0} (+{1} pendientes)	{0} (+{1} pendents)
+Commissions dues au total	Total commissions due	Comisiones adeudadas en total	Comissions degudes en total
+Retraits en cours	Withdrawals in progress	Retiradas en curso	Retirades en curs
+Proche d'un titulaire ? Votre accès se fait dans l'application	A holder's relative? Your access is in the app	¿Allegado de un titular? Su acceso se hace en la aplicación	Familiar d'un titular? El vostre accés es fa a l'aplicació
+Programme partenaires	Partner programme	Programa de socios	Programa de socis
+Espace partenaire	Partner space	Espacio de socio	Espai de soci
+Recommandez le Coffre, soyez rémunéré	Recommend the Vault, get paid	Recomiende el Cofre y gane comisiones	Recomaneu el Cofre i guanyeu comissions
+Sur chaque coffre vendu grâce à vous, {0} % du prix hors taxes sont reversés : vous choisissez la part que vous gardez sur vos ventes directes et celle que vous prenez sur les ventes de vos filleuls.	On every vault sold thanks to you, {0}% of the price before tax is paid back: you choose the share you keep on your direct sales and the share you take on your recruits' sales.	Por cada cofre vendido gracias a usted, se reintegra el {0} % del precio sin impuestos: usted elige la parte que conserva en sus ventas directas y la que toma de las ventas de sus ahijados.	Per cada cofre venut gràcies a vós, es retorna el {0} % del preu sense impostos: vós trieu la part que conserveu de les vostres vendes directes i la que preneu de les vendes dels vostres afillats.
+Votre candidature est en cours d'examen par notre équipe. Vous serez prévenu par e-mail.	Your application is being reviewed by our team. You will be told by email.	Nuestro equipo está examinando su solicitud. Se le avisará por correo electrónico.	El nostre equip està examinant la vostra sol·licitud. Se us avisarà per correu electrònic.
+Devenir partenaire	Become a partner	Hacerse socio	Fer-se soci
+Votre dernière candidature n'a pas été retenue. Vous pouvez en envoyer une nouvelle.	Your last application was not accepted. You can send a new one.	Su última solicitud no ha sido aceptada. Puede enviar una nueva.	La vostra darrera sol·licitud no ha estat acceptada. En podeu enviar una de nova.
+{0} % de chaque première vente, sur deux niveaux	{0}% of each first sale, over two levels	El {0} % de cada primera venta, en dos niveles	El {0} % de cada primera venda, en dos nivells
+Votre lien à partager, et vos statistiques	Your link to share, and your statistics	Su enlace para compartir y sus estadísticas	El vostre enllaç per compartir i les vostres estadístiques
+Vos retraits quand vous le voulez, par virement ou en crypto	Your withdrawals whenever you want, by transfer or in crypto	Sus retiradas cuando quiera, por transferencia o en cripto	Les vostres retirades quan vulgueu, per transferència o en cripto
+Pourquoi souhaitez-vous devenir partenaire ?	Why do you want to become a partner?	¿Por qué desea hacerse socio?	Per què voleu fer-vos soci?
+Votre activité, votre réseau, comment vous comptez recommander le Coffre	Your activity, your network, how you plan to recommend the Vault	Su actividad, su red, cómo piensa recomendar el Cofre	La vostra activitat, la vostra xarxa, com penseu recomanar el Cofre
+Envoyer ma candidature	Send my application	Enviar mi solicitud	Enviar la meva sol·licitud
+Notre équipe examine chaque candidature. Une fois acceptée, votre espace partenaire apparaît dans le menu.	Our team reviews each application. Once accepted, your partner space appears in the menu.	Nuestro equipo examina cada solicitud. Una vez aceptada, su espacio de socio aparece en el menú.	El nostre equip examina cada sol·licitud. Un cop acceptada, el vostre espai de soci apareix al menú.
+Votre lien de parrainage	Your referral link	Su enlace de patrocinio	El vostre enllaç de patrocini
+Lien copié	Link copied	Enlace copiado	Enllaç copiat
+Copier mon lien	Copy my link	Copiar mi enlace	Copiar el meu enllaç
+Répartition de vos {0} %	Split of your {0}%	Reparto de su {0} %	Repartiment del vostre {0} %
+Niveau 1 : vos ventes directes	Level 1: your direct sales	Nivel 1: sus ventas directas	Nivell 1: les vostres vendes directes
+Niveau 2 : les ventes de vos filleuls	Level 2: your recruits' sales	Nivel 2: las ventas de sus ahijados	Nivell 2: les vendes dels vostres afillats
+Part du niveau 1	Level 1 share	Parte del nivel 1	Part del nivell 1
+Une vente ne coûte jamais plus de {0} % : sur la vente d'un filleul, votre part de niveau 2 passe en premier ; sur vos ventes directes, vous recevez votre part de niveau 1, dans la limite de ce que votre propre parrain ne prend pas. Le changement vaut pour les ventes à venir.	A sale never costs more than {0}%: on a recruit's sale, your level 2 share comes first; on your direct sales, you receive your level 1 share, within what your own sponsor does not take. The change applies to future sales.	Una venta nunca cuesta más del {0} %: en la venta de un ahijado, su parte de nivel 2 va primero; en sus ventas directas, recibe su parte de nivel 1, dentro de lo que su propio patrocinador no toma. El cambio se aplica a las ventas futuras.	Una venda mai no costa més del {0} %: en la venda d'un afillat, la vostra part de nivell 2 va primer; en les vostres vendes directes, rebeu la vostra part de nivell 1, dins del que el vostre propi patrocinador no pren. El canvi s'aplica a les vendes futures.
+Enregistrer la répartition	Save the split	Guardar el reparto	Desar el repartiment
+Volume d'affaires	Business volume	Volumen de negocio	Volum de negoci
+Commissions gagnées	Commissions earned	Comisiones ganadas	Comissions guanyades
+Coffres vendus	Vaults sold	Cofres vendidos	Cofres venuts
+{0} en direct · {1} par vos filleuls	{0} direct · {1} through your recruits	{0} directas · {1} por sus ahijados	{0} directes · {1} pels vostres afillats
+Clics et inscriptions	Clicks and sign-ups	Clics y registros	Clics i registres
+Commissions par mois	Commissions per month	Comisiones por mes	Comissions per mes
+Vos filleuls (niveau 2)	Your recruits (level 2)	Sus ahijados (nivel 2)	Els vostres afillats (nivell 2)
+{0} vente{1}	{0} sale(s)	{0} venta(s)	{0} venda(es)
+Démo : vente directe	Demo: direct sale	Demo: venta directa	Demo: venda directa
+Démo : vente d'un filleul	Demo: recruit's sale	Demo: venta de un ahijado	Demo: venda d'un afillat
+Solde disponible : {0}	Available balance: {0}	Saldo disponible: {0}	Saldo disponible: {0}
+Montant (€)	Amount (€)	Importe (€)	Import (€)
+Adresse du portefeuille	Wallet address	Dirección del monedero	Adreça del moneder
+Cette coordonnée n'est gardée que le temps du retrait : elle est effacée dès qu'il est clôturé.	These details are kept only for the withdrawal: they are erased as soon as it is closed.	Este dato solo se conserva el tiempo de la retirada: se borra en cuanto se cierra.	Aquesta dada només es conserva el temps de la retirada: s'esborra tan bon punt es tanca.
+Demander le retrait	Request the withdrawal	Solicitar la retirada	Sol·licitar la retirada
+Demandé	Requested	Solicitada	Sol·licitada
+Validation financière	Financial validation	Validación financiera	Validació financera
+Virement ou transaction en cours	Transfer or transaction in progress	Transferencia o transacción en curso	Transferència o transacció en curs
+Réussi	Completed	Completada	Completada
+IBAN ou adresse invalide.	Invalid IBAN or address.	IBAN o dirección no válidos.	IBAN o adreça no vàlids.
+Solde insuffisant.	Insufficient balance.	Saldo insuficiente.	Saldo insuficient.
+Un retrait est déjà en cours.	A withdrawal is already in progress.	Ya hay una retirada en curso.	Ja hi ha una retirada en curs.
+Vous êtes partenaire	You are a partner	Ya es socio	Ja sou soci
+Bienvenue dans le programme partenaires	Welcome to the partner programme	Bienvenido al programa de socios	Benvingut al programa de socis
+Votre candidature est acceptée. Votre code de parrainage : {0}.	Your application is accepted. Your referral code: {0}.	Su solicitud ha sido aceptada. Su código de patrocinio: {0}.	La vostra sol·licitud ha estat acceptada. El vostre codi de patrocini: {0}.
+Dans votre espace partenaire : votre lien à partager, la répartition de vos 25 % entre vos ventes directes et celles de vos filleuls, vos commissions et vos retraits.	In your partner space: your link to share, the split of your 25% between your direct sales and your recruits' sales, your commissions and your withdrawals.	En su espacio de socio: su enlace para compartir, el reparto de su 25 % entre sus ventas directas y las de sus ahijados, sus comisiones y sus retiradas.	Al vostre espai de soci: el vostre enllaç per compartir, el repartiment del vostre 25 % entre les vostres vendes directes i les dels vostres afillats, les vostres comissions i les vostres retirades.
+Mon espace partenaire	My partner space	Mi espacio de socio	El meu espai de soci
+Votre candidature partenaire	Your partner application	Su solicitud de socio	La vostra sol·licitud de soci
+Candidature non retenue	Application not accepted	Solicitud no aceptada	Sol·licitud no acceptada
+Votre candidature au programme partenaires n'a pas été retenue pour le moment. Vous pourrez candidater de nouveau depuis votre Espace.	Your application to the partner programme has not been accepted for now. You can apply again from your Space.	Su solicitud al programa de socios no ha sido aceptada por ahora. Podrá volver a solicitarlo desde su Espacio.	La vostra sol·licitud al programa de socis no ha estat acceptada de moment. Podreu tornar a sol·licitar-ho des del vostre Espai.
+Votre retrait de {0} {1} est effectué	Your withdrawal of {0} {1} is done	Su retirada de {0} {1} se ha realizado	La vostra retirada de {0} {1} s'ha fet
+Retrait effectué	Withdrawal done	Retirada realizada	Retirada feta
+Votre retrait de {0} {1} a été envoyé. Selon le moyen choisi, il peut mettre quelques jours à arriver.	Your withdrawal of {0} {1} has been sent. Depending on the method chosen, it may take a few days to arrive.	Su retirada de {0} {1} ha sido enviada. Según el medio elegido, puede tardar unos días en llegar.	La vostra retirada de {0} {1} s'ha enviat. Segons el mitjà triat, pot trigar uns dies a arribar.
+Votre demande de retrait	Your withdrawal request	Su solicitud de retirada	La vostra sol·licitud de retirada
+Retrait non effectué	Withdrawal not done	Retirada no realizada	Retirada no feta
+Votre demande de retrait de {0} {1} n'a pas pu être traitée : le montant reste sur votre solde. Vérifiez vos coordonnées et refaites la demande, ou écrivez au support.	Your withdrawal request of {0} {1} could not be processed: the amount stays in your balance. Check your details and request again, or write to support.	Su solicitud de retirada de {0} {1} no ha podido tramitarse: el importe sigue en su saldo. Compruebe sus datos y vuelva a solicitarla, o escriba al soporte.	La vostra sol·licitud de retirada de {0} {1} no s'ha pogut tramitar: l'import continua al vostre saldo. Comproveu les vostres dades i torneu a sol·licitar-la, o escriviu al suport.

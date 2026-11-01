@@ -57,6 +57,9 @@ Parcours à montrer :
 - **Mes démarches de protection** (procuration, compte joint, mandat de protection future, personne de confiance, assurance-vie, testament, délégation, tuteur) : pourquoi, où, quoi apporter ; relance mensuelle ; comptent dans le pourcentage.
 - **Rubriques v2** : volontés médicales, personnes et animaux à charge, contacts clés, procurations et mandats, administration et impôts, inventaire du patrimoine, étiquettes « à maintenir / à résilier », déclaration des assurances, cryptos et actifs numériques, où sont mes vidéos et souvenirs.
 - **Autonomie** : Alma répond à tout, sinon ticket de conciergerie (coût à part, affiché avant) ; plus aucun renvoi vers un juriste, un notaire ou un avocat.
+- **Programme partenaires** (spécifications de novembre 2026, migration 0008) : candidature validée par l'équipe, code et lien de parrainage, curseur N1/N2 (25 % au total), **une vente ne coûte jamais plus de 25 %** (le parrain prend d'abord son N2, le vendeur son N1 dans la limite du reste), première vente seulement, tableau de bord sans identité des clients, retraits SEPA ou crypto en 4 étapes (rôle d'équipe « finance »), IBAN ou adresse effacés à la clôture.
+- **Statistiques anonymes** (Administration › Statistiques) : sessions actives, ouvertures et temps moyen dans le Coffre, échecs de carte, adoption ; des compteurs, jamais une personne.
+- **Coffre dans le navigateur du téléphone** avec une carte FIDO2 (WebAuthn par NFC), sans appli ; site installable (PWA). L'accès des proches reste dans l'appli.
 - **Fiche d'urgence** copiée dans la fiche médicale du téléphone ; **PDF téléchargeable** contenant uniquement ce que la personne a le droit de voir (sans codes ni mots de passe).
 - **Vidéos** retirées du lancement : « Où se trouvent mes vidéos et souvenirs » dans Volontés et messages.
 - **Échéances** saisies dans l'Espace avec consentement ; relances « tout est-il à jour ? » tous les 3 mois.

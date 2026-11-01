@@ -2,7 +2,7 @@
 // A relative only ever receives the SSKs the owner attributed to them, sealed to their phone's key (their cards keep that key).
 // Each file has its own key, kept inside its (encrypted) element: changing a sub-section key never re-uploads files.
 import { del, get, set as idbSet } from "idb-keyval";
-import { closeProcedureRemote, loadHolderView, remote, trustOfCard } from "./api";
+import { closeProcedureRemote, loadHolderView, remote, track, trustOfCard } from "./api";
 import { keyFrom, purposeOf, type Enrolled, type Tap } from "./cards";
 import { fromB64, na, newKey, newSalt, open, openBytes, openFrom, openJson, seal, sealBytes, sealJson, sealTo, toB64, type Sealed } from "./crypto";
 import { PROD } from "./env";
@@ -139,8 +139,10 @@ export async function cardKeys(tap: Tap, pin?: string): Promise<OpenSession> {
       keys = { mode: "holder", cardId: card.phoneId!, publicKey: (await na()).crypto_scalarmult_base(privateKey), privateKey };
     }
     failedAttempts = 0;
+    track("carte_ok");
     return keys;
   } catch {
+    track("carte_echec");
     if (++failedAttempts >= 5) {
       lockedUntil = Date.now() + 5 * 60_000;
       failedAttempts = 0;
@@ -152,6 +154,8 @@ export async function cardKeys(tap: Tap, pin?: string): Promise<OpenSession> {
 // Opens the Coffre on this device with keys from a card, or sent by the phone to a trusted computer.
 export async function openSession(keys: OpenSession): Promise<"owner" | "holder"> {
   useSession.getState().setSession(keys);
+  track("coffre_ouvert");
+  openedAt = Date.now();
   // Never reported as a wrong code: the Coffre is open, these only bring it up to date.
   if (keys.mode === "owner") await ensureSubsectionKeys().then(syncEnvelopes).catch(console.error);
   else if (PROD) {
@@ -164,7 +168,10 @@ export async function openSession(keys: OpenSession): Promise<"owner" | "holder"
 
 export const unlock = async (tap: Tap, pin?: string) => openSession(await cardKeys(tap, pin));
 
+let openedAt = 0;
 export const lock = () => {
+  if (openedAt) track("coffre_secondes", Math.round((Date.now() - openedAt) / 1000));
+  openedAt = 0;
   useSession.getState().setSession({ mode: "locked" });
   if (useApp.getState().holder) useApp.getState().set({ holder: undefined });
 };
