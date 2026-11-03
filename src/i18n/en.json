@@ -1734,7 +1734,7 @@
 "déposé par {0} ({1})":"uploaded by {0} ({1})",
 "en attente d'un bénéficiaire":"awaiting a beneficiary",
 "en cours de vérification":"being verified",
-"en pré-lancement, le Coffre reste fermé jusqu'au lancement : basculez pour le montrer":"in pre-launch, the Vault stays closed until the launch: switch over to show it",
+"en pré-lancement, on ne peut pas encore ajouter de documents au Coffre : basculez pour tout montrer":"in pre-launch, documents cannot be added to the Vault yet: switch over to show everything",
 "iPhone : app Santé › votre photo › Fiche médicale › Modifier. Android : Paramètres › Sécurité et urgence › Informations médicales. Collez le texte, puis activez « Afficher en mode verrouillé ».":"iPhone: Health app › your photo › Medical ID › Edit. Android: Settings › Safety & emergency › Medical information. Paste the text, then turn on \"Show When Locked\".",
 "inclus ou payant, à décider":"included or paid, to be decided",
 "indiquée dans Famille":"given in Family",
