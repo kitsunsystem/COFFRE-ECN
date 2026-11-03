@@ -66,7 +66,7 @@ export async function seedDemo() {
   await setRight(paul.id, "lettres", "deces");
   await setRight(paul.id, "obseques", "deces");
   useSession.getState().setSession({ mode: "locked" });
-  // Presentation: the demo ends in the pre-launch customers see (everything but the Coffre, opening on the launch date);
-  // Compte › Mode démonstration switches to the launch to show the Coffre filled in above.
+  // Presentation: the demo ends in pre-launch, with the launch date on every page; Claire's Coffre stays readable as an
+  // example, nothing can be added before the launch. Compte › Mode démonstration switches to the launch.
   useApp.getState().set({ tourPending: true, phase: "decouverte" });
 }
