@@ -33,8 +33,16 @@ npm run build        # export statique dans out/ (site + applications)
 npm run build:prod   # idem + en-têtes de sécurité (CSP, HSTS…) pour Cloudflare Pages
 npm run test:e2e     # parcours complet sur un vrai Supabase (supabase start), lancé aussi par la CI
 npm run i18n         # reconstruit les traductions depuis src/i18n/*.tsv et liste les textes manquants
-npm run deploy       # met à jour la démo en ligne (toujours en mode démonstration)
+npm run deploy       # met à jour la démo en ligne, depuis la branche presentation (toujours en mode démonstration)
 npx cap sync         # copie le site dans les projets iOS (ios/) et Android (android/)
+```
+
+**Deux branches.** `main` est la version officielle : on y travaille chaque jour jusqu'au lancement. `presentation` est
+la version publique, celle de la démo en ligne : elle s'ouvre en pré-lancement, avec la date du lancement. Pour la
+mettre à jour avec le travail de `main` :
+
+```bash
+git checkout presentation && git merge main && git push && npm run deploy && git checkout main
 ```
 
 **Démonstration** : page *Connexion* → « Découvrir la démonstration ». Code de toutes les cartes et des téléphones des proches : `123456`. Le *Mode démonstration* (Compte) avance le temps, simule la veille INSEE, bascule entre pré-lancement et lancement officiel, simule un impayé, et ouvre l'Espace bénéficiaire et l'administration.

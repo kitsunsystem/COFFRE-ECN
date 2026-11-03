@@ -19,7 +19,7 @@ export const GRACE_DAYS = 30;
 // shortcut: global constant for the demo (switchable in Mode démonstration); in production it is the app_settings.launched flag.
 export const LAUNCH = {
   phase: "decouverte" as "decouverte" | "lancement",
-  plannedDate: null as string | null, // date de lancement officiel annoncée, AAAA-MM-JJ (à décider) ; en production : app_settings.planned_launch
+  plannedDate: "2027-01-01" as string | null, // date de lancement officiel annoncée, AAAA-MM-JJ ; en production, celle de la console (app_settings.planned_launch) prime
   discoveryPrice: null as number | null, // prix de la phase découverte (à décider)
 };
 

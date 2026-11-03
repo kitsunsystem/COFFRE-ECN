@@ -201,6 +201,7 @@ const initial: State = {
   reminders: [],
   reminderConsent: false,
   phase: LAUNCH.phase,
+  plannedLaunch: LAUNCH.plannedDate ?? undefined,
   billing: { status: "a_jour" },
   checklist: {},
   concierge: [],

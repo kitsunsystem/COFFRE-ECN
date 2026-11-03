@@ -1,6 +1,6 @@
 // Every change the app makes goes through here. Demo: the local store only. Production: Supabase first (the database
 // checks the rules), then the local store with what the server accepted. Errors are shown to the person, never swallowed.
-import { CONCIERGE, OFFER } from "./config";
+import { CONCIERGE, LAUNCH, OFFER } from "./config";
 import { currentLang } from "./i18n";
 import { PROD } from "./env";
 import { rates, type Dashboard, type Payout } from "./affiliation";
@@ -122,7 +122,7 @@ export async function loadAll() {
     staffRole: (staff as { role?: string } | null)?.role,
     trusts: ((trusts as unknown[]) ?? []).map((t) => toTrust(t as Record<string, unknown>)),
     phase: (settings as { launched: boolean }).launched ? ("lancement" as const) : ("decouverte" as const),
-    plannedLaunch: (settings as { planned_launch?: string }).planned_launch ?? undefined,
+    plannedLaunch: (settings as { planned_launch?: string }).planned_launch ?? LAUNCH.plannedDate ?? undefined,
     conciergeKey: (settings as { concierge_public_key?: string }).concierge_public_key ?? undefined,
     holder: undefined,
     partner: partner ? { ...(partner as { status: "candidat" | "actif" | "refuse"; n1: number }), code: (partner as { code: string | null }).code ?? undefined } : undefined,

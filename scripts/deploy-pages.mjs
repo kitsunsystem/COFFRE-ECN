@@ -7,6 +7,10 @@ import { rmSync, writeFileSync } from "node:fs";
 const sh = (cmd, opts = {}) => execSync(cmd, { stdio: "inherit", ...opts });
 const read = (cmd) => execSync(cmd).toString().trim();
 
+// The public demo is the presentation branch, exactly as committed: daily work on main never goes public by mistake.
+if (read("git rev-parse --abbrev-ref HEAD") !== "presentation") throw new Error("La démo publique se publie depuis la branche presentation : git checkout presentation");
+if (read("git status --porcelain")) throw new Error("Des modifications ne sont pas enregistrées (commit) : la démo publique doit être exactement la branche presentation.");
+
 const TARGET = process.env.DEMO_REPO ?? "https://github.com/kitsunsystem/COFFRE-ECN.git";
 const [owner, repo] = TARGET.replace(/\.git$/, "").split("/").slice(-2);
 const BASE = `/${repo}`; // a project site lives under /<repo>/

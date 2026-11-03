@@ -44,6 +44,20 @@ export async function saveFile(blob: Blob, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
+// The phone's share sheet (WhatsApp, Signal, Messages…), or the browser's when it has one. True once an app was chosen.
+export const canShare = () => isNative() || typeof navigator.share === "function";
+export async function shareText(title: string, text: string) {
+  try {
+    if (isNative()) {
+      const { Share } = await import("@capacitor/share");
+      await Share.share({ title, text });
+    } else await navigator.share({ title, text });
+    return true;
+  } catch {
+    return false; // closed without choosing an app
+  }
+}
+
 export async function copyText(text: string) {
   if (isNative()) {
     const { Clipboard } = await import("@capacitor/clipboard");
