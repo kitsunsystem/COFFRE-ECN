@@ -238,21 +238,28 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
     title: "Essayez la démo",
     text: "Le parcours qui montre tout, dans l'ordre :",
     visual: null,
-    extra: (
-      <ol className="mt-4 space-y-2.5 text-left">
-        {SCENARIO.map(([t, d], k) => (
-          <motion.li key={t} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + k * 0.08 }} className="flex gap-3 rounded-2xl bg-paper/[0.06] p-3.5 ring-1 ring-paper/10">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gold font-display font-semibold text-night">{k + 1}</span>
-            <span>
-              <span className="block font-semibold leading-snug">{t}</span>
-              <span className="text-[0.85rem] text-paper/60">{d}</span>
-            </span>
-          </motion.li>
-        ))}
-      </ol>
-    ),
+    extra: <Scenario />,
   },
 ];
+
+// In pre-launch the Coffre stays closed until the launch: the first step shows how to open it for the demo.
+function Scenario() {
+  const prelaunch = useApp((s) => s.phase === "decouverte");
+  const steps = prelaunch ? [["Compte → Mode démonstration → Lancement officiel", "en pré-lancement, le Coffre reste fermé jusqu'au lancement : basculez pour le montrer"], ...SCENARIO] : SCENARIO;
+  return (
+    <ol className="mt-4 space-y-2.5 text-left">
+      {steps.map(([t, d], k) => (
+        <motion.li key={t} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + k * 0.08 }} className="flex gap-3 rounded-2xl bg-paper/[0.06] p-3.5 ring-1 ring-paper/10">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gold font-display font-semibold text-night">{k + 1}</span>
+          <span>
+            <span className="block font-semibold leading-snug">{t}</span>
+            <span className="text-[0.85rem] text-paper/60">{d}</span>
+          </span>
+        </motion.li>
+      ))}
+    </ol>
+  );
+}
 
 const slide = {
   enter: (d: number) => ({ opacity: 0, x: d * 70, rotateY: d * -24 }),
