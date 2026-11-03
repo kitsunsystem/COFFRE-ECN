@@ -242,10 +242,10 @@ const STEPS: { eyebrow: string; title: string; text: string; visual: ReactNode; 
   },
 ];
 
-// In pre-launch the Coffre stays closed until the launch: the first step shows how to open it for the demo.
+// In pre-launch nothing can be added to the Coffre yet: the first step shows how to demo the launched product.
 function Scenario() {
   const prelaunch = useApp((s) => s.phase === "decouverte");
-  const steps = prelaunch ? [["Compte → Mode démonstration → Lancement officiel", "en pré-lancement, le Coffre reste fermé jusqu'au lancement : basculez pour le montrer"], ...SCENARIO] : SCENARIO;
+  const steps = prelaunch ? [["Compte → Mode démonstration → Lancement officiel", "en pré-lancement, on ne peut pas encore ajouter de documents au Coffre : basculez pour tout montrer"], ...SCENARIO] : SCENARIO;
   return (
     <ol className="mt-4 space-y-2.5 text-left">
       {steps.map(([t, d], k) => (
