@@ -26,6 +26,7 @@ writeFileSync("out/.nojekyll", ""); // otherwise Pages hides the _next/ folder
 // out/ becomes a throwaway one-commit repo: gh-pages only ever holds the latest build.
 sh("git init -q -b gh-pages", { cwd: "out" });
 sh("git -c core.autocrlf=false add -A", { cwd: "out" });
-sh('git commit -q -m "Demo en ligne"', { cwd: "out", env });
+// The label shows on GitHub which version of the presentation branch is online.
+sh(`git commit -q -m "Démo en ligne : branche presentation (${read("git rev-parse --short HEAD")})"`, { cwd: "out", env });
 sh(`git push -f ${TARGET} gh-pages`, { cwd: "out" });
 console.log(`\nPublié : https://${owner.toLowerCase()}.github.io${BASE}/`);
