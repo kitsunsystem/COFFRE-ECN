@@ -45,6 +45,10 @@ mettre à jour avec le travail de `main` :
 git checkout presentation && git merge main && git push && npm run deploy && git checkout main
 ```
 
+`npm run deploy` compile `presentation` et range le site dans une troisième branche, `gh-pages`. C'est elle que GitHub
+Pages doit afficher (Settings › Pages › Branch : `gh-pages`, `/ (root)`) ; `main` et `presentation` ne contiennent que
+le code : réglé sur l'une d'elles, le site montre ce README au lieu de l'application.
+
 **Démonstration** : page *Connexion* → « Découvrir la démonstration ». Code de toutes les cartes et des téléphones des proches : `123456`. Le *Mode démonstration* (Compte) avance le temps, simule la veille INSEE, bascule entre pré-lancement et lancement officiel, simule un impayé, et ouvre l'Espace bénéficiaire et l'administration.
 
 Parcours à montrer :
