@@ -1,15 +1,19 @@
-BASE DE CONNAISSANCE D'ALMA, L'ASSISTANTE DE SILLAGE
+BASE DE CONNAISSANCE D'ALMA, L'ASSISTANTE DE LLARYS
 Les durées et délais ci-dessous sont les réglages actuels du service.
 
 
 === 1. LE SERVICE EN BREF ===
 
-Sillage est un coffre de vie et de succession, personnel ou familial : il aide les familles à tout retrouver et tout régler, de leur vivant comme après : la vie quotidienne, une hospitalisation, un accident, une perte d'autonomie, un décès.
+LLARYS est un coffre de vie et de succession, personnel ou familial : il aide les familles à tout retrouver et tout régler, de leur vivant comme après : la vie quotidienne, une hospitalisation, un accident, une perte d'autonomie, un décès.
 Chaque titulaire prépare un Coffre chiffré : ses papiers, ses comptes, ses contrats, ses codes, ses volontés et ses messages. Il choisit, pour chaque proche, ce que ce proche pourra ouvrir, et à quel moment : maintenant, en cas de coup dur, au décès, ou jamais. Un accès conseillé est proposé pour chaque sous-rubrique : le titulaire le confirme ou le change.
 Rien n'est à retenir : le Coffre s'ouvre avec une carte sans contact et un code (ou Face ID dans l'application).
-Personne d'autre ne peut lire le Coffre, pas même l'équipe de Sillage : tout est chiffré sur le téléphone avant d'être envoyé.
+Personne d'autre ne peut lire le Coffre, pas même l'équipe de LLARYS : tout est chiffré sur le téléphone avant d'être envoyé.
 En plus du Coffre : des démarches de protection à faire de son vivant, des listes de démarches et des modèles de courriers pour les moments difficiles, des rappels d'échéances, une fiche d'urgence, l'assistante Alma qui répond à tout, et, quand une aide humaine est vraiment nécessaire, la conciergerie sur ticket (service avec un coût à part).
 L'accès au service se fait sur invitation d'un conseiller.
+
+Le nom LLARYS assemble trois mots. LLAR désigne le foyer en catalan, la langue officielle de l'Andorre : la maison, la famille et la protection. LAR, ce sont les Lares, divinités protectrices du foyer dans la Rome antique, dont le nom a donné le mot catalan llar. LYS, c'est la fleur, symbole de pureté, de noblesse et de continuité familiale. Ensemble, ces trois mots disent ce que fait LLARYS : réunir la famille, protéger ce qui compte et le transmettre à chacun, au bon moment.
+Q : Que veut dire LLARYS ?
+R : C'est l'union de trois mots : LLAR, le foyer en catalan ; LAR, les Lares, protecteurs du foyer dans la Rome antique ; LYS, la fleur, symbole de pureté, de noblesse et de continuité familiale. Le foyer, ceux qui le protègent, et ce qui se transmet.
 
 Ce que comprend la formule : le Coffre, trois cartes pour le titulaire, un pack de 2 cartes prépayées pour chaque bénéficiaire (gardé en solde, envoyé au décès), les démarches de protection, les listes de démarches et les modèles de courriers, l'assistante, les rappels et la fiche d'urgence. Les tarifs sont communiqués au lancement, ou par votre conseiller.
 
@@ -431,7 +435,7 @@ Impayé : des relances chaque semaine pendant un délai de grâce de 30 jours, p
 
 === 22. COMPTE ET RÉGLAGES (ESPACE › COMPTE) ===
 
-On y trouve : vérification d'identité ; téléphone, adresse, adresse e-mail ; mot de passe ; rubrique Entreprise (chef d'entreprise) ; langue (français, anglais, espagnol, catalan : les e-mails suivent la langue choisie) ; couleurs de l'application (Noir et or ou Sillage) ; appareils de confiance ; Coup dur et décès (signalements en cours, annulation) ; abonnement ; adresse du support ; suppression du compte.
+On y trouve : vérification d'identité ; téléphone, adresse, adresse e-mail ; mot de passe ; rubrique Entreprise (chef d'entreprise) ; langue (français, anglais, espagnol, catalan : les e-mails suivent la langue choisie) ; couleurs de l'application (Noir et or ou Lys) ; appareils de confiance ; Coup dur et décès (signalements en cours, annulation) ; abonnement ; adresse du support ; suppression du compte.
 
 Q : Comment supprimer mon compte ?
 R : Espace › Compte › supprimer, puis tapez SUPPRIMER pour confirmer. Votre Espace, votre Coffre, ses documents et les accès de vos proches sont effacés définitivement : personne, pas même l'équipe, ne pourra les récupérer.
@@ -553,7 +557,7 @@ Q : Combien de bénéficiaires puis-je désigner ?
 R : Chaque bénéficiaire a son pack de 2 cartes prépayées à son nom. Votre conseiller vous indique ce que comprend votre formule.
 
 Q : Qui est Alma ?
-R : L'assistante de Sillage. Elle répond à vos questions sur le service et les démarches. Elle ne voit jamais le contenu de votre Coffre. Si elle ne peut pas répondre, vous pouvez ouvrir un ticket auprès de la conciergerie (service avec un coût à part).
+R : L'assistante de LLARYS. Elle répond à vos questions sur le service et les démarches. Elle ne voit jamais le contenu de votre Coffre. Si elle ne peut pas répondre, vous pouvez ouvrir un ticket auprès de la conciergerie (service avec un coût à part).
 
 
 === 27. CHIFFRES CLÉS (RÉGLAGES ACTUELS) ===

@@ -35,7 +35,7 @@ jobs:
       - run: chmod +x android/gradlew && cd android && bash ../scripts/ci-run.sh ./gradlew --no-daemon assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: sillage-android
+          name: llarys-android
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 14
 
@@ -64,6 +64,6 @@ jobs:
           -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
       - uses: actions/upload-artifact@v4
         with:
-          name: sillage-ios-simulator
+          name: llarys-ios-simulator
           path: build/Build/Products/Debug-iphonesimulator/App.app
           retention-days: 14

@@ -5,7 +5,7 @@ import { useSyncExternalStore } from "react";
 import { currentTheme, DEFAULT_THEME, setTheme, subscribeTheme, THEMES } from "@/lib/theme";
 
 const SWATCH: Record<string, string[]> = {
-  sillage: ["#f7f2e9", "#0f1b2d", "#c9a55c"],
+  sillage: ["#f7f2e9", "#17130e", "#c9a55c"],
   noir: ["#050608", "#f6e29e", "#d4af37"],
 };
 

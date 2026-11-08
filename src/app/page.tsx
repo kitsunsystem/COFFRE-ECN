@@ -1,6 +1,7 @@
 "use client";
 import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from "motion/react";
-import { ArrowRight, BadgeCheck, Bell, CalendarClock, ChevronRight, ConciergeBell, EyeOff, FileText, HandHeart, HeartPulse, Lock, ShieldCheck, Siren, Sparkles, UserRound, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, Bell, CalendarClock, ChevronRight, ConciergeBell, EyeOff, FileText, Flower2, HandHeart, HeartPulse, Home, Landmark, Lock, ShieldCheck, Siren, Sparkles, UserRound, Users } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +12,7 @@ import { Aurora, Emblem, Logo, NfcCard, Reveal, rise, stagger, TapDemo } from "@
 import { APP_NAME, LAUNCH, OFFER } from "@/lib/config";
 import { isNative } from "@/lib/native";
 import { moment, type Moment } from "@/lib/rules";
+import markLarge from "@/assets/brand/llarys-mark.webp";
 
 function FloatChip({ icon: I, text, className, delay }: { icon: typeof Bell; text: string; className: string; delay: number }) {
   return (
@@ -116,6 +118,51 @@ function Hero() {
           <FloatChip icon={CalendarClock} text="Passeport : expire dans 30 jours" className="-left-2 top-0 sm:-left-10" delay={1.1} />
           <FloatChip icon={HeartPulse} text="Marc voit : Urgence et santé" className="-right-2 bottom-16 sm:-right-8" delay={1.3} />
           <FloatChip icon={Sparkles} text="Famille préparée à 88 %" className="bottom-0 left-4" delay={1.5} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// The story behind the name, chosen by the client: three old words for the home, its protectors and what is passed on.
+const LORE = [
+  { word: "LLAR", icon: Home, text: "Le foyer, en catalan, la langue de l'Andorre : la maison qui réunit la famille et la protège." },
+  { word: "LAR", icon: Landmark, text: "Les Lares, protecteurs du foyer dans la Rome antique. Comme eux, votre Coffre veille sur ce qui compte et ne s'ouvre que selon vos choix." },
+  { word: "LYS", icon: Flower2, text: "La fleur, symbole de pureté, de noblesse et de continuité familiale : ce que vous transmettez à chacun, au bon moment." },
+];
+
+function Lore() {
+  return (
+    <section id="llarys" className="relative overflow-hidden bg-night px-5 py-24 text-paper">
+      <Aurora dark className="opacity-70" />
+      <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+        <Reveal>
+          <Image src={markLarge} alt="Logo LLARYS" className="mx-auto w-[min(70vw,24rem)] drop-shadow-[0_0_70px_rgb(212_175_55/0.28)]" />
+        </Reveal>
+        <div>
+          <Reveal>
+            <Eyebrow className="!text-gold-soft">Pourquoi LLARYS</Eyebrow>
+            <h2 className="mt-3 text-[2.3rem] font-semibold leading-tight sm:text-[3rem]">Trois mots autour du foyer.</h2>
+            <p className="mt-5 text-[1.1rem] text-paper/75">LLARYS assemble trois mots aux racines anciennes, qui parlent tous de la famille.</p>
+          </Reveal>
+          <div className="mt-10 space-y-4">
+            {LORE.map((x, i) => (
+              <Reveal key={x.word} delay={i * 0.1}>
+                <div className="flex gap-4 rounded-3xl bg-paper/5 p-5 ring-1 ring-paper/10">
+                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gold/15 ring-1 ring-gold/40">
+                    <x.icon className="h-6 w-6 text-gold-soft" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="notranslate font-display text-[1.35rem] font-semibold tracking-[0.16em] text-gold-soft">{x.word}</div>
+                    <p className="mt-1 text-paper/75">{x.text}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal>
+            <p className="mt-8 font-display text-[1.25rem] italic text-paper/85">Le foyer, ses gardiens, et ce qui se transmet.</p>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -400,6 +447,7 @@ export default function Landing() {
   return (
     <>
       <Hero />
+      <Lore />
       <Moments />
       <CardSection />
       <Rights />

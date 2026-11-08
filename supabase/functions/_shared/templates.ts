@@ -38,7 +38,7 @@ export interface Email {
   cta?: { label: string; path: string };
 }
 
-const brand = "Sillage";
+const brand = "LLARYS";
 const LOCALES: Record<MailLang, string> = { fr: "fr-FR", en: "en-GB", es: "es-ES", ca: "ca-ES" };
 
 let dict: Record<string, string> = {};

@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0f1b2d;
-  --color-ink-soft: #2a3a52;
-  --color-night: #070d18;
-  --color-night-2: #0e1a2e;
+  --color-ink: #17130e;
+  --color-ink-soft: #4a4236;
+  --color-night: #050608;
+  --color-night-2: #0c0d10;
   --color-cream: #f7f2e9;
   --color-sand: #ede3d1;
   --color-paper: #fffdf9;
@@ -15,16 +15,16 @@
   --color-sage-soft: #d9eadc;
   --color-coral: #d0573d;
   --color-coral-soft: #f7dcd3;
-  --color-mist: #6b778a;
+  --color-mist: #7a7264;
   --color-line: #e3d9c6;
-  --color-aura: #2c4c7a;
+  --color-aura: #c9a55c;
 
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-manrope), system-ui, sans-serif;
 
   --radius-xl2: 1.75rem;
-  --shadow-soft: 0 1px 2px rgb(15 27 45 / 0.04), 0 8px 24px -8px rgb(15 27 45 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(15 27 45 / 0.06), 0 24px 48px -16px rgb(15 27 45 / 0.22);
+  --shadow-soft: 0 1px 2px rgb(23 19 14 / 0.04), 0 8px 24px -8px rgb(23 19 14 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(23 19 14 / 0.06), 0 24px 48px -16px rgb(23 19 14 / 0.22);
   --shadow-glow: 0 0 0 1px rgb(201 165 92 / 0.25), 0 20px 60px -10px rgb(201 165 92 / 0.45);
 
   --animate-aurora: aurora 18s ease-in-out infinite alternate;
@@ -88,6 +88,20 @@ h1, h2, h3, .font-display {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
+/* Large illustrations shrink on short screens (a phone browser shows less than the whole screen, its bars take the
+   rest), so the main button below them stays in view. zoom also shrinks the space they take, unlike transform. */
+@media (max-height: 760px) { .fit-short { zoom: 0.86; } }
+@media (max-height: 680px) { .fit-short { zoom: 0.74; } }
+@media (max-height: 600px) { .fit-short { zoom: 0.64; } }
+
+/* The LLARYS mark is gold light on black: on the light theme it keeps its black medallion (Emblem, visuals.tsx). */
+html:not([data-theme="noir"]) .brand-medallion {
+  background: #050608;
+  border-radius: 9999px;
+  padding: 7%;
+  box-shadow: 0 0 0 1px rgb(201 165 92 / 0.35);
+}
+
 /* Another language than French: hidden until the page is translated (src/lib/i18n.ts). */
 html.i18n-wait body {
   visibility: hidden;
@@ -98,7 +112,7 @@ html.i18n-wait body {
 .aura-l2 { background: rgb(217 234 220 / 0.8); }
 .aura-l3 { background: rgb(247 220 211 / 0.6); }
 .aura-d1 { background: rgb(201 165 92 / 0.25); }
-.aura-d2 { background: rgb(44 76 122 / 0.5); }
+.aura-d2 { background: rgb(139 92 246 / 0.16); } /* the violet glint of the LLARYS logo */
 .aura-d3 { background: rgb(79 138 98 / 0.25); }
 
 /* Scroll bars in the colours of the app, never the browser's grey ones. */

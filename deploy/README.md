@@ -23,7 +23,7 @@ Pour la **phase de test** (Supabase de test, Brevo, applis en test, sans domaine
    - SMTP & API › API Keys : une clé → Supabase › Edge Functions › Secrets : `BREVO_API_KEY`, plus `MAIL_FROM`
      (l'adresse vérifiée), `MAIL_FROM_NAME`, `APP_URL` et `APP_ORIGINS` (l'adresse du site quand il existera).
 3. **Apple** (compte Organisation : demander le numéro D-U-N-S, gratuit, plusieurs jours) puis :
-   - Certificates, Identifiers & Profiles › Identifiers › + App ID `app.sillage.famille`, cocher **NFC Tag Reading**
+   - Certificates, Identifiers & Profiles › Identifiers › + App ID `com.llarys.app`, cocher **NFC Tag Reading**
      et **Push Notifications** ;
    - App Store Connect › Apps › + Nouvelle app avec cet identifiant ;
    - Users and Access › Integrations › App Store Connect API › clé d'équipe (rôle **Admin**) : secrets
@@ -32,7 +32,7 @@ Pour la **phase de test** (Supabase de test, Brevo, applis en test, sans domaine
 4. **Google Play** (compte Organisation, D-U-N-S aussi) :
    - sur votre PC : `node scripts/android-upload-key.mjs` → secrets `ANDROID_KEYSTORE_BASE64` et
      `ANDROID_KEYSTORE_PASSWORD` (contenu des deux fichiers créés), puis ranger le dossier `coffre-cles` en lieu sûr ;
-   - Play Console › Créer l'application, identifiant `app.sillage.famille` ;
+   - Play Console › Créer l'application, identifiant `com.llarys.app` ;
    - lancer Actions › **Release** une première fois, télécharger le fichier `.aab` produit et le déposer à la main
      dans Tests internes (Google l'exige pour la toute première version) ;
    - Google Cloud › compte de service (clé JSON) invité dans Play Console › Utilisateurs et autorisations avec le
@@ -168,8 +168,7 @@ Le workflow **Mobile** construit à chaque mise à jour un APK Android et une ve
 l'exécution), avec la production si les variables `SUPABASE_URL` / `SUPABASE_ANON_KEY` sont renseignées.
 
 Pour les stores :
-- **Apple** : compte Apple Developer (99 $/an), identifiant `app.sillage.famille` (à changer avec le nom final dans
-  `capacitor.config.json`), certificats de distribution, puis Xcode › Archive. Capability NFC si cartes Tangem.
+- **Apple** : compte Apple Developer (99 $/an), identifiant `com.llarys.app` (définitif dès la création de l'appli chez Apple et Google), certificats de distribution, puis Xcode › Archive. Capability NFC si cartes Tangem.
 - **Google** : compte Google Play Console (25 $), clé de signature (keystore), `./gradlew bundleRelease`.
 - Icônes et écrans de lancement : `npx @capacitor/assets generate` à partir d'un logo 1024×1024.
 - Cartes : Tangem, lues par l'application (module `native/tangem`, à valider avec de vraies cartes : écran
@@ -180,7 +179,7 @@ Pour les stores :
 **Ordinateurs de confiance (notifications).** Sur ordinateur, le Coffre s'ouvre avec l'accord du téléphone (code QR la
 première fois, puis notification). Sans les clés ci-dessous tout fonctionne, la demande attend simplement dans
 l'application ; avec elles, le téléphone sonne :
-- **Android** : projet Firebase (gratuit), application `app.sillage.famille` ; le contenu de `google-services.json`
+- **Android** : projet Firebase (gratuit), application `com.llarys.app` ; le contenu de `google-services.json`
   va dans le secret GitHub `GOOGLE_SERVICES_JSON` ; compte de service Firebase (JSON) →
   `supabase secrets set FCM_SERVICE_ACCOUNT='<json sur une ligne>'`.
 - **iOS** : Apple Developer › Keys › clé APNs (.p8) → secrets Supabase `APNS_KEY` (contenu du .p8), `APNS_KEY_ID`,

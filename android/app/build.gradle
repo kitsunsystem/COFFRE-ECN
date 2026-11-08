@@ -4,7 +4,7 @@ android {
     namespace = "app.sillage.famille"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "app.sillage.famille"
+        applicationId "com.llarys.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Store builds get their numbers from the Release workflow (-PversionCode, -PversionName).
