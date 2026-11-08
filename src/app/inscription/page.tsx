@@ -91,7 +91,7 @@ export default function Inscription() {
     <div className="relative min-h-dvh overflow-hidden">
       <Aurora />
       <div className="relative mx-auto flex min-h-dvh max-w-lg flex-col px-5 pb-8 pt-5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <Link href="/">
             <Logo />
           </Link>

@@ -59,7 +59,7 @@ export default function Connexion() {
     <div className="relative min-h-dvh overflow-hidden">
       <Aurora />
       <div className="relative mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5 py-10">
-        <div className="mb-10 flex items-center justify-between">
+        <div className="mb-10 flex items-center justify-between gap-3">
           <Link href="/">
             <Logo />
           </Link>

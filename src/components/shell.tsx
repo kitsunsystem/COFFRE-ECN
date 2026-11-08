@@ -116,7 +116,7 @@ export function EspaceShell({ children }: { children: ReactNode }) {
     <div className="relative min-h-dvh overflow-x-clip">
       <Aurora className="fixed opacity-60" />
       <header className="sticky top-0 z-30 bg-cream/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-3">
+        <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-5 py-3">
           <Link href="/espace" aria-label="Accueil">
             <Logo />
           </Link>
@@ -224,9 +224,9 @@ export function CoffreShell({ children }: { children: ReactNode }) {
     <div className="grain relative min-h-dvh overflow-x-clip bg-night text-paper">
       <Aurora dark className="fixed opacity-70" />
       <header className="sticky top-0 z-30 bg-night/60 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-lg items-center justify-between px-5 py-3">
+        <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-5 py-3">
           <Logo light />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Alma dark />
             <motion.button
               whileTap={{ scale: 0.92 }}
@@ -238,9 +238,10 @@ export function CoffreShell({ children }: { children: ReactNode }) {
               className="flex items-center gap-2 whitespace-nowrap rounded-full bg-gold px-4 py-2.5 text-[0.9rem] font-semibold text-night"
             >
               <Lock className="h-4 w-4" />
-              {/* One flex item: the gap must not split "Fermer le Coffre" into a double space. */}
-              <span>
-                Fermer<span className="hidden min-[420px]:inline"> le Coffre</span>
+              {/* One flex item: the gap must not split "Fermer le Coffre" into a double space. Under 360 px only the
+                  padlock shows, the words stay for screen readers. */}
+              <span className="max-[359px]:sr-only">
+                Fermer<span className="hidden min-[480px]:inline"> le Coffre</span>
               </span>
             </motion.button>
           </div>

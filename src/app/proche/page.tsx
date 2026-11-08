@@ -67,7 +67,7 @@ export default function Proche() {
     <div className="relative min-h-dvh overflow-x-clip">
       <Aurora className="fixed opacity-60" />
       <div className="relative mx-auto max-w-lg px-5 pb-16 pt-5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <Logo />
           <button
             onClick={async () => {

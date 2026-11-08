@@ -55,7 +55,7 @@ export default function Appareil() {
     <div className="grain relative grid min-h-dvh overflow-hidden bg-night text-paper">
       <Aurora dark className="opacity-80" />
       <div className="relative mx-auto flex w-full max-w-md flex-col px-6 pb-10 pt-5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <Logo light />
           {!PROD && <span className="rounded-full bg-gold/15 px-3 py-1 text-[0.75rem] font-bold text-gold-soft">Téléphone (démo)</span>}
         </div>

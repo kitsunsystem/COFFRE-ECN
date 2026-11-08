@@ -1,7 +1,7 @@
 "use client";
-import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
+import { AnimatePresence, motion, useDragControls, type HTMLMotionProps } from "motion/react";
 import Link from "next/link";
-import { useEffect, useId, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
@@ -144,27 +144,61 @@ export function Badge({ children, tone = "ink" }: { children: ReactNode; tone?: 
   return <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t}`}>{children}</span>;
 }
 
-export function Sheet({ open, onClose, title, children, dark }: { open: boolean; onClose: () => void; title?: string; children: ReactNode; dark?: boolean }) {
+export function Sheet({
+  open,
+  onClose,
+  title,
+  children,
+  dark,
+  footer,
+  tall,
+  scrollKey,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title?: string;
+  children: ReactNode;
+  dark?: boolean;
+  footer?: ReactNode; // stays at the bottom while the content scrolls (a chat's input)
+  tall?: boolean; // always nearly full height, for content that grows (a conversation)
+  scrollKey?: unknown; // each change scrolls the content to its end (a new message)
+}) {
   // The portal needs document.body: false during the static build, true in the browser.
   const mounted = useSyncExternalStore(noop, () => true, () => false);
+  const drag = useDragControls();
+  const body = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
+    // The page behind must not scroll: on a phone it would also move the browser's bars and the visible area.
+    const html = document.documentElement;
+    const overflow = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", k);
+      html.style.overflow = overflow;
+    };
   }, [open, onClose]);
+  useEffect(() => {
+    if (open && scrollKey !== undefined) body.current?.scrollTo({ top: body.current.scrollHeight, behavior: "smooth" });
+  }, [open, scrollKey]);
   // Portal to <body>: inside a blurred or transformed parent (the top bar, page transitions) a fixed sheet is trapped there.
   if (!mounted) return null;
   return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div className="fixed inset-0 z-50 flex items-end justify-center overscroll-none sm:items-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
           <motion.div className="absolute inset-0 bg-night/50 backdrop-blur-sm" onClick={onClose} />
           <motion.div
             role="dialog"
             aria-modal
             aria-label={title}
+            // Only the top (handle and title) pulls the sheet down: dragging the whole sheet stole the finger from the
+            // content, which could no longer scroll on a phone.
             drag="y"
+            dragListener={false}
+            dragControls={drag}
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_, i) => i.offset.y > 120 && onClose()}
@@ -172,16 +206,21 @@ export function Sheet({ open, onClose, title, children, dark }: { open: boolean;
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 260, damping: 30 }}
-            className={`relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-[2rem] p-6 pt-3 safe-bottom sm:rounded-[2rem] ${dark ? "bg-night-2 text-paper ring-1 ring-paper/10" : "bg-cream text-ink"}`}
+            className={`relative flex w-full max-w-lg flex-col rounded-t-[2rem] sm:rounded-[2rem] ${tall ? "h-[88dvh]" : "max-h-[92dvh]"} ${dark ? "bg-night-2 text-paper ring-1 ring-paper/10" : "bg-cream text-ink"}`}
           >
-            <div className={`mx-auto mb-4 h-1.5 w-12 rounded-full ${dark ? "bg-paper/20" : "bg-ink/15"}`} />
-            <div className="mb-4 flex items-start gap-3">
-              {title && <h2 className="flex-1 text-[1.5rem] font-semibold leading-tight">{title}</h2>}
-              <button onClick={onClose} aria-label="Fermer" className={`rounded-full p-2 ${dark ? "hover:bg-paper/10" : "hover:bg-ink/5"}`}>
-                <X className="h-5 w-5" />
-              </button>
+            <div className="shrink-0 cursor-grab touch-none px-6 pt-3" onPointerDown={(e) => !(e.target as HTMLElement).closest("button") && drag.start(e)}>
+              <div className={`mx-auto mb-4 h-1.5 w-12 rounded-full ${dark ? "bg-paper/20" : "bg-ink/15"}`} />
+              <div className="mb-4 flex items-start gap-3">
+                {title && <h2 className="flex-1 text-[1.5rem] font-semibold leading-tight">{title}</h2>}
+                <button onClick={onClose} aria-label="Fermer" className={`rounded-full p-2 ${dark ? "hover:bg-paper/10" : "hover:bg-ink/5"}`}>
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
-            {children}
+            <div ref={body} className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 ${footer ? "pb-4" : "safe-bottom"}`}>
+              {children}
+            </div>
+            {footer && <div className={`shrink-0 border-t px-6 pt-3 safe-bottom ${dark ? "border-paper/10" : "border-line"}`}>{footer}</div>}
           </motion.div>
         </motion.div>
       )}

@@ -41,7 +41,7 @@ function DemoAdmin() {
   return (
     <div className="min-h-dvh bg-cream">
       <header className="sticky top-0 z-30 border-b border-line bg-paper/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-3">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-3">
           <Logo />
           <span className="rounded-full bg-ink px-3 py-1 text-[0.75rem] font-bold uppercase tracking-wider text-paper">Administration</span>
         </div>
