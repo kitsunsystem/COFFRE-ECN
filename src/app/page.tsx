@@ -41,7 +41,7 @@ function Hero() {
   return (
     <section ref={ref} className="relative overflow-hidden px-5 pb-20 pt-6">
       <Aurora />
-      <nav className="relative mx-auto flex max-w-6xl items-center justify-between">
+      <nav className="relative mx-auto flex max-w-6xl items-center justify-between gap-3">
         <Logo />
         <div className="flex items-center gap-1 sm:gap-2">
           <LangPicker compact />
@@ -49,8 +49,8 @@ function Hero() {
             <UserRound className="h-6 w-6 sm:hidden" />
             <span className="hidden sm:inline">Se connecter</span>
           </Link>
-          {/* Small phones: the hero's "Protéger ma famille" right below leads to the same place. */}
-          <Button href="/inscription" className="!min-h-11 whitespace-nowrap !px-4 max-[419px]:!hidden sm:!px-5">
+          {/* Phones: the hero's "Protéger ma famille" right below leads to the same place. */}
+          <Button href="/inscription" className="!min-h-11 whitespace-nowrap !px-4 max-sm:!hidden sm:!px-5">
             Commencer
           </Button>
         </div>

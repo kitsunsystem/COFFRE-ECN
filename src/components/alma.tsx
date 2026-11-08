@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Mic, Play, Send } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ask, DISCLAIMER, SUGGESTIONS } from "@/lib/assistant";
 import { ASSISTANT_NAME } from "@/lib/config";
 import { locale, tr } from "@/lib/i18n";
@@ -53,13 +53,6 @@ export function Alma({ dark }: { dark?: boolean }) {
   const [text, setText] = useState("");
   const [listening, setListening] = useState(false);
   const [thinking, setThinking] = useState(false);
-  const end = useRef<HTMLDivElement>(null);
-
-  // Braces matter: recent browsers return a Promise from scrollIntoView, which React would take for a cleanup.
-  useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "smooth" });
-  }, [msgs, thinking]);
-
   async function send(q: string) {
     if (!q.trim()) return;
     setMsgs((m) => [...m, { from: "me", text: q }]);
@@ -98,11 +91,40 @@ export function Alma({ dark }: { dark?: boolean }) {
         <span className="hidden text-[0.85rem] font-semibold sm:inline">{ASSISTANT_NAME}</span>
       </motion.button>
 
-      <Sheet open={open} onClose={() => setOpen(false)} title={`Bonjour, je suis ${ASSISTANT_NAME}`}>
+      {/* The conversation scrolls between the title and the input, which stays at the bottom; each message scrolls it down. */}
+      <Sheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title={`Bonjour, je suis ${ASSISTANT_NAME}`}
+        tall
+        scrollKey={msgs.length + (thinking ? 0.5 : 0)}
+        footer={
+          <>
+            <div className="no-scrollbar -mx-6 flex gap-2 overflow-x-auto px-6 pb-3">
+              {(SUGGESTIONS[place] ?? SUGGESTIONS.default).map((s) => (
+                // Sent in the language shown, so Alma answers in it.
+                <button key={s} onClick={() => void send(tr(s))} className="shrink-0 whitespace-nowrap rounded-full bg-gold-soft/60 px-3.5 py-2 text-[0.85rem] font-semibold text-ink ring-1 ring-gold/30">
+                  {s}
+                </button>
+              ))}
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); void send(text); }} className="flex items-center gap-2">
+              <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Posez votre question" className="min-h-[3.25rem] min-w-0 flex-1 rounded-full bg-paper px-5 ring-1 ring-line outline-none focus:ring-2 focus:ring-gold" />
+              <motion.button type="button" whileTap={{ scale: 0.9 }} onClick={listen} aria-label="Parler" className={`grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-full ring-1 ring-line ${listening ? "bg-coral text-paper" : "bg-paper"}`}>
+                <Mic className="h-5 w-5" />
+              </motion.button>
+              <motion.button type="submit" whileTap={{ scale: 0.9 }} aria-label="Envoyer" className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-full bg-ink text-paper">
+                <Send className="h-5 w-5" />
+              </motion.button>
+            </form>
+          </>
+        }
+      >
         <div className="flex items-center gap-4">
-          <AlmaFace size={84} />
+          <AlmaFace size={72} />
           <p className="flex-1 text-[0.95rem] text-ink-soft">Je vous guide pas à pas. Je ne vois jamais ce que vous écrivez dans votre Coffre.</p>
         </div>
+        <p className="mt-3 text-[0.78rem] text-mist">{DISCLAIMER}</p>
 
         {msgs.length === 0 && (
           <div className="mt-5 grid grid-cols-2 gap-3">
@@ -131,28 +153,7 @@ export function Alma({ dark }: { dark?: boolean }) {
               ))}
             </div>
           )}
-          <div ref={end} />
         </div>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {(SUGGESTIONS[place] ?? SUGGESTIONS.default).map((s) => (
-            // Sent in the language shown, so Alma answers in it.
-            <button key={s} onClick={() => void send(tr(s))} className="rounded-full bg-gold-soft/60 px-3.5 py-2 text-[0.85rem] font-semibold text-ink ring-1 ring-gold/30">
-              {s}
-            </button>
-          ))}
-        </div>
-
-        <form onSubmit={(e) => { e.preventDefault(); void send(text); }} className="mt-4 flex items-center gap-2">
-          <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Posez votre question" className="min-h-[3.25rem] flex-1 rounded-full bg-paper px-5 ring-1 ring-line outline-none focus:ring-2 focus:ring-gold" />
-          <motion.button type="button" whileTap={{ scale: 0.9 }} onClick={listen} aria-label="Parler" className={`grid h-[3.25rem] w-[3.25rem] place-items-center rounded-full ring-1 ring-line ${listening ? "bg-coral text-paper" : "bg-paper"}`}>
-            <Mic className="h-5 w-5" />
-          </motion.button>
-          <motion.button type="submit" whileTap={{ scale: 0.9 }} aria-label="Envoyer" className="grid h-[3.25rem] w-[3.25rem] place-items-center rounded-full bg-ink text-paper">
-            <Send className="h-5 w-5" />
-          </motion.button>
-        </form>
-        <p className="mt-4 text-[0.78rem] text-mist">{DISCLAIMER}</p>
       </Sheet>
     </>
   );

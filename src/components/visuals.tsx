@@ -20,9 +20,9 @@ export function Emblem({ className = "h-8 w-8", light }: { className?: string; l
 
 export function Logo({ light, className = "" }: { light?: boolean; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <Emblem light={light} className="h-9 w-9" />
-      <span className={`font-display text-[1.4rem] font-semibold tracking-[0.08em] ${light ? "text-paper" : "text-ink"}`}>{APP_NAME}</span>
+    <span className={`inline-flex shrink-0 items-center gap-2 ${className}`}>
+      <Emblem light={light} className="h-8 w-8 min-[400px]:h-9 min-[400px]:w-9" />
+      <span className={`font-display text-[1.2rem] font-semibold tracking-[0.06em] min-[400px]:text-[1.4rem] min-[400px]:tracking-[0.08em] ${light ? "text-paper" : "text-ink"}`}>{APP_NAME}</span>
     </span>
   );
 }

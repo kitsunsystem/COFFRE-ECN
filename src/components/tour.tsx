@@ -290,24 +290,26 @@ export function Tour() {
   });
 
   const s = STEPS[i];
+  // Exactly the visible height of the browser (dvh, which follows its bars): progress at the top, buttons at the
+  // bottom, and only the step scrolls in between. A page that scrolled as a whole moved the bars and lost the buttons.
   return (
-    <motion.div role="dialog" aria-modal aria-label="Visite guidée de la démonstration" className="grain fixed inset-0 z-[70] overflow-y-auto bg-night text-paper" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <Aurora dark className="fixed opacity-80" />
-      <div className="relative mx-auto flex min-h-dvh max-w-lg flex-col px-5 pt-5">
-        <div className="flex items-center gap-3">
-          <div className="flex flex-1 gap-1.5" aria-hidden>
-            {STEPS.map((_, k) => (
-              <button key={k} onClick={() => go(k)} className="h-1.5 flex-1 overflow-hidden rounded-full bg-paper/15" tabIndex={-1}>
-                <motion.span className="block h-full bg-gold" initial={false} animate={{ width: k <= i ? "100%" : "0%" }} transition={{ type: "spring", stiffness: 140, damping: 20 }} />
-              </button>
-            ))}
-          </div>
-          <button onClick={close} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[0.9rem] font-semibold text-paper/75 ring-1 ring-paper/15 hover:bg-paper/10">
-            Passer <X className="h-4 w-4" />
-          </button>
+    <motion.div role="dialog" aria-modal aria-label="Visite guidée de la démonstration" className="grain fixed inset-x-0 top-0 z-[70] flex h-dvh flex-col overflow-hidden overscroll-none bg-night text-paper" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <Aurora dark className="opacity-80" />
+      <div className="relative mx-auto flex w-full max-w-lg shrink-0 touch-none items-center gap-3 px-5 pb-2 pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <div className="flex flex-1 gap-1.5" aria-hidden>
+          {STEPS.map((_, k) => (
+            <button key={k} onClick={() => go(k)} className="h-1.5 flex-1 overflow-hidden rounded-full bg-paper/15" tabIndex={-1}>
+              <motion.span className="block h-full bg-gold" initial={false} animate={{ width: k <= i ? "100%" : "0%" }} transition={{ type: "spring", stiffness: 140, damping: 20 }} />
+            </button>
+          ))}
         </div>
+        <button onClick={close} className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[0.9rem] font-semibold text-paper/75 ring-1 ring-paper/15 hover:bg-paper/10">
+          Passer <X className="h-4 w-4" />
+        </button>
+      </div>
 
-        <div className="grid flex-1 place-items-center py-6 [perspective:1200px]">
+      <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="mx-auto grid min-h-full max-w-lg place-items-center px-5 py-5 [perspective:1200px]">
           <AnimatePresence mode="wait" custom={dir} initial={false}>
             <motion.div
               key={i}
@@ -322,39 +324,46 @@ export function Tour() {
               onDragEnd={(_, info) => (info.offset.x < -70 ? go(i + 1) : info.offset.x > 70 && go(i - 1))}
               className="w-full text-center"
             >
-              {s.visual && <div className="fit-short mb-7">{s.visual}</div>}
+              {/* The title first: on a short screen, a tall illustration no longer pushes it out of sight. */}
               <div className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-gold-soft">
                 {i + 1} / {STEPS.length} · {s.eyebrow}
               </div>
               <h2 className="mt-2 text-[1.9rem] font-semibold leading-tight">{s.title}</h2>
+              {s.visual && <div className="fit-short my-6">{s.visual}</div>}
               <p className="mx-auto mt-3 max-w-md text-[1.05rem] text-paper/75">{s.text}</p>
               {s.extra}
             </motion.div>
           </AnimatePresence>
         </div>
+      </div>
 
-        {/* Pinned to the bottom of the visible area: on a short screen the step scrolls under the buttons. */}
-        <div className="sticky bottom-0 -mx-5 flex gap-3 bg-gradient-to-t from-night via-night/95 to-transparent px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-6">
-          {i > 0 && (
-            <Button variant="light" className="!px-4" aria-label="Étape précédente" onClick={() => go(i - 1)}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          )}
-          {last ? (
-            <div className="flex flex-1 gap-3">
-              <Link href="/coffre" onClick={close} className="flex min-h-[3.25rem] flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-b from-gold-soft to-gold px-5 font-semibold text-night shadow-glow">
-                <Lock className="h-5 w-5" /> Ouvrir le Coffre
-              </Link>
-              <Button variant="light" onClick={close}>
+      <div className="relative mx-auto w-full max-w-lg shrink-0 touch-none px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+        {last ? (
+          <div className="grid gap-3">
+            <Link href="/coffre" onClick={close} className="flex min-h-[3.25rem] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-b from-gold-soft to-gold px-5 font-semibold text-night shadow-glow">
+              <Lock className="h-5 w-5" /> Ouvrir le Coffre
+            </Link>
+            <div className="flex gap-3">
+              <Button variant="light" className="!px-4" aria-label="Étape précédente" onClick={() => go(i - 1)}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Button full variant="light" onClick={close}>
                 L'Espace
               </Button>
             </div>
-          ) : (
+          </div>
+        ) : (
+          <div className="flex gap-3">
+            {i > 0 && (
+              <Button variant="light" className="!px-4" aria-label="Étape précédente" onClick={() => go(i - 1)}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
             <Button full variant="gold" icon={<ArrowRight className="h-5 w-5" />} onClick={() => go(i + 1)}>
               {i === 0 ? "Commencer la visite" : "Suivant"}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );
