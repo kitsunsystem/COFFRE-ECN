@@ -154,7 +154,7 @@ export default function Verrou() {
             </motion.div>
           ) : (
             <motion.div key="code" className="flex flex-1 flex-col justify-center pt-6" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
-              <div className="mx-auto mb-6 w-56">
+              <div className="fit-short mx-auto mb-6 w-56">
                 <NfcCard name={tapped.printedName} flipped interactive={false} />
               </div>
               <p className="mb-5 text-center text-paper/70">

@@ -111,7 +111,8 @@ ok("Urgence : Marc lit l'élément et télécharge le fichier chiffré ; un inco
 // Coup dur: Marc asks from his account with a proof, his ID and his face, all in his own folder; Claire refuses.
 await must(claire.c.from("rights").upsert({ person_id: pMarc, owner_id: claire.id, subsection_id: "banques", moment: "coup_dur" }), "droit coup dur");
 const docs = ["justificatif.pdf", "identite.jpg", "visage.jpg"].map((f) => `${marc.id}/${tag}-${f}`);
-for (const d of docs) await must(marc.c.storage.from("verification").upload(d, new Blob([new Uint8Array([1])]), { contentType: d.endsWith(".pdf") ? "application/pdf" : "image/jpeg" }), "justificatif");
+// A Blob carries its own type: the contentType option is ignored for it, and the bucket refuses an untyped file.
+for (const d of docs) await must(marc.c.storage.from("verification").upload(d, new Blob([new Uint8Array([1])], { type: d.endsWith(".pdf") ? "application/pdf" : "image/jpeg" })), "justificatif");
 const ask = { owner: claire.id, motif: "hospitalisation", proof_path: docs[0], id_path: docs[1], face_path: docs[2] };
 const procId = await must(marc.c.rpc("request_coup_dur", ask), "demande de coup dur");
 assert.ok(procId);

@@ -3,7 +3,7 @@
 // device), ?theme=noir to come back.
 export const THEMES = [
   { id: "noir", label: "Noir et or", hint: "Noir profond et or métallique", meta: "#07090e" },
-  { id: "sillage", label: "Sillage", hint: "Crème, encre et or", meta: "#f7f2e9" },
+  { id: "sillage", label: "Lys", hint: "Crème, encre et or", meta: "#f7f2e9" },
 ] as const;
 export type ThemeId = (typeof THEMES)[number]["id"];
 export const DEFAULT_THEME: ThemeId = "noir";

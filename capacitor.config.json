@@ -1,6 +1,6 @@
 {
-  "appId": "app.sillage.famille",
-  "appName": "Sillage",
+  "appId": "com.llarys.app",
+  "appName": "LLARYS",
   "webDir": "out",
   "server": {
     "androidScheme": "https"
@@ -15,7 +15,7 @@
   },
   "plugins": {
     "SplashScreen": {
-      "backgroundColor": "#070d18",
+      "backgroundColor": "#000000",
       "launchShowDuration": 600
     }
   }

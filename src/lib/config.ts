@@ -1,5 +1,5 @@
 // Everything the client still has to decide ("À décider" in the brief and the project follow-up) lives here, in one place.
-export const APP_NAME = "Sillage"; // nom de travail : Sillage, Védora ou Laréo (après vérification INPI / EUIPO et domaines)
+export const APP_NAME = "LLARYS"; // nom choisi par le client : LLAR (le foyer en catalan), LAR (les Lares, protecteurs du foyer), LYS (la fleur)
 export const ASSISTANT_NAME = "Alma"; // avatar fictif de l'assistant ; réponses par le bot Botpress (deploy/alma/), vidéo : à décider
 
 const HOUR = 3_600_000;
@@ -37,4 +37,4 @@ export const CONCIERGE = {
   price: null as string | null, // tarif ou « sur devis » (à décider)
 };
 
-export const SUPPORT_EMAIL = "bonjour@sillage.app";
+export const SUPPORT_EMAIL = "bonjour@llarys.com"; // provisoire : à confirmer quand le domaine sera réservé

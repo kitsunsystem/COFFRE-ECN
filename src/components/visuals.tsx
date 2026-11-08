@@ -1,30 +1,28 @@
 "use client";
 import { animate, motion, useInView, useMotionTemplate, useMotionValue, useSpring, useTransform, type Variants } from "motion/react";
 import { Check } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import mark from "@/assets/brand/llarys-mark-192.webp";
 import { APP_NAME } from "@/lib/config";
 
 /* ---------- Brand ---------- */
 
 export function Emblem({ className = "h-8 w-8", light }: { className?: string; light?: boolean }) {
-  // Three widening arcs: the wake ("sillage") a life leaves behind, and the contactless gesture of the card.
-  // Colours come from the theme (CSS variables), so the emblem follows the chosen palette.
-  const c = light ? "var(--color-gold-soft)" : "var(--color-gold)";
+  // The LLARYS mark, gold on black: it glows on a dark surface; on the light theme it sits in its black medallion
+  // (.brand-medallion in globals.css), since gold light on cream fades away.
   return (
-    <svg viewBox="0 0 40 40" className={className} aria-hidden>
-      <circle cx="12" cy="20" r="4.2" style={{ fill: c }} />
-      {[9, 15, 21].map((r, i) => (
-        <path key={r} d={`M ${12 + r * Math.cos(-0.9)} ${20 + r * Math.sin(-0.9)} A ${r} ${r} 0 0 1 ${12 + r * Math.cos(0.9)} ${20 + r * Math.sin(0.9)}`} fill="none" style={{ stroke: c }} strokeWidth="2.6" strokeLinecap="round" opacity={1 - i * 0.25} />
-      ))}
-    </svg>
+    <span aria-hidden className={`inline-grid shrink-0 place-items-center ${light ? "" : "brand-medallion"} ${className}`}>
+      <Image src={mark} alt="" loading="eager" className="h-full w-full object-contain" />
+    </span>
   );
 }
 
 export function Logo({ light, className = "" }: { light?: boolean; className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
-      <Emblem light={light} />
-      <span className={`font-display text-[1.45rem] font-semibold tracking-tight ${light ? "text-paper" : "text-ink"}`}>{APP_NAME}</span>
+      <Emblem light={light} className="h-9 w-9" />
+      <span className={`font-display text-[1.4rem] font-semibold tracking-[0.08em] ${light ? "text-paper" : "text-ink"}`}>{APP_NAME}</span>
     </span>
   );
 }
@@ -226,7 +224,7 @@ export type TapState = "idle" | "reading" | "done" | "error";
 export function TapReader({ state, light }: { state: TapState; light?: boolean }) {
   const stroke = light ? "rgba(247,242,233,0.9)" : "var(--color-ink)";
   return (
-    <div className="relative mx-auto flex h-72 w-60 items-center justify-center [perspective:900px]">
+    <div className="fit-short relative mx-auto flex h-72 w-60 items-center justify-center [perspective:900px]">
       {(state === "reading" || state === "idle") &&
         [0, 1, 2].map((i) => (
           <motion.span

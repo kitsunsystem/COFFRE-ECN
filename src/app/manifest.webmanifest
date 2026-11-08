@@ -1,11 +1,11 @@
 {
-  "name": "Sillage — coffre de vie et de succession",
-  "short_name": "Sillage",
+  "name": "LLARYS — coffre de vie et de succession",
+  "short_name": "LLARYS",
   "description": "Le coffre de vie et de succession, personnel ou familial.",
   "start_url": "./espace/",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0c0d10",
+  "background_color": "#000000",
   "theme_color": "#0c0d10",
   "icons": [
     { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" },

@@ -293,7 +293,7 @@ export function Tour() {
   return (
     <motion.div role="dialog" aria-modal aria-label="Visite guidée de la démonstration" className="grain fixed inset-0 z-[70] overflow-y-auto bg-night text-paper" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
       <Aurora dark className="fixed opacity-80" />
-      <div className="relative mx-auto flex min-h-dvh max-w-lg flex-col px-5 pb-8 pt-5">
+      <div className="relative mx-auto flex min-h-dvh max-w-lg flex-col px-5 pt-5">
         <div className="flex items-center gap-3">
           <div className="flex flex-1 gap-1.5" aria-hidden>
             {STEPS.map((_, k) => (
@@ -322,7 +322,7 @@ export function Tour() {
               onDragEnd={(_, info) => (info.offset.x < -70 ? go(i + 1) : info.offset.x > 70 && go(i - 1))}
               className="w-full text-center"
             >
-              {s.visual && <div className="mb-7">{s.visual}</div>}
+              {s.visual && <div className="fit-short mb-7">{s.visual}</div>}
               <div className="text-[0.72rem] font-bold uppercase tracking-[0.22em] text-gold-soft">
                 {i + 1} / {STEPS.length} · {s.eyebrow}
               </div>
@@ -333,7 +333,8 @@ export function Tour() {
           </AnimatePresence>
         </div>
 
-        <div className="flex gap-3">
+        {/* Pinned to the bottom of the visible area: on a short screen the step scrolls under the buttons. */}
+        <div className="sticky bottom-0 -mx-5 flex gap-3 bg-gradient-to-t from-night via-night/95 to-transparent px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-6">
           {i > 0 && (
             <Button variant="light" className="!px-4" aria-label="Étape précédente" onClick={() => go(i - 1)}>
               <ArrowLeft className="h-5 w-5" />

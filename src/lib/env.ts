@@ -6,7 +6,7 @@ export const PROD = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 // Cards: "auto" picks FIDO2 (web) or Tangem (native app); "demo" simulates the chip, for end-to-end tests only.
 export const CARD_DRIVER = (process.env.NEXT_PUBLIC_CARD_DRIVER ?? "auto") as "auto" | "demo";
-// WebAuthn relying party: the site's domain (e.g. app.sillage.fr). Empty = the current host.
+// WebAuthn relying party: the site's domain (e.g. app.llarys.com). Empty = the current host.
 export const FIDO_RP_ID = process.env.NEXT_PUBLIC_FIDO_RP_ID || undefined;
 // Public web address, used in links and for the native app's redirects.
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
