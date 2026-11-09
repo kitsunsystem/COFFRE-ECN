@@ -76,7 +76,7 @@ export default function Droits() {
         </div>
       ) : (
         <>
-          <div className="no-scrollbar -mx-5 mt-6 flex gap-2 overflow-x-auto px-5 pb-1">
+          <div className="no-scrollbar -mx-5 mt-6 flex gap-2 overflow-x-auto px-5 pb-1 pointer-fine:flex-wrap">
             {beneficiaries.map((p) => (
               <button key={p.id} onClick={() => setPersonId(p.id)} className={`relative shrink-0 rounded-full px-4 py-2.5 text-[0.95rem] font-semibold ${personId === p.id ? "text-night" : "text-paper/75 ring-1 ring-paper/15"}`}>
                 {personId === p.id && <motion.span layoutId="holder" className="absolute inset-0 rounded-full bg-gold-soft" transition={{ type: "spring", stiffness: 400, damping: 32 }} />}

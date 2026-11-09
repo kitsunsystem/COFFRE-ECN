@@ -40,7 +40,7 @@ function Hero() {
   const sceneX = useSpring(useTransform(() => 14 - scrollYProgress.get() * 18 - py.get() * 10), { stiffness: 80, damping: 18 });
   return (
     <section ref={ref} className="relative overflow-hidden px-5 pb-20 pt-6">
-      <Aurora />
+      <Aurora className="seam-fade-b" />
       <nav className="relative mx-auto flex max-w-6xl items-center justify-between gap-3">
         <Logo />
         <div className="flex items-center gap-1 sm:gap-2">
@@ -133,7 +133,7 @@ const LORE = [
 
 function Lore() {
   return (
-    <section id="llarys" className="relative overflow-hidden bg-night px-5 py-24 text-paper">
+    <section id="llarys" className="seam-fade relative overflow-hidden bg-night px-5 py-24 text-paper">
       <Aurora dark className="opacity-70" />
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.85fr_1.15fr]">
         <Reveal>
@@ -204,7 +204,7 @@ function Moments() {
 
 function CardSection() {
   return (
-    <section id="comment" className="relative overflow-hidden bg-night px-5 py-24 text-paper">
+    <section id="comment" className="seam-fade relative overflow-hidden bg-night px-5 py-24 text-paper">
       <Aurora dark />
       <div className="relative mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-2">
         <Reveal>
@@ -298,7 +298,7 @@ function Family() {
     { icon: ConciergeBell, t: "Une conciergerie", d: "Si la famille le souhaite, quelqu'un s'occupe de tout, sur mandat." },
   ];
   return (
-    <section className="bg-sand/60 px-5 py-24">
+    <section className="seam-fade bg-sand/60 px-5 py-24">
       <div className="mx-auto max-w-6xl">
         <Reveal>
           <Eyebrow>Vos proches ne sont jamais seuls</Eyebrow>
@@ -322,7 +322,7 @@ function Family() {
 
 function Privacy() {
   return (
-    <section className="relative overflow-hidden bg-night-2 px-5 py-24 text-paper">
+    <section className="seam-fade relative overflow-hidden bg-night-2 px-5 py-24 text-paper">
       <Aurora dark className="opacity-60" />
       <div className="relative mx-auto max-w-4xl text-center">
         <Reveal>
