@@ -137,7 +137,8 @@ function Lore() {
       <Aurora dark className="opacity-70" />
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[0.85fr_1.15fr]">
         <Reveal>
-          <Image src={markLarge} alt="Logo LLARYS" className="mx-auto w-[min(70vw,24rem)] drop-shadow-[0_0_70px_rgb(212_175_55/0.28)]" />
+          {/* brand-medallion: on the light theme the mark (gold light drawn for black) sits on its black disc. */}
+          <Image src={markLarge} alt="Logo LLARYS" className="brand-medallion mx-auto w-[min(70vw,24rem)] drop-shadow-[0_0_70px_rgb(212_175_55/0.28)]" />
         </Reveal>
         <div>
           <Reveal>

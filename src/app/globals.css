@@ -132,6 +132,43 @@ html.i18n-wait body {
   mask-image: linear-gradient(90deg, transparent 0, #000 1.25rem, #000 calc(100% - 2.5rem), transparent);
 }
 
+/* Home page bands: they and their glows melt into the page at the top and bottom instead of ending on a hard line.
+   The fade stays inside their padding (py-24), never over their text. */
+.seam-fade {
+  -webkit-mask-image: linear-gradient(transparent, #000 5rem, #000 calc(100% - 5rem), transparent);
+  mask-image: linear-gradient(transparent, #000 5rem, #000 calc(100% - 5rem), transparent);
+}
+.seam-fade-b {
+  -webkit-mask-image: linear-gradient(#000 50%, transparent);
+  mask-image: linear-gradient(#000 50%, transparent);
+}
+/* Light theme: a black band on cream still read as a separate block, even faded, so the dark bands turn light like
+   the rest of the page. Their texts, written in "paper" for a dark background, become ink; pale gold becomes deep.
+   Only where color-mix() exists: without it Tailwind writes text-paper/75 as a fixed cream, which the swap cannot
+   reach, so older browsers keep the dark bands. */
+@supports (color: color-mix(in lab, red, red)) {
+  html:not([data-theme="noir"]) section.seam-fade:is(.bg-night, .bg-night-2) {
+    background-color: rgb(237 227 209 / 0.6); /* bg-sand/60, like the page's other light band */
+    --color-paper: var(--color-ink);
+    --color-gold-soft: var(--color-gold-deep);
+    --tap-line: var(--color-ink); /* the phone drawn by TapReader (visuals.tsx) */
+    --tap-fill: #fffdf9;
+  }
+  /* Two light bands in a row (Family, Privacy) would each fade at their shared edge: a pale stripe between them. */
+  html:not([data-theme="noir"]) section.seam-fade + section.seam-fade {
+    background-color: transparent;
+  }
+  html:not([data-theme="noir"]) section.seam-fade :is(.bg-night, .bg-night-2, .bg-ink, .bg-sage, .bg-coral) {
+    --color-paper: #fffdf9; /* what keeps its own dark or coloured background keeps its light text */
+  }
+  html:not([data-theme="noir"]) section.seam-fade ::selection {
+    background: #ead7a8; /* the page's pale gold, not the deep gold swapped in above */
+  }
+  html:not([data-theme="noir"]) section.seam-fade .aura-d1 { background: rgb(234 215 168 / 0.7); } /* = .aura-l1 */
+  html:not([data-theme="noir"]) section.seam-fade .aura-d2 { background: rgb(217 234 220 / 0.8); } /* = .aura-l2 */
+  html:not([data-theme="noir"]) section.seam-fade .aura-d3 { background: rgb(247 220 211 / 0.6); } /* = .aura-l3 */
+}
+
 /* A light sweep across the main buttons, every few seconds. */
 .btn-shine {
   position: absolute;
@@ -190,16 +227,6 @@ html[data-theme="noir"] ::-webkit-scrollbar-thumb:hover { background-color: rgb(
 html[data-theme="noir"] .aura-l1, html[data-theme="noir"] .aura-d1 { background: rgb(212 175 55 / 0.12); }
 html[data-theme="noir"] .aura-l2, html[data-theme="noir"] .aura-d2 { background: rgb(212 175 55 / 0.06); }
 html[data-theme="noir"] .aura-l3, html[data-theme="noir"] .aura-d3 { background: rgb(246 226 158 / 0.04); }
-/* Home page: its dark bands and their glows melt into the page instead of ending on a hard line (on the light theme a
-   black band on cream stays crisp). The fade stays inside the bands' padding (py-24), never over their text. */
-html[data-theme="noir"] .seam-fade {
-  -webkit-mask-image: linear-gradient(transparent, #000 5rem, #000 calc(100% - 5rem), transparent);
-  mask-image: linear-gradient(transparent, #000 5rem, #000 calc(100% - 5rem), transparent);
-}
-html[data-theme="noir"] .seam-fade-b {
-  -webkit-mask-image: linear-gradient(#000 50%, transparent);
-  mask-image: linear-gradient(#000 50%, transparent);
-}
 /* The screens that were already dark (the Coffre, dark cards) write their text with "paper": it stays light there. */
 html[data-theme="noir"] :is(.bg-night, .\!bg-night, .bg-night-2) {
   --color-paper: #f8f9fc;

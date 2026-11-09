@@ -222,7 +222,8 @@ export function NfcCard({
 export type TapState = "idle" | "reading" | "done" | "error";
 
 export function TapReader({ state, light }: { state: TapState; light?: boolean }) {
-  const stroke = light ? "rgba(247,242,233,0.9)" : "var(--color-ink)";
+  // light: drawn for a dark screen; a band that turns light (home page, light theme) redraws it via --tap-line/--tap-fill.
+  const stroke = light ? "var(--tap-line, rgba(247,242,233,0.9))" : "var(--color-ink)";
   return (
     <div className="fit-short relative mx-auto flex h-72 w-60 items-center justify-center [perspective:900px]">
       {(state === "reading" || state === "idle") &&
@@ -238,7 +239,7 @@ export function TapReader({ state, light }: { state: TapState; light?: boolean }
       {/* Phone and card share one tilted 3D plane, so the card really lands on the back of the phone. */}
       <motion.div className="relative [transform-style:preserve-3d]" initial={false} animate={{ rotateX: 18, rotateY: state === "done" ? -4 : -16, rotateZ: -3 }} transition={{ type: "spring", stiffness: 60, damping: 14 }}>
         <svg viewBox="0 0 120 220" className="relative h-60 w-auto drop-shadow-2xl" aria-hidden>
-          <rect x="6" y="4" width="108" height="212" rx="22" style={{ fill: light ? "rgba(255,255,255,0.08)" : "var(--color-paper)", stroke }} strokeWidth="3" />
+          <rect x="6" y="4" width="108" height="212" rx="22" style={{ fill: light ? "var(--tap-fill, rgba(255,255,255,0.08))" : "var(--color-paper)", stroke }} strokeWidth="3" />
           <rect x="44" y="12" width="32" height="8" rx="4" style={{ fill: stroke }} opacity="0.5" />
           <motion.rect x="12" y="26" width="96" height="176" rx="14" style={{ fill: "var(--color-sage)" }} initial={false} animate={{ opacity: state === "done" ? 0.35 : 0 }} />
         </svg>
