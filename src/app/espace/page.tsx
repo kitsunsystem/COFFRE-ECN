@@ -1,7 +1,8 @@
 "use client";
 import { motion } from "motion/react";
-import { ArrowRight, Bell, CalendarClock, Check, ChevronRight, Compass, ConciergeBell, CreditCard, HeartPulse, LifeBuoy, Lock, ShieldCheck, Smartphone, Users } from "lucide-react";
+import { ArrowRight, Bell, CalendarClock, Check, ChevronLeft, ChevronRight, Compass, ConciergeBell, CreditCard, HeartPulse, LifeBuoy, Lock, ShieldCheck, Smartphone, Users } from "lucide-react";
 import Link from "next/link";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { NamedIcon, TONES } from "@/components/icons";
 import { useNow } from "@/components/providers";
@@ -185,8 +186,7 @@ export default function Accueil() {
             Tout voir
           </Link>
         </div>
-        {/* Swiped with a finger or a trackpad: no scroll bar, the next card peeks out at the faded edge. */}
-        <div className="no-scrollbar fade-x -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-3 pt-1">
+        <Carousel>
           {RUBRICS.map((r) => (
             <Link key={r.id} href={`/espace/aide/${r.id}`} className="w-60 shrink-0 snap-start">
               <Tilt className="rounded-[1.5rem]">
@@ -199,8 +199,55 @@ export default function Accueil() {
             </Link>
           ))}
           <span aria-hidden className="w-2 shrink-0" />
-        </div>
+        </Carousel>
       </motion.div>
     </motion.div>
+  );
+}
+
+// Swiped with a finger or a trackpad: no scroll bar, the next card peeks out at the faded edge. A mouse wheel only
+// scrolls the page, so with a mouse two arrows move the row one card at a time.
+function Carousel({ children }: { children: ReactNode }) {
+  const row = useRef<HTMLDivElement>(null);
+  const [edge, setEdge] = useState({ start: true, end: false });
+  const update = useCallback(() => {
+    const el = row.current;
+    if (!el) return;
+    const start = el.scrollLeft < 8;
+    const end = el.scrollLeft + el.clientWidth > el.scrollWidth - 8;
+    setEdge((e) => (e.start === start && e.end === end ? e : { start, end }));
+  }, []);
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [update]);
+  // No behavior here: scroll-smooth on the row animates it, and "reduce motion" (globals.css) turns that off.
+  const by = (dir: 1 | -1) => {
+    const [a, b] = Array.from(row.current?.children ?? []) as HTMLElement[];
+    if (a && b) row.current!.scrollBy({ left: dir * (b.offsetLeft - a.offsetLeft) });
+  };
+  // At an end the arrow stays, dimmed: if it vanished, the next quick click would open the card underneath.
+  const arrow = "absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-paper text-ink shadow-soft ring-1 ring-line transition-opacity pointer-fine:grid aria-disabled:cursor-default aria-disabled:opacity-40";
+  return (
+    <div className="relative">
+      <div ref={row} onScroll={update} className="no-scrollbar fade-x -mx-5 flex snap-x snap-mandatory scroll-px-5 scroll-smooth gap-3 overflow-x-auto px-5 pb-3 pt-1">
+        {children}
+      </div>
+      {!(edge.start && edge.end) && (
+        <>
+          {/* From md (768px) there is room beside the 576px column: the arrows leave the cards' text uncovered. */}
+          <button type="button" onClick={() => by(-1)} aria-disabled={edge.start} aria-label="Faire défiler vers la gauche" className={`${arrow} -left-3 md:-left-14`}>
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={() => by(1)} aria-disabled={edge.end} aria-label="Faire défiler vers la droite" className={`${arrow} -right-3 md:-right-14`}>
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </>
+      )}
+    </div>
   );
 }

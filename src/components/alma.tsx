@@ -100,7 +100,7 @@ export function Alma({ dark }: { dark?: boolean }) {
         scrollKey={msgs.length + (thinking ? 0.5 : 0)}
         footer={
           <>
-            <div className="no-scrollbar -mx-6 flex gap-2 overflow-x-auto px-6 pb-3">
+            <div className="no-scrollbar -mx-6 flex gap-2 overflow-x-auto px-6 pb-3 pointer-fine:flex-wrap">
               {(SUGGESTIONS[place] ?? SUGGESTIONS.default).map((s) => (
                 // Sent in the language shown, so Alma answers in it.
                 <button key={s} onClick={() => void send(tr(s))} className="shrink-0 whitespace-nowrap rounded-full bg-gold-soft/60 px-3.5 py-2 text-[0.85rem] font-semibold text-ink ring-1 ring-gold/30">
