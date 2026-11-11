@@ -54,7 +54,7 @@ export function Alma({ dark }: { dark?: boolean }) {
   const [listening, setListening] = useState(false);
   const [thinking, setThinking] = useState(false);
   async function send(q: string) {
-    if (!q.trim()) return;
+    if (!q.trim() || thinking) return; // one question at a time: two would share one conversation
     setMsgs((m) => [...m, { from: "me", text: q }]);
     setText("");
     setThinking(true);
@@ -103,7 +103,7 @@ export function Alma({ dark }: { dark?: boolean }) {
             <div className="no-scrollbar -mx-6 flex gap-2 overflow-x-auto px-6 pb-3 pointer-fine:flex-wrap">
               {(SUGGESTIONS[place] ?? SUGGESTIONS.default).map((s) => (
                 // Sent in the language shown, so Alma answers in it.
-                <button key={s} onClick={() => void send(tr(s))} className="shrink-0 whitespace-nowrap rounded-full bg-gold-soft/60 px-3.5 py-2 text-[0.85rem] font-semibold text-ink ring-1 ring-gold/30">
+                <button key={s} disabled={thinking} onClick={() => void send(tr(s))} className="shrink-0 disabled:opacity-50 whitespace-nowrap rounded-full bg-gold-soft/60 px-3.5 py-2 text-[0.85rem] font-semibold text-ink ring-1 ring-gold/30">
                   {s}
                 </button>
               ))}
@@ -113,7 +113,7 @@ export function Alma({ dark }: { dark?: boolean }) {
               <motion.button type="button" whileTap={{ scale: 0.9 }} onClick={listen} aria-label="Parler" className={`grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-full ring-1 ring-line ${listening ? "bg-coral text-paper" : "bg-paper"}`}>
                 <Mic className="h-5 w-5" />
               </motion.button>
-              <motion.button type="submit" whileTap={{ scale: 0.9 }} aria-label="Envoyer" className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-full bg-ink text-paper">
+              <motion.button type="submit" disabled={thinking} whileTap={{ scale: 0.9 }} aria-label="Envoyer" className="disabled:opacity-50 grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center rounded-full bg-ink text-paper">
                 <Send className="h-5 w-5" />
               </motion.button>
             </form>

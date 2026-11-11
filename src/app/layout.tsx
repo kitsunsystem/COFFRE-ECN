@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cinzel, Fraunces, Manrope, Outfit } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { APP_NAME } from "@/lib/config";
+import { APP_URL } from "@/lib/env";
 import { LANG_BOOT } from "@/lib/i18n";
 import { THEME_BOOT } from "@/lib/theme";
 import "./globals.css";
@@ -15,8 +16,8 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: 
 const DESCRIPTION = "Le coffre de vie et de succession, personnel ou familial : tout retrouver et tout régler, de son vivant comme après.";
 
 export const metadata: Metadata = {
-  // shortcut: the public demo's host (Next adds its /COFFRE-ECN base path to opengraph-image.jpg); the real domain at launch.
-  metadataBase: new URL("https://kitsunsystem.github.io"),
+  // The site's origin only: Next adds the base path (/COFFRE-ECN on the public demo) to opengraph-image.jpg itself.
+  metadataBase: new URL(APP_URL || "https://kitsunsystem.github.io"),
   title: { default: `${APP_NAME} — coffre de vie et de succession`, template: `%s · ${APP_NAME}` },
   description: DESCRIPTION,
   applicationName: APP_NAME,

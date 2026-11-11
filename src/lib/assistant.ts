@@ -58,6 +58,7 @@ async function api<T>(path: string, key?: string, body?: unknown): Promise<T> {
     method: body ? "POST" : "GET",
     headers: { "content-type": "application/json", ...(key ? { "x-user-key": key } : {}) },
     body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout?.(8_000), // a stalled network gives up instead of hanging
   });
   if (!r.ok) throw new Error(String(r.status));
   return r.json() as Promise<T>;
@@ -95,7 +96,7 @@ async function botpress(question: string, place: string) {
   const { message } = await api<{ message: { createdAt: string } }>("/messages", c.key, { conversationId: c.conversationId, payload: { type: "text", text: question }, metadata: { page: place, lang: currentLang() } });
   // The answer comes a few seconds later, sometimes in several messages: taken once it has stopped changing.
   let last = "";
-  for (let i = 0; i < 45; i++) {
+  for (const end = Date.now() + 20_000; Date.now() < end; ) {
     await sleep(1000);
     const replies = (await messages(c)).filter((m) => m.userId !== c.userId && m.createdAt > message.createdAt).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     const text = replies.map((m) => textOf(m.payload)).filter(Boolean).join("\n\n");

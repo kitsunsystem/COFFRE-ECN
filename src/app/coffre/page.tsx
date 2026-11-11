@@ -62,7 +62,7 @@ export default function Verrou() {
   const fromPhone = async (keys: OpenSession) => {
     setRevealing(true);
     // Demo: the simulated phone window saved its changes (the "new device" e-mail); take them before writing anything.
-    if (!PROD) await useApp.persist.rehydrate();
+    if (!PROD) await useApp.persist?.rehydrate();
     await openSession(keys);
   };
   const tapped = f.tap?.card;

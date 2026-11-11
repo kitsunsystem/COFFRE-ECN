@@ -170,7 +170,7 @@ export async function loadAll() {
 
 export async function createProfile(draft: Omit<Account, "kyc" | "createdAt">, people: Person[]) {
   if (!PROD) {
-    st().set({ account: { ...draft, kyc: "verifie", createdAt: Date.now() }, people, tourPending: true });
+    st().set({ account: { ...draft, kyc: "verifie", createdAt: Date.now() }, people });
     st().email(draft.email, "bienvenue", { firstName: draft.firstName });
     return;
   }

@@ -176,7 +176,7 @@ function PersonForm({ value, onSave, onDelete }: { value: Person; onSave: (p: Pe
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Prénom" value={p.firstName} onChange={up("firstName")} autoFocus />
+        <Field label="Prénom" value={p.firstName} onChange={up("firstName")} autoFocus={!value.id} />
         <Field label="Nom" value={p.lastName} onChange={up("lastName")} />
       </div>
       <div>

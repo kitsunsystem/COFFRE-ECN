@@ -124,6 +124,8 @@ export default function Inscription() {
                   <Notice tone="ink">
                     <span className="font-semibold">Votre Coffre ne dépend d&apos;aucun mot de passe.</span> Il s&apos;ouvre avec votre carte et Face ID. Le mot de passe ne sert qu&apos;à l&apos;Espace.
                   </Notice>
+                  {/* The public demo keeps everything in the browser: a visitor must not think a place was reserved. */}
+                  {!PROD && <p className="mt-4 text-[0.92rem] text-mist">Démonstration : votre compte reste sur cet appareil, rien n&apos;est envoyé.</p>}
                 </div>
               )}
 
@@ -364,7 +366,7 @@ export default function Inscription() {
         {step === last && otp.error && <p className="mt-3 text-center font-semibold text-coral">{otp.error}</p>}
         {step === 0 && (
           <Link href="/connexion" className="mt-4 text-center font-semibold text-ink-soft underline-offset-4 hover:underline">
-            J'ai déjà un compte
+            {PROD ? "J'ai déjà un compte" : "Voir la démonstration"}
           </Link>
         )}
       </div>

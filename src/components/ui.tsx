@@ -130,7 +130,7 @@ export function Segmented<T extends string>({ options, value, onChange, layoutKe
   return (
     <div className="flex rounded-full bg-ink/[0.06] p-1">
       {options.map((o) => (
-        <button key={o.id} type="button" onClick={() => onChange(o.id)} className="relative flex-1 whitespace-nowrap rounded-full px-1.5 py-2 text-[0.78rem] font-semibold">
+        <button key={o.id} type="button" onClick={() => onChange(o.id)} className="relative flex-1 rounded-full px-1 py-2 text-[0.78rem] font-semibold leading-tight">
           {value === o.id && <motion.span layoutId={layoutKey} className="seg-on absolute inset-0 rounded-full bg-paper shadow-soft" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
           <span className={`relative ${value === o.id ? "text-ink" : "text-mist"}`}>{o.label}</span>
         </button>
