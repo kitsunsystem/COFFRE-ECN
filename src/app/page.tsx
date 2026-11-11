@@ -11,6 +11,7 @@ import { Button, Eyebrow } from "@/components/ui";
 import { Aurora, Emblem, Logo, NfcCard, Reveal, rise, stagger, TapDemo } from "@/components/visuals";
 import { APP_NAME, LAUNCH, OFFER } from "@/lib/config";
 import { isNative } from "@/lib/native";
+import { longDate } from "@/lib/i18n";
 import { moment, type Moment } from "@/lib/rules";
 import markLarge from "@/assets/brand/llarys-mark.webp";
 
@@ -331,7 +332,7 @@ function Privacy() {
             <ShieldCheck className="h-11 w-11 text-gold-soft" />
           </motion.div>
           <h2 className="mt-8 text-[2.3rem] font-semibold leading-tight sm:text-[3rem]">Personne ne peut lire votre Coffre.</h2>
-          <p className="mx-auto mt-5 max-w-2xl text-[1.1rem] text-paper/75">Tout est chiffré sur votre téléphone avant de partir. Ni nous, ni notre assistant, ni la conciergerie ne pouvons en lire le contenu. Seuls vous et les porteurs de cartes que vous avez choisis, au moment que vous avez choisi.</p>
+          <p className="mx-auto mt-5 max-w-2xl text-[1.1rem] text-paper/75">Tout est chiffré sur votre téléphone avant de partir. Ni nous, ni notre assistante, ni la conciergerie ne pouvons en lire le contenu. Seuls vous et les proches que vous avez choisis, au moment que vous avez choisi.</p>
         </Reveal>
         <div className="mt-12 grid gap-4 sm:grid-cols-3">
           {[
@@ -371,7 +372,7 @@ function Offer() {
             <div className="font-semibold">Pré-lancement{LAUNCH.discoveryPrice ? ` · ${LAUNCH.discoveryPrice} €` : ""}</div>
             <ul className="mt-2 space-y-1.5 text-[0.92rem] text-ink-soft">
               <li>Ouvert dès maintenant : votre Espace, la vérification d&apos;identité, vos proches, vos garants, « qui voit quoi » et vos démarches de protection.</li>
-              <li>{`Au lancement${LAUNCH.plannedDate ? `, prévu le ${new Date(LAUNCH.plannedDate).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : ", dont la date est annoncée par e-mail"} : vos cartes arrivent et le Coffre s'active. Rien n'est stocké avant.`}</li>
+              <li>{`Au lancement${LAUNCH.plannedDate ? `, prévu le ${longDate(LAUNCH.plannedDate)}` : ", dont la date est annoncée par e-mail"} : vos cartes arrivent et le Coffre s'active. Rien n'est stocké avant.`}</li>
               <li>Si la date est repoussée, vous choisissez : reporter, ou être remboursé.</li>
             </ul>
           </div>

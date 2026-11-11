@@ -11,6 +11,7 @@ import { useApp, useSession } from "@/lib/store";
 import { lock } from "@/lib/vault";
 import { Alma } from "./alma";
 import { Tour } from "./tour";
+import { longDate } from "@/lib/i18n";
 import { useHydrated, useNow } from "./providers";
 import { Aurora, Logo } from "./visuals";
 
@@ -146,7 +147,7 @@ export function EspaceShell({ children }: { children: ReactNode }) {
         {phase === "decouverte" && (
           <div className="bg-gold-soft px-5 py-2.5 text-ink">
             <div className="mx-auto max-w-lg text-[0.85rem] font-semibold">
-              {`Pré-lancement : tout est ouvert, sauf le Coffre, qui s'active avec vos cartes au lancement${plannedLaunch ? `, prévu le ${new Date(plannedLaunch).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : ""}.`}
+              {`Pré-lancement : tout est ouvert, sauf le Coffre, qui s'active avec vos cartes au lancement${plannedLaunch ? `, prévu le ${longDate(plannedLaunch)}` : ""}.`}
             </div>
           </div>
         )}

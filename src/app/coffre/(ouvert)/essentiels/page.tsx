@@ -72,7 +72,7 @@ export default function Essentiels() {
               </div>
             ) : !launched ? (
               <div className="mt-5 rounded-[1.75rem] bg-gold/15 p-5 ring-1 ring-gold/30">
-                <p className="text-paper/85">Phase découverte : vous pourrez remplir cette étape au lancement officiel. Rien n&apos;est stocké avant.</p>
+                <p className="text-paper/85">Pré-lancement : vous pourrez remplir cette étape au lancement officiel. Rien n&apos;est stocké avant.</p>
                 <Button className="mt-4" full variant="light" onClick={next}>
                   Étape suivante
                 </Button>

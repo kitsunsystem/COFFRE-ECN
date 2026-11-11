@@ -16,6 +16,7 @@ import { driver } from "@/lib/cards";
 import { DEMO_PIN } from "@/lib/demo";
 import { PROD } from "@/lib/env";
 import { isNative, isPhoneBrowser } from "@/lib/native";
+import { longDate } from "@/lib/i18n";
 import { isPhone, personName, useApp, useSession, type OpenSession } from "@/lib/store";
 import { openSession } from "@/lib/vault";
 
@@ -107,7 +108,7 @@ export default function Verrou() {
                     <CalendarClock className="h-5 w-5" /> Pré-lancement
                   </div>
                   <p className="text-paper/80">
-                    {`Le Coffre s'active à la réception de vos cartes, au lancement ${plannedLaunch ? `prévu le ${new Date(plannedLaunch).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : "dont la date vous sera annoncée par e-mail"}. En attendant, tout le reste est ouvert : votre Espace, vos proches, vos démarches de protection et « Qui voit quoi ».`}
+                    {`Le Coffre s'active à la réception de vos cartes, au lancement ${plannedLaunch ? `prévu le ${longDate(plannedLaunch)}` : "dont la date vous sera annoncée par e-mail"}. En attendant, tout le reste est ouvert : votre Espace, vos proches, vos démarches de protection et « Qui voit quoi ».`}
                   </p>
                   <p className="text-[0.88rem] text-paper/60">Si la date est repoussée, vous êtes prévenu par e-mail et vous choisissez : reporter, ou être remboursé.</p>
                   <Button full variant="gold" href="/coffre/droits" icon={<ShieldCheck className="h-5 w-5" />}>

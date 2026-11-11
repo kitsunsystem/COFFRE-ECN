@@ -206,7 +206,7 @@ export default function Cartes() {
       <Sheet open={assign} onClose={() => setAssign(false)} title="Un pack de 2 cartes pour qui ?">
         <p className="mb-4 text-ink-soft">
           {/* No price in the apps (store rules). */}
-          {!isNative() && <>Pack bénéficiaire : {OFFER.packPrice ? `${OFFER.packPrice} €` : "inclus ou payant, à décider"}. </>}
+          {!isNative() && OFFER.packPrice ? <>Pack bénéficiaire : {`${OFFER.packPrice} €`}. </> : null}
           {PACK_INFO}
         </p>
         <div className="space-y-2.5">

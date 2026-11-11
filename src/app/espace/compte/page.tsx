@@ -8,7 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import { LangPicker } from "@/components/lang-picker";
 import { PasswordReset } from "@/components/password-reset";
 import { TrustedDevices } from "@/components/phone-open";
-import { tr } from "@/lib/i18n";
+import { longDate, tr } from "@/lib/i18n";
 import { ThemePicker } from "@/components/theme-picker";
 import { Badge, Button, Card, Field, Notice, PageTitle, Sheet, Toggle } from "@/components/ui";
 import { rise, stagger } from "@/components/visuals";
@@ -123,12 +123,12 @@ export default function Compte() {
               <div className="text-[0.8rem] text-mist">pack{packs > 1 ? "s" : ""} bénéficiaire{packs > 1 ? "s" : ""}</div>
             </div>
           </div>
-          {s.phase === "decouverte" && <p className="mt-3 text-[0.85rem] text-mist">{`Pré-lancement${LAUNCH.discoveryPrice && !app ? ` (${LAUNCH.discoveryPrice} €)` : ""} : tout est ouvert sauf le Coffre, qui s'active avec vos cartes au lancement${s.plannedLaunch ? `, prévu le ${new Date(s.plannedLaunch).toLocaleDateString("fr-FR", { dateStyle: "long" })}` : ", dont la date vous sera annoncée"}. Si elle est repoussée, vous choisissez : reporter, ou être remboursé.`}</p>}
+          {s.phase === "decouverte" && <p className="mt-3 text-[0.85rem] text-mist">{`Pré-lancement${LAUNCH.discoveryPrice && !app ? ` (${LAUNCH.discoveryPrice} €)` : ""} : tout est ouvert sauf le Coffre, qui s'active avec vos cartes au lancement${s.plannedLaunch ? `, prévu le ${longDate(s.plannedLaunch)}` : ", dont la date vous sera annoncée"}. Si elle est repoussée, vous choisissez : reporter, ou être remboursé.`}</p>}
           {!OFFER.price && !app && <p className="mt-2 text-[0.85rem] text-mist">Tarifs communiqués au lancement.</p>}
           {s.billing.status === "impaye" && s.billing.since && (
             <div className="mt-4">
               <Notice tone="coral">
-                <p>Paiement non reçu. Sans régularisation avant le {new Date(graceEnd(s.billing.since)).toLocaleDateString("fr-FR", { dateStyle: "long" })}, votre Coffre sera effacé définitivement.</p>
+                <p>Paiement non reçu. Sans régularisation avant le {longDate(graceEnd(s.billing.since))}, votre Coffre sera effacé définitivement.</p>
                 {!app && (
                   <Button className="mt-3" variant="danger" onClick={() => (PROD ? openBillingPortal() : s.set({ billing: { status: "a_jour" } }))}>
                     {PROD ? "Régulariser maintenant" : "Régulariser (démo)"}

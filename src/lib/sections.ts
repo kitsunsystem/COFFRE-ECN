@@ -163,10 +163,10 @@ export const SECTIONS: Section[] = [
       {
         id: "cryptos",
         title: "Cryptos et actifs numériques",
-        hint: "Wallets, où ils se trouvent, comment y accéder, où est rangée la phrase de récupération",
+        hint: "Portefeuilles, où ils se trouvent, comment y accéder, où est rangée la phrase de récupération",
         advised: "deces",
         notice: "Indiquez où est rangée la phrase de récupération, plutôt que de la recopier ici.",
-        fields: [{ key: "wallet", label: "Wallet ou plateforme" }, { key: "where", label: "Où il se trouve" }, { key: "how", label: "Procédure d'accès", kind: "long" }, { key: "seed", label: "Où est rangée la phrase de récupération" }, note],
+        fields: [{ key: "wallet", label: "Portefeuille ou plateforme" }, { key: "where", label: "Où il se trouve" }, { key: "how", label: "Procédure d'accès", kind: "long" }, { key: "seed", label: "Où est rangée la phrase de récupération" }, note],
       },
     ],
   },
