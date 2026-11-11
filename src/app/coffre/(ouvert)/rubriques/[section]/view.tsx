@@ -160,7 +160,7 @@ export function SectionView({ id }: { id: string }) {
       })}
 
       <Sheet open={!!open} onClose={() => setOpen(null)} title={open?.entry ? open.entry.payload.title : current ? current.title : ""}>
-        {open && (owner ? <ItemEditor key={open.entry?.item.id ?? open.subId} subId={open.subId} entry={open.entry} onDone={() => setOpen(null)} /> : open.entry && <ItemView subId={open.subId} entry={open.entry} />)}
+        {open && (owner && launched ? <ItemEditor key={open.entry?.item.id ?? open.subId} subId={open.subId} entry={open.entry} onDone={() => setOpen(null)} /> : open.entry && <ItemView subId={open.subId} entry={open.entry} />)}
       </Sheet>
     </motion.div>
   );

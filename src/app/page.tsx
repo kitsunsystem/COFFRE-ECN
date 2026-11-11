@@ -10,6 +10,8 @@ import { ThemePicker } from "@/components/theme-picker";
 import { Button, Eyebrow } from "@/components/ui";
 import { Aurora, Emblem, Logo, NfcCard, Reveal, rise, stagger, TapDemo } from "@/components/visuals";
 import { APP_NAME, LAUNCH, OFFER } from "@/lib/config";
+import { useHydrated } from "@/components/providers";
+import { PROD } from "@/lib/env";
 import { isNative } from "@/lib/native";
 import { longDate } from "@/lib/i18n";
 import { moment, type Moment } from "@/lib/rules";
@@ -86,6 +88,14 @@ function Hero() {
               Comment ça marche
             </Button>
           </motion.div>
+          {/* The public demo: the ready-made Durand family is one tap away (otherwise behind the sign-in icon). */}
+          {!PROD && (
+            <motion.p variants={rise} className="mt-5">
+              <Link href="/connexion" className="font-semibold text-gold-deep underline underline-offset-4">
+                Voir la démonstration (famille Durand)
+              </Link>
+            </motion.p>
+          )}
           <motion.div variants={rise} className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[0.92rem] text-ink-soft">
             <span className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 text-sage" /> Rien à retenir</span>
             <span className="flex items-center gap-2"><Lock className="h-5 w-5 text-sage" /> Chiffré sur votre téléphone</span>
@@ -354,6 +364,9 @@ function Privacy() {
 }
 
 function Offer() {
+  // The date is written in the visitor's language: in the browser only. In the pre-built page it differed for EN/ES/CA,
+  // and React then rebuilt the whole page, dropping the chosen language and theme.
+  const hydrated = useHydrated();
   return (
     <section className="px-5 py-24">
       <div className="mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-paper shadow-lift ring-1 ring-line md:grid md:grid-cols-2">
@@ -372,7 +385,7 @@ function Offer() {
             <div className="font-semibold">Pré-lancement{LAUNCH.discoveryPrice ? ` · ${LAUNCH.discoveryPrice} €` : ""}</div>
             <ul className="mt-2 space-y-1.5 text-[0.92rem] text-ink-soft">
               <li>Ouvert dès maintenant : votre Espace, la vérification d&apos;identité, vos proches, vos garants, « qui voit quoi » et vos démarches de protection.</li>
-              <li>{`Au lancement${LAUNCH.plannedDate ? `, prévu le ${longDate(LAUNCH.plannedDate)}` : ", dont la date est annoncée par e-mail"} : vos cartes arrivent et le Coffre s'active. Rien n'est stocké avant.`}</li>
+              {hydrated && <li>{`Au lancement${LAUNCH.plannedDate ? `, prévu le ${longDate(LAUNCH.plannedDate)}` : ", dont la date est annoncée par e-mail"} : vos cartes arrivent et le Coffre s'active. Rien n'est stocké avant.`}</li>}
               <li>Si la date est repoussée, vous choisissez : reporter, ou être remboursé.</li>
             </ul>
           </div>
@@ -462,7 +475,8 @@ export default function Landing() {
           <span className="flex items-center gap-2">
             <Emblem /> <span className="font-display text-[1.2rem] font-semibold">{APP_NAME}</span>
           </span>
-          <p className="text-center text-[0.85rem] text-mist">Coffre de vie et de succession, personnel ou familial. © {new Date().getFullYear()} {APP_NAME}</p>
+          {/* Built one year, read the next (from 1 January): the year may differ, which must not rebuild the page. */}
+          <p className="text-center text-[0.85rem] text-mist" suppressHydrationWarning>Coffre de vie et de succession, personnel ou familial. © {new Date().getFullYear()} {APP_NAME}</p>
           <Link href="/beneficiaire" className="text-[0.85rem] font-semibold text-ink-soft hover:text-ink">
             Un proche est décédé ? Espace bénéficiaire
           </Link>

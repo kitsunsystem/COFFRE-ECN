@@ -115,6 +115,10 @@ html.i18n-wait body {
 .aura-d2 { background: rgb(139 92 246 / 0.16); } /* the violet glint of the LLARYS logo */
 .aura-d3 { background: rgb(79 138 98 / 0.25); }
 
+@media (pointer: coarse) {
+  .animate-aurora { animation: none; }
+}
+
 /* Scroll bars in the colours of the app, never the browser's grey ones. */
 * {
   scrollbar-width: thin;

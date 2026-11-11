@@ -195,13 +195,14 @@ export function CoffreShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (hydrated && session.mode === "locked" && !closing.current && !rightsOnly) router.replace("/coffre");
   }, [hydrated, session.mode, rightsOnly, router]);
-  // Auto-lock after 5 minutes without activity: keys must not stay in memory. Reading counts as activity too
+  // Auto-lock after 5 minutes without activity (30 in the demo, shown while talking): keys must not stay in memory. Reading counts as activity too
   // (scrolling with a finger, a wheel or a trackpad), or the Coffre closed under someone reading "Qui voit quoi".
   useEffect(() => {
-    let timer = setTimeout(lock, 5 * 60_000);
+    const idle = (PROD ? 5 : 30) * 60_000;
+    let timer = setTimeout(lock, idle);
     const reset = () => {
       clearTimeout(timer);
-      timer = setTimeout(lock, 5 * 60_000);
+      timer = setTimeout(lock, idle);
     };
     const events = ["pointerdown", "pointermove", "keydown", "wheel", "touchmove", "scroll"] as const;
     events.forEach((e) => window.addEventListener(e, reset, { passive: true, capture: true }));

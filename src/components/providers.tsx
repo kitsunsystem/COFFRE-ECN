@@ -97,7 +97,7 @@ export function Providers({ children }: { children: ReactNode }) {
     void startI18n();
     captureReferral();
     if (PROD) void bootstrap().finally(() => useApp.getState().set({ ready: true }));
-    else void Promise.resolve(useApp.persist.rehydrate()).finally(() => useApp.getState().set({ ready: true }));
+    else void Promise.resolve(useApp.persist?.rehydrate()).finally(() => useApp.getState().set({ ready: true }));
   }, []);
   // App: notifications from a trusted computer, once someone is signed in.
   useEffect(() => {

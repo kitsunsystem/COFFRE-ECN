@@ -6,7 +6,10 @@ import { activateOwnerCard, lock, saveItem, setRight, setSectionRight } from "./
 
 export const DEMO_PIN = "123456";
 
-export async function seedDemo() {
+let seeding: Promise<void> | undefined;
+export const seedDemo = () => (seeding ??= fill().finally(() => (seeding = undefined)));
+
+async function fill() {
   const st = useApp.getState();
   st.reset();
   lock();
