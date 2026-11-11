@@ -12,10 +12,17 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", displa
 const cinzel = Cinzel({ subsets: ["latin"], variable: "--font-cinzel", display: "swap", preload: false });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap", preload: false });
 
+const DESCRIPTION = "Le coffre de vie et de succession, personnel ou familial : tout retrouver et tout régler, de son vivant comme après.";
+
 export const metadata: Metadata = {
+  // shortcut: the public demo's host (Next adds its /COFFRE-ECN base path to opengraph-image.jpg); the real domain at launch.
+  metadataBase: new URL("https://kitsunsystem.github.io"),
   title: { default: `${APP_NAME} — coffre de vie et de succession`, template: `%s · ${APP_NAME}` },
-  description: "Le coffre de vie et de succession, personnel ou familial : tout retrouver et tout régler, de son vivant comme après.",
+  description: DESCRIPTION,
   applicationName: APP_NAME,
+  // The preview of a link shared on WhatsApp, Telegram, SMS (image: app/opengraph-image.jpg).
+  openGraph: { title: `${APP_NAME} — coffre de vie et de succession`, description: DESCRIPTION, siteName: APP_NAME, locale: "fr_FR", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

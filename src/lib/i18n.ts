@@ -29,6 +29,11 @@ export function currentLang(): Lang {
 export const locale = () => LANGS.find((l) => l.id === currentLang())!.locale;
 // "Groupe sanguin : A+" in French, "Blood type: A+" elsewhere.
 export const colon = () => (currentLang() === "fr" ? " :" : ":");
+// A long date; French writes the first of the month "1er" (toLocaleDateString gives "1 janvier 2027").
+export const longDate = (d: string | number | Date) => {
+  const s = new Date(d).toLocaleDateString("fr-FR", { dateStyle: "long" });
+  return currentLang() === "fr" ? s.replace(/^1 /, "1er ") : s;
+};
 
 // A reload shows every screen again from its French source, in the new language.
 export function setLang(l: Lang) {

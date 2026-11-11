@@ -96,3 +96,4 @@ id, name, created_at, expires_at, last_used_at
 POST
 GET
 ?nextToken={0}
+fr_FR

@@ -163,7 +163,7 @@ function DemoAdmin() {
                       <div className="font-semibold">{owner}</div>
                       <div className="text-[0.88rem] text-mist">{s.account.email}</div>
                     </div>
-                    <Badge tone={s.account.kyc === "verifie" ? "sage" : "gold"}>{s.account.kyc === "verifie" ? "KYC vérifié" : "KYC en attente"}</Badge>
+                    <Badge tone={s.account.kyc === "verifie" ? "sage" : "gold"}>{s.account.kyc === "verifie" ? "Identité vérifiée" : "Identité à vérifier"}</Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-center text-[0.85rem]">
                     <div className="rounded-2xl bg-ink/[0.04] p-3"><div className="font-display text-[1.4rem] font-semibold">{s.people.length}</div>proches</div>
