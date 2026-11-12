@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002Fcoffre\u002Frubriques\u002F[section]","\u002Fespace\u002Faide\u002F[rubrique]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
